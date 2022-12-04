@@ -37,7 +37,10 @@ void MapMapping::push_T(Mat revc, Mat tevc)
     T_Matrix.at<float>(Point2i(3, 1)) = tvec.at<float>(Point2i(1, 0));
     T_Matrix.at<float>(Point2i(3, 2)) = tvec.at<float>(Point2i(2, 0));
     cv2eigen(T_Matrix, this->_T);
-    this->_T = this->_T.inverse();
+    this->_T << this->_T.inverse();
+    Matrix<float, 4, 1> m1;
+    m1 << 0.f, 0.f, 0.f, 1.f;
+    this->cameraPostion << (this->_T * m1).topRows(3);
     this->_pass_flag = true;
 }
 
@@ -95,7 +98,7 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
                     al.z = dst_xyzu(2, 0);
                     al.flag = true;
                     TRTtype = true;
-                    if(Z_A)
+                    if (Z_A)
                         this->adjust_z_one(al);
                     break;
                 }
@@ -117,9 +120,9 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
             }
             ++iter;
         }
-        if(Z_A)
+        if (Z_A)
         {
-            if(pred_loc.size() > 0)
+            if (pred_loc.size() > 0)
             {
                 this->cached_location3D.swap(pred_loc);
             }
@@ -131,8 +134,24 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
         }
     }
 }
-
-void MapMapping::adjust_z_one(MapLocation3D &locs)
+// TODO: 待验证
+void MapMapping::adjust_z_one(MapLocation3D &loc)
 {
-
+    MapLocation3D pre_loc;
+    for (const auto &it : this->cached_location3D)
+    {
+        if (it.id == loc.id)
+            pre_loc = it;
+    }
+    if (!pre_loc.flag)
+        return;
+    if (loc.z - pre_loc.z > Z_THRE)
+    {
+        Matrix<float, 3, 1> line;
+        line << loc.x - this->cameraPostion(0, 0), loc.y - this->cameraPostion(1, 0), loc.z - this->cameraPostion(2, 0);
+        float radio = (pre_loc.z - this->cameraPostion(2, 0)) / line(2, 0);
+        loc.x = radio * line(0, 0) + this->cameraPostion(0, 0);
+        loc.y = radio * line(1, 0) + this->cameraPostion(1, 0);
+        loc.z = radio * line(2, 0) + this->cameraPostion(2, 0);
+    }
 }

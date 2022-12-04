@@ -11,6 +11,7 @@ private:
     vector<MapLocation3D> cached_location3D;
     map<int, int> _ids;
     Matrix<float, 4, 4> _T;
+    Matrix<float, 3, 1> cameraPostion;
     Mat revc, tvec;
     bool _pass_flag = false;
 
