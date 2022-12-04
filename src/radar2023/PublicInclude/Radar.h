@@ -1,5 +1,5 @@
-#ifndef __LIDAR_H
-#define __LIDAR_H
+#ifndef __RADAR_H
+#define __RADAR_H
 
 #include "./public.h"
 #include "./camera.h"
@@ -14,7 +14,7 @@
  * @brief 主要雷达类
  * 负责相关工作线程的管理，获取雷达点云数据并进行处理
  */
-class Lidar
+class Radar
 {
 private:
     ros::Subscriber sub;
@@ -31,8 +31,8 @@ private:
     promise<void> exitSignal3;
 
 public:
-    Lidar(int argc, char **argv);
-    ~Lidar();
+    Radar(int argc, char **argv);
+    ~Radar();
 
     void init(int argc, char **argv);
 

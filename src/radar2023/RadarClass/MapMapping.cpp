@@ -116,7 +116,13 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
         }
         for (size_t i = 0; i < pred_loc.size(); ++i)
         {
+            pred_loc[i].z += Real_Size_W;
             this->_location3D[this->_ids[(int)pred_loc[i].id]] = pred_loc[i];
         }
     }
+}
+
+void MapMapping::adjust_z_one(vector<MapLocation3D> &locs)
+{
+
 }

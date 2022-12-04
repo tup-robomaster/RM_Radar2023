@@ -1,4 +1,4 @@
-#include "../PublicInclude/Lidar.h"
+#include "../PublicInclude/Radar.h"
 
 static const char lidarTopicName[13] = "/livox/lidar"; //雷达点云节点名称
 
@@ -95,16 +95,16 @@ static void send_judge(judge_message &message, UART &myUART)
     }
 }
 
-Lidar::Lidar(int argc, char **argv)
+Radar::Radar(int argc, char **argv)
 {
     this->init(argc, argv);
 }
 
-Lidar::~Lidar()
+Radar::~Radar()
 {
 }
 
-void Lidar::init(int argc, char **argv)
+void Radar::init(int argc, char **argv)
 {
     if (!this->_init_flag)
     {
@@ -154,14 +154,14 @@ void Lidar::init(int argc, char **argv)
     }
 }
 
-void Lidar::LidarListenerBegin(int argc, char **argv)
+void Radar::LidarListenerBegin(int argc, char **argv)
 {
     ros::init(argc, argv, "laser_listener");
     ros::NodeHandle nh;
-    sub = nh.subscribe(lidarTopicName, LidarQueueSize, &Lidar::LidarCallBack, this);
+    sub = nh.subscribe(lidarTopicName, LidarQueueSize, &Radar::LidarCallBack, this);
 }
 
-void Lidar::LidarMainLoop(future<void> futureObj)
+void Radar::LidarMainLoop(future<void> futureObj)
 {
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
@@ -169,7 +169,7 @@ void Lidar::LidarMainLoop(future<void> futureObj)
     }
 }
 
-void Lidar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
+void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {
 #ifdef ThreadSpeedTest
     clock_t start, finish;
@@ -191,7 +191,7 @@ void Lidar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 #endif
 }
 
-void Lidar::MovementDetectorLoop(future<void> futureObj)
+void Radar::MovementDetectorLoop(future<void> futureObj)
 {
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
@@ -221,17 +221,17 @@ void Lidar::MovementDetectorLoop(future<void> futureObj)
     }
 }
 
-void Lidar::SerReadLoop()
+void Radar::SerReadLoop()
 {
     mainUARTBox[0].read(mainSerBox[0]);
 }
 
-void Lidar::SerWriteLoop()
+void Radar::SerWriteLoop()
 {
     mainUARTBox[0].write(mainSerBox[0]);
 }
 
-void Lidar::MainProcessLoop(future<void> futureObj)
+void Radar::MainProcessLoop(future<void> futureObj)
 {
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
@@ -283,7 +283,7 @@ void Lidar::MainProcessLoop(future<void> futureObj)
     }
 }
 
-void Lidar::spin(int argc, char **argv)
+void Radar::spin(int argc, char **argv)
 {
     this->init(argc, argv);
     if (!this->_init_flag)
@@ -337,7 +337,7 @@ void Lidar::spin(int argc, char **argv)
     }
 }
 
-void Lidar::stop()
+void Radar::stop()
 {
     if (this->_thread_working)
     {

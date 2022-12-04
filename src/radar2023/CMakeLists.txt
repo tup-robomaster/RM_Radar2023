@@ -33,7 +33,7 @@ link_directories(/opt/intel/mkl/lib/intel64
 cuda_add_executable(radar2023
   main.cpp
   RadarClass/camera.cpp
-  RadarClass/Lidar.cpp
+  RadarClass/Radar.cpp
   RadarClass/depthProcesser.cpp
   RadarClass/MovementDetector.cpp
   CUDA/yololayer.cu
