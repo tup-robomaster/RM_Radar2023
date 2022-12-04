@@ -230,7 +230,7 @@ void UART::read(MySerial &ser)
         {
             if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
             {
-                this->myUARTPasser.Referee_Update_GameData();
+                this->myUARTPasser.Referee_Update_GameData(this->buffer);
                 this->buffercnt = 0;
                 if (this->buffer[this->buffercnt] == 0xa5)
                     this->buffercnt = 1;

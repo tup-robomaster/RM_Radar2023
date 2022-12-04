@@ -1,8 +1,8 @@
-#include "PublicInclude/Lidar.h"
+#include "PublicInclude/Radar.h"
 
 int main(int argc, char **argv)
 {
-    Lidar myLidar(argc, argv);
+    Radar myLidar(argc, argv);
     while (true)
     {
         myLidar.spin(argc, argv);

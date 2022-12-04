@@ -124,5 +124,5 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
 
 void MapMapping::adjust_z_one(vector<MapLocation3D> &locs)
 {
-
+    
 }

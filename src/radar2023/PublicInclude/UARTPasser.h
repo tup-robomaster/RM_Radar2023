@@ -40,7 +40,7 @@ public:
     AlarmBag pop();
     void get_message();
     void Refree_MapLocationSelf_Message();
-    void Referee_Update_GameData();
+    void Referee_Update_GameData(unsigned char *buffer);
     void Referee_Robot_HP(unsigned char *buffer);
     BOData One_compete_end();
     bool One_compete_start();
