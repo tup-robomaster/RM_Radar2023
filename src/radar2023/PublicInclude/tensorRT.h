@@ -22,9 +22,9 @@ private:
     int outputIndex;
     uint8_t *img_host = nullptr;
     uint8_t *img_device = nullptr;
-    bool is_p6 = false;
-    float gd = 0.67;    //n:0.33 s:0.33 m:0.67 l:1.0 x:1.33
-    float gw = 0.75;    //n:0.25 s:0.50 m:0.75 l:1.0 x:1.25
+    bool is_p6 = Is_p6;
+    float gd = G_D;
+    float gw = G_W;
 
 private:
     bool build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw);
