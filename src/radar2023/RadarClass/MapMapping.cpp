@@ -37,6 +37,7 @@ void MapMapping::push_T(Mat revc, Mat tevc)
     T_Matrix.at<float>(Point2i(3, 1)) = tvec.at<float>(Point2i(1, 0));
     T_Matrix.at<float>(Point2i(3, 2)) = tvec.at<float>(Point2i(2, 0));
     cv2eigen(T_Matrix, this->_T);
+    this->_T = this->_T.inverse();
     this->_pass_flag = true;
 }
 
@@ -94,6 +95,8 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
                     al.z = dst_xyzu(2, 0);
                     al.flag = true;
                     TRTtype = true;
+                    if(Z_A)
+                        this->adjust_z_one(al);
                     break;
                 }
                 // TODO:添加IOU预测
@@ -114,6 +117,13 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
             }
             ++iter;
         }
+        if(Z_A)
+        {
+            if(pred_loc.size() > 0)
+            {
+                this->cached_location3D.swap(pred_loc);
+            }
+        }
         for (size_t i = 0; i < pred_loc.size(); ++i)
         {
             pred_loc[i].z += Real_Size_W;
@@ -122,7 +132,7 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
     }
 }
 
-void MapMapping::adjust_z_one(vector<MapLocation3D> &locs)
+void MapMapping::adjust_z_one(MapLocation3D &locs)
 {
-    
+
 }

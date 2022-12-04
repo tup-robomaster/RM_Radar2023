@@ -22,7 +22,7 @@ public:
     void push_T(Mat revc, Mat tevc);
     vector<MapLocation3D> updata();
     void mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<ArmorBoundingBox> &Ioubbox);
-    void adjust_z_one(vector<MapLocation3D> &locs);
+    void adjust_z_one(MapLocation3D &locs);
 };
 
 #endif
