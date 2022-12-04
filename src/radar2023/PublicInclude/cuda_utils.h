@@ -1,6 +1,7 @@
 #ifndef TRTX_CUDA_UTILS_H_
 #define TRTX_CUDA_UTILS_H_
 
+#include <cuda.h>
 #include <cuda_runtime_api.h>
 
 #ifndef CUDA_CHECK

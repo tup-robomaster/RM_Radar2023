@@ -10,7 +10,7 @@ find_package(PCL REQUIRED)
 find_package(CUDA 11.6 REQUIRED)
 message("CUDA_LIBRARIES:${CUDA_LIBRARIES}")
 message("CUDA_INCLUDE_DIRS:${CUDA_INCLUDE_DIRS}")
-include_directories(${CUDA_INCLUDE_DIRS})
+include_directories()
 add_compile_options(-std=c++17)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=16000000")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O3  -Wall")
@@ -22,9 +22,10 @@ include_directories(
   # include
   ${catkin_INCLUDE_DIRS}
   /opt/intel/mkl/include/
+  ${CUDA_INCLUDE_DIRS}
+  /home/nine-fish/TensorRT/TensorRT-8.5.1.7/include
 )
 
-include_directories(/home/nine-fish/TensorRT/TensorRT-8.5.1.7/include)
 set(TENSORRT_LIB_PATH "/home/nine-fish/TensorRT/TensorRT-8.5.1.7/lib")
 file(GLOB LIBS "${TENSORRT_LIB_PATH}/*.so")
 link_directories(/opt/intel/mkl/lib/intel64
@@ -65,6 +66,7 @@ target_link_libraries(radar2023
   libm.so
   libdl.so
   MVSDK
+  cuda
 )
 
 macro(remove_warnings)

@@ -260,6 +260,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 vector<Rect> tempMTs = MTs;
                 slk.unlock();
                 armorBoundingBoxs = mainADBox[0].infer(frameBag.frame, tempMTs);
+                //TODO: 加入防抖层
                 armor_filter(armorBoundingBoxs);
                 slk.lock();
                 detectDepth(&armorBoundingBoxs);

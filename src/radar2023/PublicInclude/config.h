@@ -22,8 +22,9 @@
 
 #define CAMERA_PARAM_PATH   (char*)"/home/nine-fish/ws_Radar2023/src/radar2023/Camera/camera0.yaml"     //相机参数文件
 
+#define USE_FP16
 #define TensorRTEnginePath  (char*)"/home/nine-fish/ws_Radar2023/src/radar2023/Moudles/yolov5.engine"   //Engine
-#define Yolov5wtsPath       (char*)"/home/nine-fish/ws_Radar2023/src/radar2023/Moudles/yolov5.wts"      //wts
+#define Yolov5wtsPath       (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/Moudles/yolov5.wts"      //wts
 #define TensorRTMaxBatchSize 10                             //转换TRT最大BatchSize
 #define INPUT_BLOB_NAME     (char*)"images"                 //输入名
 #define OUTPUT_BLOB_NAME    (char*)"output0"                //输出名

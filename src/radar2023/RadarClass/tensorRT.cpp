@@ -122,7 +122,9 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     network->markOutput(*yolo->getOutput(0));
     // Build engine
     builder->setMaxBatchSize(maxBatchSize);
-    config->setMaxWorkspaceSize(256 * (1 << 20)); // 256MB
+    size_t memfree, total;
+    cuMemGetInfo(&memfree, &total);
+    config->setMaxWorkspaceSize(memfree); 
 #if defined(USE_FP16)
     config->setFlag(BuilderFlag::kFP16);
 #elif defined(USE_INT8)
@@ -227,7 +229,9 @@ ICudaEngine *MyTensorRT::build_engine_p6(unsigned int maxBatchSize, IBuilder *bu
 
     // Build engine
     builder->setMaxBatchSize(maxBatchSize);
-    config->setMaxWorkspaceSize(256 * (1 << 20)); // 256MB
+    size_t memfree, total;
+    cuMemGetInfo(&memfree, &total);
+    config->setMaxWorkspaceSize(memfree);
 #if defined(USE_FP16)
     config->setFlag(BuilderFlag::kFP16);
 #elif defined(USE_INT8)

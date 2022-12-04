@@ -11,6 +11,8 @@ ArmorDetector::~ArmorDetector()
 
 void ArmorDetector::initModel()
 {
+    cout << "[INFO]"
+         << "ArmorDetector::initModel" << endl;
     this->armorTensorRT->initMyTensorRT(TensorRTEnginePath, Yolov5wtsPath);
 }
 
@@ -20,7 +22,7 @@ vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> targets)
     vector<ReShapeBox> boxs;
     vector<Mat> preProcessedImage = this->preProcess(image, targets, &boxs);
     results = this->armorTensorRT->doInference(&preProcessedImage, preProcessedImage.size());
-    if(results.size() < 1)
+    if (results.size() < 1)
         return {};
     this->reBuildBoxs(&results, &boxs);
     return this->results;
