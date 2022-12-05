@@ -396,5 +396,6 @@ void Radar::stop()
         this->mainloop.join();
         this->MDloop.join();
         this->processLoop.join();
+        mainCamBox[0].stop();
     }
 }

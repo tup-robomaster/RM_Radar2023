@@ -66,7 +66,7 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     INetworkDefinition *network = builder->createNetworkV2(0U);
 
     // Create input tensor of shape {3, INPUT_H, INPUT_W} with name INPUT_BLOB_NAME
-    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{3, TRT_INPUT_H, TRT_INPUT_W});
+    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{ 3, TRT_INPUT_H, TRT_INPUT_W});
     assert(data);
     std::map<std::string, Weights> weightMap = loadWeights(wts_name);
     /* ------ yolov5 backbone------ */
@@ -135,7 +135,7 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     config->setInt8Calibrator(calibrator);
 #endif
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-               "[INFO], Building engine, please wait for a while...");
+               "[INFO], Building engine, please wait for a while...\n");
     ICudaEngine *engine = builder->buildEngineWithConfig(*network, *config);
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Build engine successfully!\n");
@@ -244,7 +244,7 @@ ICudaEngine *MyTensorRT::build_engine_p6(unsigned int maxBatchSize, IBuilder *bu
 #endif
 
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-               "[INFO], Building engine, please wait for a while...");
+               "[INFO], Building engine, please wait for a while...\n");
     ICudaEngine *engine = builder->buildEngineWithConfig(*network, *config);
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Build engine successfully!\n");
