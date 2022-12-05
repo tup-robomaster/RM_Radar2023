@@ -109,13 +109,13 @@ void Radar::init(int argc, char **argv)
     if (!this->_init_flag)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO],Initing ...\n");
+                   "[INFO], Initing ...\n");
         if (ENEMY)
             fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
-                       "[GAME],YOU ARE RED\n");
+                       "[GAME], YOU ARE RED\n");
         else
             fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
-                       "[GAME],YOU ARE BLUE\n");
+                       "[GAME], YOU ARE BLUE\n");
         Matrix<float, 3, 3> K_0;
         Matrix<float, 1, 5> C_0;
         Matrix<float, 4, 4> E_0;
@@ -123,7 +123,11 @@ void Radar::init(int argc, char **argv)
         Mat C_0_Mat;
         Mat E_0_Mat;
         if (!read_yaml(K_0_Mat, C_0_Mat, E_0_Mat))
+        {
+            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], Can't read yaml !\n");
             return;
+        }
         cv2eigen(K_0_Mat, K_0);
         cv2eigen(C_0_Mat, C_0);
         cv2eigen(E_0_Mat, E_0);
@@ -131,7 +135,7 @@ void Radar::init(int argc, char **argv)
         if (mainDqBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Adding DepthQueue ...");
+                       "[INFO], Adding DepthQueue ...");
             mainDqBox.emplace_back(DepthQueue(K_0, C_0, E_0));
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                        "Done.\n");
@@ -139,7 +143,7 @@ void Radar::init(int argc, char **argv)
         if (mainMDBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Adding MovementDetector ...");
+                       "[INFO], Adding MovementDetector ...");
             mainMDBox.emplace_back(MovementDetector());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                        "Done.\n");
@@ -147,7 +151,7 @@ void Radar::init(int argc, char **argv)
         if (mainADBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Adding ArmorDetector ...");
+                       "[INFO], Adding ArmorDetector ...");
             mainADBox.emplace_back(ArmorDetector());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                        "Done.\n");
@@ -155,7 +159,7 @@ void Radar::init(int argc, char **argv)
         if (mainCamBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Adding CameraThread ...");
+                       "[INFO], Adding CameraThread ...");
             mainCamBox.emplace_back(CameraThread());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                        "Done.\n");
@@ -163,7 +167,7 @@ void Radar::init(int argc, char **argv)
         if (mainMMBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Adding MapMapping ...");
+                       "[INFO], Adding MapMapping ...");
             mainMMBox.emplace_back(MapMapping());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                        "Done.\n");
@@ -171,7 +175,7 @@ void Radar::init(int argc, char **argv)
         if (mainUARTBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Adding UART ...");
+                       "[INFO], Adding UART ...");
             mainUARTBox.emplace_back(UART());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                        "Done.\n");
@@ -179,7 +183,7 @@ void Radar::init(int argc, char **argv)
         if (mainSerBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Adding MySerial ...");
+                       "[INFO], Adding MySerial ...");
             mainSerBox.emplace_back(MySerial());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                        "Done.\n");
@@ -190,8 +194,8 @@ void Radar::init(int argc, char **argv)
             mainADBox[0].initModel();
             mainSerBox[0].initSerial();
             this->_init_flag = true;
-            cout << "[INFO]"
-                 << "Init Done" << endl;
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Init Done\n");
         }
     }
 }

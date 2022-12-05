@@ -53,8 +53,8 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
 {
     if (!this->_pass_flag)
     {
-        cout << "[ERROR]"
-             << "Can't get _T !" << endl;
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], Can't get _T !\n");
         return;
     }
     vector<MapLocation3D> temp(10, MapLocation3D());
