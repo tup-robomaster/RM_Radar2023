@@ -109,7 +109,7 @@ void Radar::init(int argc, char **argv)
     if (!this->_init_flag)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Initing ...\n");
+                   "[INFO], Initing ...Process\n");
         if (ENEMY)
             fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
                        "[GAME], YOU ARE RED\n");
@@ -159,10 +159,10 @@ void Radar::init(int argc, char **argv)
         if (mainCamBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO], Adding CameraThread ...");
+                       "[INFO], Adding CameraThread ...Process\n");
             mainCamBox.emplace_back(CameraThread());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                       "Done.\n");
+                       "[INFO], Adding CameraThread ...Done.\n");
         }
         if (mainMMBox.size() == 0)
         {
@@ -193,9 +193,10 @@ void Radar::init(int argc, char **argv)
             this->LidarListenerBegin(argc, argv);
             mainADBox[0].initModel();
             mainSerBox[0].initSerial();
+            mainCamBox[0].start();
             this->_init_flag = true;
-            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Init Done\n");
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "[INFO], Init Done\n");
         }
     }
 }
@@ -337,20 +338,20 @@ void Radar::spin(int argc, char **argv)
         return;
     if (!mainMMBox[0]._is_pass())
     {
-        cout << "[INFO]"
-             << "Locate pick start ..." << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Locate pick start ...\n");
         Location myLocation = Location();
         Mat revc, tvec;
         if (!myLocation.locate_pick(mainCamBox[0], ENEMY, revc, tvec))
             return;
         mainMMBox[0].push_T(revc, tvec);
-        cout << "[INFO]"
-             << "Locate pick Done" << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Locate pick Done \n");
     }
     if (!this->_thread_working)
     {
-        cout << "[INFO]"
-             << "Thread starting ..." << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Thread starting ...");
         this->_thread_working = true;
         this->exitSignal1 = promise<void>();
         this->exitSignal2 = promise<void>();
@@ -361,26 +362,26 @@ void Radar::spin(int argc, char **argv)
         this->mainloop = thread(&this->LidarMainLoop, move(futureObj1));
         this->MDloop = thread(&this->MovementDetectorLoop, move(futureObj2));
         this->processLoop = thread(&this->MainProcessLoop, move(futureObj3));
-        cout << "[INFO]"
-             << "Thread start Done" << endl;
+        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                   "Done.\n");
     }
     if (!mainSerBox[0]._is_open())
     {
-        cout << "[INFO]"
-             << "Serial initing ..." << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Serial initing ...");
         mainSerBox[0].initSerial();
-        cout << "[INFO]"
-             << "Serial init Done" << endl;
+        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                   "Done.\n");
     }
     if (!this->_Ser_working && mainSerBox[0]._is_open())
     {
-        cout << "[INFO]"
-             << "SerThread starting ..." << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], SerThread initing ...");
         this->_Ser_working = true;
         this->serRead = thread(&this->SerReadLoop);
         this->serWrite = thread(&this->SerWriteLoop);
-        cout << "[INFO]"
-             << "SerThread start Done" << endl;
+        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                   "Done.\n");
     }
 }
 

@@ -24,7 +24,8 @@ public:
     bool _openflag = false;
 
 public:
-    MV_Camera(bool Is_init = true);
+    MV_Camera();
+    MV_Camera(bool Is_init);
     ~MV_Camera();
 
     FrameBag read();
@@ -54,7 +55,7 @@ private:
     bool _is_init = false;
 
 public:
-    MV_Camera openCamera(bool is_init);
+    void openCamera(bool is_init);
     void adjustExposure(MV_Camera &cap);
     CameraThread();
     ~CameraThread();
@@ -62,6 +63,8 @@ public:
     bool is_open();
     FrameBag read();
     void release();
+    void start();
+    void stop();
 };
 
 #endif

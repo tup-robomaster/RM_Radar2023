@@ -5,7 +5,7 @@
 
 #define SerialPortNAME      (char*)"/dev/ttyUSB0" 
 
-#define CameraConfigPath    (char*)"Camera/Config_0.Config"        //相机配置文件名称
+#define CameraConfigPath    (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/Camera/Config_0.Config"        //相机配置文件名称
 #define TestVideoPath       (char*)"demo_resource/video0.mp4"      //DEMO视频路径
 
 #define MaxPointsNum        10000                           //最大点云数量
