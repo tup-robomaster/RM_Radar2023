@@ -14,7 +14,7 @@ void ArmorDetector::initModel()
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                "[INFO], {}!\n", "ArmorDetector init Moudel");
     this->armorTensorRT->initMyTensorRT(TensorRTEnginePath, Yolov5wtsPath);
-    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "[INFO], {}!\n", "ArmorDetector Moudel inited");
 }
 
