@@ -22,9 +22,11 @@ vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> targets)
 {
     vector<vector<Yolo::Detection>> results;
     vector<ReShapeBox> boxs;
+    if(targets.size() == 0)
+        return {};
     vector<Mat> preProcessedImage = this->preProcess(image, targets, &boxs);
     results = this->armorTensorRT->doInference(&preProcessedImage, preProcessedImage.size());
-    if (results.size() < 1)
+    if (results.size() == 0)
         return {};
     this->reBuildBoxs(&results, &boxs);
     return this->results;

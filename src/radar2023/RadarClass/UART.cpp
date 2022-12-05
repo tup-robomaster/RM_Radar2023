@@ -397,7 +397,7 @@ void UART::write(MySerial &ser)
         AlarmBag alarmBag = myUARTPasser.pop();
         if (alarmBag.flag)
         {
-            // TODO:添加写入逻辑
+            // TODO:添加串口发送逻辑
             for (const auto &it : alarmBag.send_targets)
             {
                 int t = it;

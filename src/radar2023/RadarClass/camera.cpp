@@ -223,7 +223,7 @@ void CameraThread::openCamera(bool is_init)
             this->_cap.saveParam(CameraConfigPath);
         }
         initFlag = true;
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "[INFO], {}", "Camera opening ...Done.\n");
     }
     catch (const std::exception &e)

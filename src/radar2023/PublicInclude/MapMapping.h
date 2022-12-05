@@ -12,7 +12,7 @@ private:
     map<int, int> _ids;
     Matrix<float, 4, 4> _T;
     Matrix<float, 3, 1> cameraPostion;
-    Mat revc, tvec;
+    Mat rvec, tvec;
     bool _pass_flag = false;
 
 public:
@@ -20,7 +20,7 @@ public:
     ~MapMapping();
 
     bool _is_pass();
-    void push_T(Mat revc, Mat tevc);
+    void push_T(Mat &rvec, Mat &tvec);
     vector<MapLocation3D> updata();
     void mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<ArmorBoundingBox> &Ioubbox);
     void adjust_z_one(MapLocation3D &locs);

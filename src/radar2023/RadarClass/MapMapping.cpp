@@ -25,17 +25,17 @@ bool MapMapping::_is_pass()
     return this->_pass_flag;
 }
 
-void MapMapping::push_T(Mat revc, Mat tevc)
+void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
 {
-    this->revc = revc;
-    this->tvec = tvec;
-    Mat revc_Matrix;
-    Rodrigues(revc, revc_Matrix);
+    rvec_input.copyTo(this->rvec);
+    tvec_input.copyTo(this->tvec);
+    Mat rvec_Matrix;             
+    Rodrigues(this->rvec, rvec_Matrix);
     Mat T_Matrix = Mat::zeros(Size(4, 4), CV_16F);
-    revc_Matrix.copyTo(T_Matrix(Rect(0, 0, 3, 3)));
-    T_Matrix.at<float>(Point2i(3, 0)) = tvec.at<float>(Point2i(0, 0));
-    T_Matrix.at<float>(Point2i(3, 1)) = tvec.at<float>(Point2i(1, 0));
-    T_Matrix.at<float>(Point2i(3, 2)) = tvec.at<float>(Point2i(2, 0));
+    rvec_Matrix.copyTo(T_Matrix(Rect(0, 0, 3, 3)));
+    T_Matrix.at<float>(Point2i(3, 0)) = this->tvec.at<float>(Point2i(0, 0));
+    T_Matrix.at<float>(Point2i(3, 1)) = this->tvec.at<float>(Point2i(1, 0));
+    T_Matrix.at<float>(Point2i(3, 2)) = this->tvec.at<float>(Point2i(2, 0));
     cv2eigen(T_Matrix, this->_T);
     this->_T << this->_T.inverse();
     Matrix<float, 4, 1> m1;

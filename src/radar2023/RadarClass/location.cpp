@@ -1,6 +1,6 @@
 #include "../PublicInclude/location.h"
 
-static vector<Point> pick_points;
+static vector<Point2f> pick_points;
 
 Location::Location()
 {
@@ -12,7 +12,7 @@ Location::Location()
     this->location_targets["r_lt"] = Point3f(8.805, -5.728, 0.120 + 0.495);
     this->location_targets["b_rt"] = Point3f(19.200, -9.272 + 0.660, 0.120 + 0.495);
     this->location_targets["b_lt"] = Point3f(19.200, -9.272, 0.120 + 0.495);
-    vector<Point>().swap(pick_points);
+    vector<Point2f>().swap(pick_points);
 }
 
 Location::~Location()
@@ -23,7 +23,7 @@ void __callback__click(int event, int x, int y, int flage, void *param)
 {
     FrameBag &frame = *(FrameBag *)param;
     Mat img_cut = Mat::zeros(Size(200, 200), CV_8UC3);
-    cv::TermCriteria criteria = cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 40, 0.01);
+    cv::TermCriteria criteria = cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 30, 0.001);
     Rect rect;
     switch (event)
     {
@@ -36,13 +36,13 @@ void __callback__click(int event, int x, int y, int flage, void *param)
         resizeWindow("ZOOM_WINDOW", 400, 400);
         break;
     case MouseEventTypes::EVENT_LBUTTONDOWN:
-        if (frame.flag)
+        if (!frame.flag)
         {
             frame.flag = true;
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO],Pick {}|{}!\n", x, y);
-            vector<Point> temp_corner;
-            temp_corner.emplace_back(Point(x, y));
+                       "[INFO], Pick {}|{}!\n", x, y);
+            vector<Point2f> temp_corner;
+            temp_corner.emplace_back(Point2f(x, y));
             Mat grey;
             cvtColor(frame.frame, grey, COLOR_BGR2GRAY);
             cornerSubPix(grey, temp_corner, cv::Size(5, 5), cv::Size(-1, -1), criteria);
@@ -147,7 +147,13 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         }
         frame.flag = false;
     }
-    if (!solvePnP(pick_points, ops, K_0, C_0, rvec_Mat, tvec_Mat, false, SolvePnPMethod::SOLVEPNP_P3P))
+    destroyWindow("PickPoints");
+    destroyWindow("ZOOM_WINDOW");
+    if (!solvePnP(ops, pick_points, K_0, C_0, rvec_Mat, tvec_Mat, false, SolvePnPMethod::SOLVEPNP_P3P))
+    {
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   "[ERROR], {}!\n", "PnP failed");
         return false;
+    }
     return true;
 }

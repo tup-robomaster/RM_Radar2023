@@ -3,6 +3,5 @@ build/
 install/
 .vscode/
 .catkin_workspace
-src/radar2023/Moudles/yolov5.wts
-src/radar2023/Camera/Config_0.Config
-src/radar2023/Moudles/yolov5.engine
+src/radar2023/Moudles/
+src/radar2023/Camera/
