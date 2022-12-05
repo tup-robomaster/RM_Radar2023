@@ -56,7 +56,7 @@ private:
 
 public:
     void openCamera(bool is_init);
-    void adjustExposure(MV_Camera &cap);
+    void adjustExposure();
     CameraThread();
     ~CameraThread();
     void open();

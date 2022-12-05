@@ -1,6 +1,8 @@
 #include "../PublicInclude/location.h"
 
 static vector<Point2f> pick_points;
+static FrameBag frame;
+static bool flag = false;
 
 Location::Location()
 {
@@ -13,6 +15,7 @@ Location::Location()
     this->location_targets["b_rt"] = Point3f(19.200, -9.272 + 0.660, 0.120 + 0.495);
     this->location_targets["b_lt"] = Point3f(19.200, -9.272, 0.120 + 0.495);
     vector<Point2f>().swap(pick_points);
+    frame = FrameBag();
 }
 
 Location::~Location()
@@ -21,7 +24,6 @@ Location::~Location()
 
 void __callback__click(int event, int x, int y, int flage, void *param)
 {
-    FrameBag &frame = *(FrameBag *)param;
     Mat img_cut = Mat::zeros(Size(200, 200), CV_8UC3);
     cv::TermCriteria criteria = cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 30, 0.001);
     Rect rect;
@@ -36,9 +38,9 @@ void __callback__click(int event, int x, int y, int flage, void *param)
         resizeWindow("ZOOM_WINDOW", 400, 400);
         break;
     case MouseEventTypes::EVENT_LBUTTONDOWN:
-        if (!frame.flag)
+        if (!flag)
         {
-            frame.flag = true;
+            flag = true;
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                        "[INFO], Pick {}|{}!\n", x, y);
             vector<Point2f> temp_corner;
@@ -84,12 +86,11 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         ops.emplace_back(r_rt);
         ops.emplace_back(blue_outpost);
     }
-    FrameBag frame = cap.read();
+    frame = cap.read();
     if (!cap.is_open() || !frame.flag)
         return false;
     int tip_w = floor(frame.frame.cols / 2);
     int tip_h = frame.frame.rows - 200;
-    frame.flag = false;
     namedWindow("PickPoints", WindowFlags::WINDOW_NORMAL);
     resizeWindow("PickPoints", Size(1280, 780));
     setWindowProperty("PickPoints", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
@@ -97,7 +98,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     namedWindow("ZOOM_WINDOW", WindowFlags::WINDOW_NORMAL);
     resizeWindow("ZOOM_WINDOW", 400, 400);
     setWindowProperty("ZOOM_WINDOW", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
-    setMouseCallback("PickPoints", __callback__click, (void *)&frame);
+    setMouseCallback("PickPoints", __callback__click);
     while (true)
     {
         putText(frame.frame, tips[(int)(enemy)][pick_points.size()], Point(tip_w, tip_h), HersheyFonts::FONT_HERSHEY_SIMPLEX, 3, Scalar(0, 255, 0), 2);
@@ -106,7 +107,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         for (size_t i = 1; i < pick_points.size(); ++i)
             line(frame.frame, pick_points[i - 1], pick_points[i], Scalar(0, 255, 0), 2);
         imshow("PickPoints", frame.frame);
-        if (frame.flag)
+        if (flag)
         {
             if (pick_points.size() == 4)
             {
@@ -114,7 +115,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
                 imshow("PickPoints", frame.frame);
             }
             int key = waitKey(0);
-            if (key == 90)
+            if (key == 90 || key == 122)
             {
                 if (pick_points.size() == 4)
                     line(frame.frame, pick_points[3], pick_points[0], Scalar(0, 0, 255), 2);
@@ -124,13 +125,13 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
                 pick_points.pop_back();
                 imshow("PickPoints", frame.frame);
             }
-            else if (key == 81)
+            else if (key == 81 || key == 113)
             {
                 destroyWindow("PickPoints");
                 destroyWindow("ZOOM_WINDOW");
                 return false;
             }
-            frame.flag = false;
+            flag = false;
         }
         else
         {
@@ -144,8 +145,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
             destroyWindow("PickPoints");
             destroyWindow("ZOOM_WINDOW");
             return false;
-        }
-        frame.flag = false;
+        }  
     }
     destroyWindow("PickPoints");
     destroyWindow("ZOOM_WINDOW");

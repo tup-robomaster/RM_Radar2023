@@ -218,8 +218,8 @@ void CameraThread::openCamera(bool is_init)
             int key = waitKey(0);
             destroyWindow("PREVIEW");
             this->_cap.disableAutoEx();
-            if (key == 84)
-                this->adjustExposure(this->_cap);
+            if (key == 84 || key == 116)
+                this->adjustExposure();
             this->_cap.saveParam(CameraConfigPath);
         }
         initFlag = true;
@@ -234,31 +234,27 @@ void CameraThread::openCamera(bool is_init)
     this->_cap._openflag = initFlag;
 }
 
-void CameraThread::adjustExposure(MV_Camera &cap)
+void CameraThread::adjustExposure()
 {
     namedWindow("EXPOSURE Press Q to Exit", WINDOW_NORMAL);
     resizeWindow("EXPOSURE Press Q to Exit", 1280, 960);
     moveWindow("EXPOSURE Press Q to Exit", 200, 200);
     setWindowProperty("EXPOSURE Press Q to Exit", WND_PROP_TOPMOST, 1);
-    createTrackbar("ex", "EXPOSURE Press Q to Exit", 0, 1);
-    setTrackbarMax("ex", "EXPOSURE Press Q to Exit", 30000);
-    setTrackbarMin("ex", "EXPOSURE Press Q to Exit", 0);
-    setTrackbarPos("ex", "EXPOSURE Press Q to Exit", cap.getExposureTime() != -1 ? cap.getExposureTime() : 0);
-    createTrackbar("gain", "EXPOSURE Press Q to Exit", 0, 1);
-    setTrackbarMax("gain", "EXPOSURE Press Q to Exit", 256);
-    setTrackbarMin("gain", "EXPOSURE Press Q to Exit", 0);
-    setTrackbarPos("gain", "EXPOSURE Press Q to Exit", cap.getAnalogGain() != -1 ? cap.getAnalogGain() : 0);
-    FrameBag framebag = cap.read();
-    while (!framebag.flag && waitKey(1) != 81)
+    createTrackbar("ex", "EXPOSURE Press Q to Exit", 0, 30000);
+    setTrackbarPos("ex", "EXPOSURE Press Q to Exit", this->_cap.getExposureTime() != -1 ? this->_cap.getExposureTime() : 0);
+    createTrackbar("gain", "EXPOSURE Press Q to Exit", 0, 256);
+    setTrackbarPos("gain", "EXPOSURE Press Q to Exit", this->_cap.getAnalogGain() != -1 ? this->_cap.getAnalogGain() : 0);
+    FrameBag framebag = this->_cap.read();
+    while (framebag.flag && waitKey(1) != 81 && waitKey(1) != 113)
     {
-        cap.setExposureTime(getTrackbarPos("ex", "EXPOSURE Press Q to Exit"));
-        cap.setGain(getTrackbarPos("gain", "EXPOSURE Press Q to Exit"));
+        this->_cap.setExposureTime(getTrackbarPos("ex", "EXPOSURE Press Q to Exit"));
+        this->_cap.setGain(getTrackbarPos("gain", "EXPOSURE Press Q to Exit"));
         imshow("EXPOSURE Press Q to Exit", framebag.frame);
-        framebag = cap.read();
+        framebag = this->_cap.read();
         waitKey(1);
     }
-    int ex = cap.getExposureTime();
-    int gain = cap.getAnalogGain();
+    int ex = this->_cap.getExposureTime();
+    int gain = this->_cap.getAnalogGain();
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                "[INFO], {}{}us\n", "Setting Expoure Time ", ex);
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
