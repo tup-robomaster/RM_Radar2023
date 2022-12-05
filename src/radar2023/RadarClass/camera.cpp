@@ -98,7 +98,6 @@ FrameBag MV_Camera::read()
             this->pFrameBuffer);
         CameraReleaseImageBuffer(this->hCamera, this->pRawDataBuffer);
         framebag.flag = true;
-        cout << 1;
         return framebag;
     }
     catch (const std::exception &e)

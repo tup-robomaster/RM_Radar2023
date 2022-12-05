@@ -159,10 +159,10 @@ void Radar::init(int argc, char **argv)
         if (mainCamBox.size() == 0)
         {
             fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO], Adding CameraThread ...Process\n");
+                       "[INFO], Adding CameraThread ...");
             mainCamBox.emplace_back(CameraThread());
             fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                       "[INFO], Adding CameraThread ...Done.\n");
+                       "Done.\n");
         }
         if (mainMMBox.size() == 0)
         {
@@ -345,7 +345,7 @@ void Radar::spin(int argc, char **argv)
         if (!myLocation.locate_pick(mainCamBox[0], ENEMY, revc, tvec))
             return;
         mainMMBox[0].push_T(revc, tvec);
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "[INFO], Locate pick Done \n");
     }
     if (!this->_thread_working)

@@ -12,8 +12,10 @@ ArmorDetector::~ArmorDetector()
 void ArmorDetector::initModel()
 {
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-             "[INFO], {}!\n", "ArmorDetector::initModel");
+               "[INFO], {}!\n", "ArmorDetector init Moudel");
     this->armorTensorRT->initMyTensorRT(TensorRTEnginePath, Yolov5wtsPath);
+    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+               "[INFO], {}!\n", "ArmorDetector Moudel inited");
 }
 
 vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> targets)
