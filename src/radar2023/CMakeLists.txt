@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(PCL REQUIRED)
 find_package(CUDA 11.6 REQUIRED)
+find_package(fmt REQUIRED)
 message("CUDA_LIBRARIES:${CUDA_LIBRARIES}")
 message("CUDA_INCLUDE_DIRS:${CUDA_INCLUDE_DIRS}")
 include_directories()
@@ -67,6 +68,7 @@ target_link_libraries(radar2023
   libdl.so
   MVSDK
   cuda
+  fmt::fmt
 )
 
 macro(remove_warnings)

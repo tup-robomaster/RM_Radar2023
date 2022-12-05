@@ -11,8 +11,8 @@ ArmorDetector::~ArmorDetector()
 
 void ArmorDetector::initModel()
 {
-    cout << "[INFO]"
-         << "ArmorDetector::initModel" << endl;
+    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+             "[INFO], {}!\n", "ArmorDetector::initModel");
     this->armorTensorRT->initMyTensorRT(TensorRTEnginePath, Yolov5wtsPath);
 }
 

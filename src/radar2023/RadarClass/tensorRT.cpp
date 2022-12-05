@@ -124,7 +124,7 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     builder->setMaxBatchSize(maxBatchSize);
     size_t memfree, total;
     cuMemGetInfo(&memfree, &total);
-    config->setMaxWorkspaceSize(memfree); 
+    config->setMaxWorkspaceSize(memfree);
 #if defined(USE_FP16)
     config->setFlag(BuilderFlag::kFP16);
 #elif defined(USE_INT8)
@@ -134,10 +134,11 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     Int8EntropyCalibrator2 *calibrator = new Int8EntropyCalibrator2(1, INPUT_W, INPUT_H, "./coco_calib/", "int8calib.table", INPUT_BLOB_NAME);
     config->setInt8Calibrator(calibrator);
 #endif
-
-    std::cout << "Building engine, please wait for a while..." << std::endl;
+    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+               "[INFO], Building engine, please wait for a while...");
     ICudaEngine *engine = builder->buildEngineWithConfig(*network, *config);
-    std::cout << "Build engine successfully!" << std::endl;
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+               "Build engine successfully!\n");
 
     // Don't need the network any more
     network->destroy();
@@ -242,9 +243,11 @@ ICudaEngine *MyTensorRT::build_engine_p6(unsigned int maxBatchSize, IBuilder *bu
     config->setInt8Calibrator(calibrator);
 #endif
 
-    std::cout << "Building engine, please wait for a while..." << std::endl;
+    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+               "[INFO], Building engine, please wait for a while...");
     ICudaEngine *engine = builder->buildEngineWithConfig(*network, *config);
-    std::cout << "Build engine successfully!" << std::endl;
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+               "Build engine successfully!\n");
 
     // Don't need the network any more
     network->destroy();
@@ -269,12 +272,14 @@ void MyTensorRT::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream
     ICudaEngine *engine = nullptr;
     if (is_p6)
     {
-        cout << "Build P6 Engine" << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Build P6 Engine\n");
         engine = this->build_engine_p6(maxBatchSize, builder, config, nvinfer1::DataType::kFLOAT, gd, gw, wts_name);
     }
     else
     {
-        cout << "Build Default Engine" << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Build Default Engine\n");
         engine = this->build_engine(maxBatchSize, builder, config, nvinfer1::DataType::kFLOAT, gd, gw, wts_name);
     }
     assert(engine != nullptr);
@@ -290,17 +295,27 @@ void MyTensorRT::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream
 
 bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw)
 {
+    char engine_name_c[engine_name.length()];
+    strcpy(engine_name_c, engine_name.data());
+    if (access(engine_name_c, F_OK) == 0)
+    {
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], TRT Moudle exists , Skip creation\n");
+        return true;
+    }
     if (!wts_name.empty())
     {
         IHostMemory *modelStream{nullptr};
         APIToModel(TensorRTMaxBatchSize, &modelStream, is_p6, gd, gw, wts_name);
         if (modelStream == nullptr)
-            cout << "Failed to build engine !" << endl;
+            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], Failed to build engine !\n");
         assert(modelStream != nullptr);
         std::ofstream p(engine_name, std::ios::binary);
         if (!p)
         {
-            std::cerr << "could not open plan output file" << std::endl;
+            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], could not open plan output file\n");
             return false;
         }
         p.write(reinterpret_cast<const char *>(modelStream->data()), modelStream->size());
@@ -381,7 +396,8 @@ vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int 
     bool success = context->enqueueV2(buffers, stream, nullptr);
     if (!success)
     {
-        cout << "doInference failure" << endl;
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], doInference failed\n");
         CUDA_CHECK(cudaStreamDestroy(stream));
         return {};
     }

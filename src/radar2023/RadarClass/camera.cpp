@@ -8,8 +8,8 @@ MV_Camera::MV_Camera(bool Is_init)
     this->iStatus = CameraEnumerateDevice(this->tCameraEnumList, &this->iCameraCounts);
     if (this->iCameraCounts == 0)
     {
-        cout << "[ERROR]"
-             << "No camera found!" << endl;
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   "[ERROR], {}!\n", "No camera found!");
         return;
     }
     // this->iStatus = -1;
@@ -24,8 +24,8 @@ MV_Camera::MV_Camera(bool Is_init)
     try
     {
         this->iStatus = CameraInit(&this->tCameraEnumList[0], -1, -1, &this->hCamera);
-        cout << "[INFO]"
-             << "CameraInit!" << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], {}!\n", "CameraInit!");
     }
     catch (const std::exception &e)
     {
@@ -34,7 +34,8 @@ MV_Camera::MV_Camera(bool Is_init)
     }
     if (this->iStatus != CAMERA_STATUS_SUCCESS)
     {
-        printf("[ERROR]CameraInit Failed: %d\n", this->iStatus);
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   "[ERROR], {} {}!\n", "CameraInit Failed!", this->iStatus);
         return;
     }
     CameraGetCapability(this->hCamera, &this->tCapability);
@@ -42,8 +43,8 @@ MV_Camera::MV_Camera(bool Is_init)
         CameraSetIspOutFormat(this->hCamera, CAMERA_MEDIA_TYPE_BGR8);
     else
     {
-        cout << "[ERROR]"
-             << "None suitable camera!";
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   "[ERROR], {}!\n", "None suitable camera!");
     }
     CameraSetTriggerMode(this->hCamera, 0);
     if (!Is_init)
@@ -73,8 +74,8 @@ FrameBag MV_Camera::read()
         CameraGetImageBuffer(this->hCamera, &this->sFrameInfo, &this->pRawDataBuffer, 200);
         if (CameraImageProcess(this->hCamera, this->pRawDataBuffer, this->pFrameBuffer, &this->sFrameInfo) != CAMERA_STATUS_SUCCESS)
         {
-            cout << "[ERROR]"
-                 << "Can not process Image!" << endl;
+            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], {}!\n", "Can not process Image!");
             return framebag;
         }
         framebag.frame = cv::Mat(
@@ -154,7 +155,10 @@ int MV_Camera::getAnalogGain()
 
 CameraThread::CameraThread()
 {
-    this->open();
+    while (!this->is_open())
+    {
+        this->open();
+    }
 }
 
 CameraThread::~CameraThread()
@@ -172,12 +176,12 @@ MV_Camera CameraThread::openCamera(bool is_init)
         FrameBag framebag = cap.read();
         if (!framebag.flag)
         {
-            cout << "[WARN]"
-                 << "Camera not init" << endl;
+            fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold,
+                       "[WARN], {}!\n", "Camera not init");
             return cap;
         }
         framebag = cap.read();
-        if (!is_init)
+        if (!is_init && framebag.flag)
         {
             namedWindow("PREVIEW", WINDOW_NORMAL);
             resizeWindow("PREVIEW", Size(840, 640));
@@ -228,10 +232,10 @@ void CameraThread::adjustExposure(MV_Camera &cap)
     }
     int ex = cap.getExposureTime();
     int gain = cap.getAnalogGain();
-    cout << "[INFO]"
-         << "Setting Expoure Time " << ex << "us" << endl;
-    cout << "[INFO]"
-         << "Setting analog gain " << gain << endl;
+    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], {}{}us!\n", "Setting Expoure Time ", ex);
+    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], {}{}!\n", "Setting analog gain ", gain);
     destroyWindow("EXPOSURE Press Q to Exit");
 }
 
@@ -276,8 +280,8 @@ FrameBag CameraThread::read()
     }
     if (!framebag.flag)
     {
-        cout << "[ERROR]"
-             << "Failed to get frame!--CameraThread::read()" << endl;
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], {}!\n", "Failed to get frame!--CameraThread::read()");
         this->release();
     }
     return framebag;

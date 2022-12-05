@@ -137,14 +137,14 @@ void UARTPasser::Referee_Update_GameData(unsigned char *buffer)
         this->_Game_Start_Flag = true;
         this->_set_max_flag = true;
         this->Remain_time = 420;
-        cout << "[GAME]"
-             << "GAME START !" << endl;
+        fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
+                       "[GAME], GAME START !\n");
     }
     if (this->_Now_stage < 5 && (buffer[7] >> 4) == 5)
     {
         this->_Game_End_Flag = true;
-        cout << "[GAME]"
-             << "GAME END !" << endl;
+        fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
+                       "[GAME], GAME END !\n");
         for (int i = 0; i < 10; ++i)
         {
             this->_max_hp[i] = this->_init_hp[i];

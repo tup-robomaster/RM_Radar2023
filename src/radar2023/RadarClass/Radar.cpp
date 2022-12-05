@@ -108,14 +108,14 @@ void Radar::init(int argc, char **argv)
 {
     if (!this->_init_flag)
     {
-        cout << "[INFO]"
-             << "Initing ..." << endl;
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO],Initing ...\n");
         if (ENEMY)
-            cout << "[INFO]"
-                 << "YOU ARE RED" << endl;
+            fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
+                       "[GAME],YOU ARE RED\n");
         else
-            cout << "[INFO]"
-                 << "YOU ARE BLUE" << endl;
+            fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
+                       "[GAME],YOU ARE BLUE\n");
         Matrix<float, 3, 3> K_0;
         Matrix<float, 1, 5> C_0;
         Matrix<float, 4, 4> E_0;
@@ -129,19 +129,61 @@ void Radar::init(int argc, char **argv)
         cv2eigen(E_0_Mat, E_0);
         // TODO: CHECK HERE
         if (mainDqBox.size() == 0)
+        {
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Adding DepthQueue ...");
             mainDqBox.emplace_back(DepthQueue(K_0, C_0, E_0));
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "Done.\n");
+        }
         if (mainMDBox.size() == 0)
+        {
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Adding MovementDetector ...");
             mainMDBox.emplace_back(MovementDetector());
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "Done.\n");
+        }
         if (mainADBox.size() == 0)
+        {
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Adding ArmorDetector ...");
             mainADBox.emplace_back(ArmorDetector());
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "Done.\n");
+        }
         if (mainCamBox.size() == 0)
+        {
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Adding CameraThread ...");
             mainCamBox.emplace_back(CameraThread());
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "Done.\n");
+        }
         if (mainMMBox.size() == 0)
+        {
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Adding MapMapping ...");
             mainMMBox.emplace_back(MapMapping());
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "Done.\n");
+        }
         if (mainUARTBox.size() == 0)
+        {
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Adding UART ...");
             mainUARTBox.emplace_back(UART());
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "Done.\n");
+        }
         if (mainSerBox.size() == 0)
+        {
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Adding MySerial ...");
             mainSerBox.emplace_back(MySerial());
+            fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                       "Done.\n");
+        }
         if (!this->_init_flag)
         {
             this->LidarListenerBegin(argc, argv);
@@ -260,7 +302,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 vector<Rect> tempMTs = MTs;
                 slk.unlock();
                 armorBoundingBoxs = mainADBox[0].infer(frameBag.frame, tempMTs);
-                //TODO: 加入防抖层
+                // TODO: 加入防抖层
                 armor_filter(armorBoundingBoxs);
                 slk.lock();
                 detectDepth(&armorBoundingBoxs);

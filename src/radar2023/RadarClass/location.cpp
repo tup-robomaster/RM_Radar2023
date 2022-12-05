@@ -39,7 +39,8 @@ void __callback__click(int event, int x, int y, int flage, void *param)
         if (frame.flag)
         {
             frame.flag = true;
-            cout << "Pick" << x << "|" << y << endl;
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                       "[INFO],Pick {}|{}!\n", x, y);
             vector<Point> temp_corner;
             temp_corner.emplace_back(Point(x, y));
             Mat grey;

@@ -13,15 +13,17 @@ void MySerial::initSerial()
     this->fd = open(SerialPortNAME, O_RDWR | O_NONBLOCK | O_NOCTTY | O_NDELAY);
     if (this->fd == -1)
     {
-        cout << "[ERROR]"
-             << "Serial init failed !" << endl;
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   "[ERROR], {}!\n", "Serial init failed !");
         return;
     }
 
     if (fcntl(this->fd, F_SETFL, 0) < 0) //改为阻塞模式
-        printf("fcntl failed\n");
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   "[ERROR], {}!\n", "fcntl failed !");
     else
-        printf("fcntl=%d\n", fcntl(this->fd, F_SETFL, 0));
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], fcntl=%d\n", fcntl(this->fd, F_SETFL, 0));
 
     tcgetattr(this->fd, &this->options);
 
