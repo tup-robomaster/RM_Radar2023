@@ -34,25 +34,25 @@ link_directories(/opt/intel/mkl/lib/intel64
   ${PCL_LIBRARY_DIRS})
 cuda_add_executable(radar2023
   main.cpp
-  RadarClass/camera.cpp
-  RadarClass/Radar.cpp
-  RadarClass/depthProcesser.cpp
-  RadarClass/MovementDetector.cpp
-  CUDA/yololayer.cu
-  CUDA/preprocess.cu
-  CUDA/gpu_decode.cu
-  RadarClass/common.cpp
-  RadarClass/calibrator.cpp
-  RadarClass/tensorRT.cpp
-  RadarClass/ArmorDetector.cpp
-  RadarClass/location.cpp
-  RadarClass/MapMapping.cpp
-  RadarClass/general.cpp
-  RadarClass/serial.cpp
-  RadarClass/UARTPasser.cpp
-  RadarClass/UART.cpp
-  RadarClass/offical_judge_Handler.cpp
-  RadarClass/CarDetector.cpp
+  RadarClass/Camera/src/camera.cpp
+  RadarClass/Common/src/general.cpp
+  RadarClass/Detectors/CUDA/gpu_decode.cu
+  RadarClass/Detectors/CUDA/preprocess.cu
+  RadarClass/Detectors/CUDA/yololayer.cu
+  RadarClass/Detectors/src/ArmorDetector.cpp
+  RadarClass/Detectors/src/calibrator.cpp
+  RadarClass/Detectors/src/CarDetector.cpp
+  RadarClass/Detectors/src/common.cpp
+  RadarClass/Detectors/src/depthProcesser.cpp
+  RadarClass/Detectors/src/MovementDetector.cpp
+  RadarClass/Detectors/src/tensorRT.cpp
+  RadarClass/Radar/src/location.cpp
+  RadarClass/Radar/src/MapMapping.cpp
+  RadarClass/Radar/src/Radar.cpp
+  RadarClass/UART/src/offical_judge_Handler.cpp
+  RadarClass/UART/src/serial.cpp
+  RadarClass/UART/src/UART.cpp
+  RadarClass/UART/src/UARTPasser.cpp
 )
 set_target_properties(radar2023 PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON)

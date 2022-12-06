@@ -3,5 +3,5 @@ build/
 install/
 .vscode/
 .catkin_workspace
-src/radar2023/Moudles/
-src/radar2023/Camera/
+src/radar2023/RadarClass/Detectors/Moudles/
+src/radar2023/RadarClass/Camera/params
