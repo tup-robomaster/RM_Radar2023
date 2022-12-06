@@ -103,7 +103,7 @@ Radar::Radar(int argc, char **argv)
 
 Radar::~Radar()
 {
-    if(this->is_alive)
+    if (this->is_alive)
         this->stop();
 }
 
@@ -125,10 +125,10 @@ void Radar::init(int argc, char **argv)
     Mat K_0_Mat;
     Mat C_0_Mat;
     Mat E_0_Mat;
-    if (!read_yaml(K_0_Mat, C_0_Mat, E_0_Mat))
+    if (!read_param(K_0_Mat, C_0_Mat, E_0_Mat))
     {
         fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], Can't read yaml !\n");
+                   "[ERROR], Can't read CAMERA_PARAM: {}!\n", CAMERA_PARAM_PATH);
         return;
     }
     cv2eigen(K_0_Mat, K_0);
@@ -453,6 +453,7 @@ void Radar::stop()
         this->processLoop.join();
         mainCamBox[0].stop();
     }
+    destroyAllWindows();
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Done.\n");
 }

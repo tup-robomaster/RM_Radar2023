@@ -1,16 +1,16 @@
 #include "../include/common.h"
 
-cv::Rect get_rect(cv::Mat &img, float bbox[4])
+cv::Rect get_rect(cv::Mat &img, float bbox[4], int input_H, int input_W)
 {
     float l, r, t, b;
-    float r_w = TRT_INPUT_W / (img.cols * 1.0);
-    float r_h = TRT_INPUT_H / (img.rows * 1.0);
+    float r_w = input_W / (img.cols * 1.0);
+    float r_h = input_H / (img.rows * 1.0);
     if (r_h > r_w)
     {
         l = bbox[0] - bbox[2] / 2.f;
         r = bbox[0] + bbox[2] / 2.f;
-        t = bbox[1] - bbox[3] / 2.f - (TRT_INPUT_H - r_w * img.rows) / 2;
-        b = bbox[1] + bbox[3] / 2.f - (TRT_INPUT_H - r_w * img.rows) / 2;
+        t = bbox[1] - bbox[3] / 2.f - (input_H - r_w * img.rows) / 2;
+        b = bbox[1] + bbox[3] / 2.f - (input_H - r_w * img.rows) / 2;
         l = l / r_w;
         r = r / r_w;
         t = t / r_w;
@@ -18,8 +18,8 @@ cv::Rect get_rect(cv::Mat &img, float bbox[4])
     }
     else
     {
-        l = bbox[0] - bbox[2] / 2.f - (TRT_INPUT_W - r_h * img.cols) / 2;
-        r = bbox[0] + bbox[2] / 2.f - (TRT_INPUT_W - r_h * img.cols) / 2;
+        l = bbox[0] - bbox[2] / 2.f - (input_W - r_h * img.cols) / 2;
+        r = bbox[0] + bbox[2] / 2.f - (input_W - r_h * img.cols) / 2;
         t = bbox[1] - bbox[3] / 2.f;
         b = bbox[1] + bbox[3] / 2.f;
         l = l / r_h;
@@ -55,7 +55,7 @@ void nms(std::vector<Yolo::Detection> &res, float *output, float conf_thresh, fl
 {
     int det_size = sizeof(Yolo::Detection) / sizeof(float);
     std::map<float, std::vector<Yolo::Detection>> m;
-    for (int i = 0; i < output[0] && i < MAX_OUTPUT_BBOX_COUNT; i++)
+    for (int i = 0; i < output[0] && i < MAX_OUTPUT_BBOX_COUNT; ++i)
     {
         if (output[1 + det_size * i + 4] <= conf_thresh)
             continue;
@@ -65,7 +65,7 @@ void nms(std::vector<Yolo::Detection> &res, float *output, float conf_thresh, fl
             m.emplace(det.class_id, std::vector<Yolo::Detection>());
         m[det.class_id].push_back(det);
     }
-    for (auto it = m.begin(); it != m.end(); it++)
+    for (auto it = m.begin(); it != m.end(); ++it)
     {
         // std::cout << it->second[0].class_id << " --- " << std::endl;
         auto &dets = it->second;
@@ -91,7 +91,7 @@ void nms(std::vector<Yolo::Detection> &res, float *output, float conf_thresh, fl
 std::map<std::string, Weights> loadWeights(const std::string file)
 {
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                       "[INFO], {}{}!\n", "Loading weights:", file);
+               "[INFO], {}{}!\n", "Loading weights:", file);
     std::map<std::string, Weights> weightMap;
 
     // Open weights file
@@ -184,12 +184,12 @@ ILayer *convBlock(INetworkDefinition *network, std::map<std::string, Weights> &w
     return ew;
 }
 
-ILayer *focus(INetworkDefinition *network, std::map<std::string, Weights> &weightMap, ITensor &input, int inch, int outch, int ksize, std::string lname)
+ILayer *focus(INetworkDefinition *network, std::map<std::string, Weights> &weightMap, ITensor &input, int inch, int outch, int ksize, std::string lname, int input_H, int input_W)
 {
-    ISliceLayer *s1 = network->addSlice(input, Dims3{0, 0, 0}, Dims3{inch, TRT_INPUT_H / 2, TRT_INPUT_W / 2}, Dims3{1, 2, 2});
-    ISliceLayer *s2 = network->addSlice(input, Dims3{0, 1, 0}, Dims3{inch, TRT_INPUT_H / 2, TRT_INPUT_W / 2}, Dims3{1, 2, 2});
-    ISliceLayer *s3 = network->addSlice(input, Dims3{0, 0, 1}, Dims3{inch, TRT_INPUT_H / 2, TRT_INPUT_W / 2}, Dims3{1, 2, 2});
-    ISliceLayer *s4 = network->addSlice(input, Dims3{0, 1, 1}, Dims3{inch, TRT_INPUT_H / 2, TRT_INPUT_W / 2}, Dims3{1, 2, 2});
+    ISliceLayer *s1 = network->addSlice(input, Dims3{0, 0, 0}, Dims3{inch, input_H / 2, input_W / 2}, Dims3{1, 2, 2});
+    ISliceLayer *s2 = network->addSlice(input, Dims3{0, 1, 0}, Dims3{inch, input_H / 2, input_W / 2}, Dims3{1, 2, 2});
+    ISliceLayer *s3 = network->addSlice(input, Dims3{0, 0, 1}, Dims3{inch, input_H / 2, input_W / 2}, Dims3{1, 2, 2});
+    ISliceLayer *s4 = network->addSlice(input, Dims3{0, 1, 1}, Dims3{inch, input_H / 2, input_W / 2}, Dims3{1, 2, 2});
     ITensor *inputTensors[] = {s1->getOutput(0), s2->getOutput(0), s3->getOutput(0), s4->getOutput(0)};
     auto cat = network->addConcatenation(inputTensors, 4);
     auto conv = convBlock(network, weightMap, *cat->getOutput(0), outch, ksize, 1, 1, lname + ".conv");
@@ -308,12 +308,12 @@ std::vector<std::vector<float>> getAnchors(std::map<std::string, Weights> &weigh
     return anchors;
 }
 
-IPluginV2Layer *addYoLoLayer(INetworkDefinition *network, std::map<std::string, Weights> &weightMap, std::string lname, std::vector<IConvolutionLayer *> dets)
+IPluginV2Layer *addYoLoLayer(INetworkDefinition *network, std::map<std::string, Weights> &weightMap, std::string lname, std::vector<IConvolutionLayer *> dets, int cls_num, int input_H, int input_W)
 {
     auto creator = getPluginRegistry()->getPluginCreator("YoloLayer_TRT", "1");
     auto anchors = getAnchors(weightMap, lname);
     PluginField plugin_fields[2];
-    int netinfo[4] = {TRT_CLS_NUM, TRT_INPUT_W, TRT_INPUT_H, MAX_OUTPUT_BBOX_COUNT};
+    int netinfo[4] = {cls_num, input_W, input_H, MAX_OUTPUT_BBOX_COUNT};
     plugin_fields[0].data = netinfo;
     plugin_fields[0].length = 4;
     plugin_fields[0].name = "netinfo";
@@ -323,8 +323,8 @@ IPluginV2Layer *addYoLoLayer(INetworkDefinition *network, std::map<std::string, 
     for (size_t i = 0; i < anchors.size(); i++)
     {
         Yolo::YoloKernel kernel;
-        kernel.width = TRT_INPUT_W / scale;
-        kernel.height = TRT_INPUT_H / scale;
+        kernel.width = input_W / scale;
+        kernel.height = input_H / scale;
         memcpy(kernel.anchors, &anchors[i][0], anchors[i].size() * sizeof(float));
         kernels.push_back(kernel);
         scale *= 2;

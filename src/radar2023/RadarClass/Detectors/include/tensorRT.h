@@ -22,6 +22,11 @@ private:
     int outputIndex;
     uint8_t *img_host = nullptr;
     uint8_t *img_device = nullptr;
+
+    int max_batchsize = 0;
+    int input_H = 0;
+    int input_W = 0;
+    int cls_num = 0;
     
 private:
     bool build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw);
@@ -33,7 +38,7 @@ public:
     MyTensorRT();
     ~MyTensorRT();
 
-    bool initMyTensorRT(char *tensorrtMoudlePath, char *onnxMoudlePath, bool is_p6, float gd, float gw);
+    bool initMyTensorRT(char *tensorrtMoudlePath, char *onnxMoudlePath, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num);
     void unInitMyTensorRT();
     vector<vector<Yolo::Detection>> doInference(vector<Mat> *input, int batchSize, float confidence_threshold = 0.25f, float nms_threshold = 0.45f);
 };

@@ -60,7 +60,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     Mat K_0;
     Mat C_0;
     Mat E_0;
-    if (!read_yaml(K_0, C_0, E_0))
+    if (!read_param(K_0, C_0, E_0))
         return false;
     Point3f red_base = this->location_targets["red_base"];
     Point3f blue_outpost = this->location_targets["blue_outpost"];

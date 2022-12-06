@@ -33,12 +33,16 @@
 #define Yolov5wtsPath       (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/yolov5.wts"      //wts
 #define TensorRTEnginePath_c  (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/yolov5_c.engine"   //Engine
 #define Yolov5wtsPath_c       (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/yolov5_c.wts"      //wts
-#define TensorRTMaxBatchSize 10                             //转换TRT最大BatchSize
+#define TensorRTMaxBatchSize 30                             //转换TRT最大BatchSize
+#define TensorRTMaxBatchSize_c 1                            //转换TRT最大BatchSize
 #define INPUT_BLOB_NAME     (char*)"images"                 //输入名
 #define OUTPUT_BLOB_NAME    (char*)"output0"                //输出名
 #define TRT_INPUT_H         256                             //输入尺寸_高
 #define TRT_INPUT_W         256                             //输入尺寸_宽
+#define TRT_INPUT_H_c       640                             //输入尺寸_高
+#define TRT_INPUT_W_c       640                             //输入尺寸_宽
 #define TRT_CLS_NUM         36                              //分类数量
+#define TRT_CLS_NUM_c       1                               //分类数量
 #define TRT_ANCHOR_OUTPUT_NUM 25200                         //先验框数量
 #define TensorRTBatchSize   1                               //TRT单次推理数量
 #define MAX_OUTPUT_BBOX_COUNT   1000

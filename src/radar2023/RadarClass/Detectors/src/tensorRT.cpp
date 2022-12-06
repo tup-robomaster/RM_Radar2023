@@ -66,7 +66,7 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     INetworkDefinition *network = builder->createNetworkV2(0U);
 
     // Create input tensor of shape {3, INPUT_H, INPUT_W} with name INPUT_BLOB_NAME
-    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{3, TRT_INPUT_H, TRT_INPUT_W});
+    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{3, this->input_H, this->input_W});
     assert(data);
     std::map<std::string, Weights> weightMap = loadWeights(wts_name);
     /* ------ yolov5 backbone------ */
@@ -105,19 +105,19 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     auto bottleneck_csp17 = C3(network, weightMap, *cat16->getOutput(0), get_width(512, gw), get_width(256, gw), get_depth(3, gd), false, 1, 0.5, "model.17");
 
     /* ------ detect ------ */
-    IConvolutionLayer *det0 = network->addConvolutionNd(*bottleneck_csp17->getOutput(0), 3 * (TRT_CLS_NUM + 5), DimsHW{1, 1}, weightMap["model.24.m.0.weight"], weightMap["model.24.m.0.bias"]);
+    IConvolutionLayer *det0 = network->addConvolutionNd(*bottleneck_csp17->getOutput(0), 3 * (this->cls_num + 5), DimsHW{1, 1}, weightMap["model.24.m.0.weight"], weightMap["model.24.m.0.bias"]);
     auto conv18 = convBlock(network, weightMap, *bottleneck_csp17->getOutput(0), get_width(256, gw), 3, 2, 1, "model.18");
     ITensor *inputTensors19[] = {conv18->getOutput(0), conv14->getOutput(0)};
     auto cat19 = network->addConcatenation(inputTensors19, 2);
     auto bottleneck_csp20 = C3(network, weightMap, *cat19->getOutput(0), get_width(512, gw), get_width(512, gw), get_depth(3, gd), false, 1, 0.5, "model.20");
-    IConvolutionLayer *det1 = network->addConvolutionNd(*bottleneck_csp20->getOutput(0), 3 * (TRT_CLS_NUM + 5), DimsHW{1, 1}, weightMap["model.24.m.1.weight"], weightMap["model.24.m.1.bias"]);
+    IConvolutionLayer *det1 = network->addConvolutionNd(*bottleneck_csp20->getOutput(0), 3 * (this->cls_num + 5), DimsHW{1, 1}, weightMap["model.24.m.1.weight"], weightMap["model.24.m.1.bias"]);
     auto conv21 = convBlock(network, weightMap, *bottleneck_csp20->getOutput(0), get_width(512, gw), 3, 2, 1, "model.21");
     ITensor *inputTensors22[] = {conv21->getOutput(0), conv10->getOutput(0)};
     auto cat22 = network->addConcatenation(inputTensors22, 2);
     auto bottleneck_csp23 = C3(network, weightMap, *cat22->getOutput(0), get_width(1024, gw), get_width(1024, gw), get_depth(3, gd), false, 1, 0.5, "model.23");
-    IConvolutionLayer *det2 = network->addConvolutionNd(*bottleneck_csp23->getOutput(0), 3 * (TRT_CLS_NUM + 5), DimsHW{1, 1}, weightMap["model.24.m.2.weight"], weightMap["model.24.m.2.bias"]);
+    IConvolutionLayer *det2 = network->addConvolutionNd(*bottleneck_csp23->getOutput(0), 3 * (this->cls_num + 5), DimsHW{1, 1}, weightMap["model.24.m.2.weight"], weightMap["model.24.m.2.bias"]);
 
-    auto yolo = addYoLoLayer(network, weightMap, "model.24", std::vector<IConvolutionLayer *>{det0, det1, det2});
+    auto yolo = addYoLoLayer(network, weightMap, "model.24", std::vector<IConvolutionLayer *>{det0, det1, det2}, this->cls_num, this->input_H, this->input_W);
     yolo->getOutput(0)->setName(OUTPUT_BLOB_NAME);
     network->markOutput(*yolo->getOutput(0));
     // Build engine
@@ -156,7 +156,7 @@ ICudaEngine *MyTensorRT::build_engine_p6(unsigned int maxBatchSize, IBuilder *bu
 {
     INetworkDefinition *network = builder->createNetworkV2(0U);
     // Create input tensor of shape {3, INPUT_H, INPUT_W} with name INPUT_BLOB_NAME
-    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{3, TRT_INPUT_H, TRT_INPUT_W});
+    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{3, this->input_H, this->input_W});
     assert(data);
 
     std::map<std::string, Weights> weightMap = loadWeights(wts_name);
@@ -219,12 +219,12 @@ ICudaEngine *MyTensorRT::build_engine_p6(unsigned int maxBatchSize, IBuilder *bu
     auto c3_32 = C3(network, weightMap, *cat31->getOutput(0), get_width(2048, gw), get_width(1024, gw), get_depth(3, gd), false, 1, 0.5, "model.32");
 
     /* ------ detect ------ */
-    IConvolutionLayer *det0 = network->addConvolutionNd(*c3_23->getOutput(0), 3 * (TRT_CLS_NUM + 5), DimsHW{1, 1}, weightMap["model.33.m.0.weight"], weightMap["model.33.m.0.bias"]);
-    IConvolutionLayer *det1 = network->addConvolutionNd(*c3_26->getOutput(0), 3 * (TRT_CLS_NUM + 5), DimsHW{1, 1}, weightMap["model.33.m.1.weight"], weightMap["model.33.m.1.bias"]);
-    IConvolutionLayer *det2 = network->addConvolutionNd(*c3_29->getOutput(0), 3 * (TRT_CLS_NUM + 5), DimsHW{1, 1}, weightMap["model.33.m.2.weight"], weightMap["model.33.m.2.bias"]);
-    IConvolutionLayer *det3 = network->addConvolutionNd(*c3_32->getOutput(0), 3 * (TRT_CLS_NUM + 5), DimsHW{1, 1}, weightMap["model.33.m.3.weight"], weightMap["model.33.m.3.bias"]);
+    IConvolutionLayer *det0 = network->addConvolutionNd(*c3_23->getOutput(0), 3 * (this->cls_num + 5), DimsHW{1, 1}, weightMap["model.33.m.0.weight"], weightMap["model.33.m.0.bias"]);
+    IConvolutionLayer *det1 = network->addConvolutionNd(*c3_26->getOutput(0), 3 * (this->cls_num + 5), DimsHW{1, 1}, weightMap["model.33.m.1.weight"], weightMap["model.33.m.1.bias"]);
+    IConvolutionLayer *det2 = network->addConvolutionNd(*c3_29->getOutput(0), 3 * (this->cls_num + 5), DimsHW{1, 1}, weightMap["model.33.m.2.weight"], weightMap["model.33.m.2.bias"]);
+    IConvolutionLayer *det3 = network->addConvolutionNd(*c3_32->getOutput(0), 3 * (this->cls_num + 5), DimsHW{1, 1}, weightMap["model.33.m.3.weight"], weightMap["model.33.m.3.bias"]);
 
-    auto yolo = addYoLoLayer(network, weightMap, "model.33", std::vector<IConvolutionLayer *>{det0, det1, det2, det3});
+    auto yolo = addYoLoLayer(network, weightMap, "model.33", std::vector<IConvolutionLayer *>{det0, det1, det2, det3}, this->cls_num, this->input_H, this->input_W);
     yolo->getOutput(0)->setName(OUTPUT_BLOB_NAME);
     network->markOutput(*yolo->getOutput(0));
 
@@ -315,7 +315,7 @@ bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, fl
             return false;
         }
         IHostMemory *modelStream{nullptr};
-        APIToModel(TensorRTMaxBatchSize, &modelStream, is_p6, gd, gw, wts_name);
+        APIToModel(this->max_batchsize, &modelStream, is_p6, gd, gw, wts_name);
         if (modelStream == nullptr)
             fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
                        "[ERROR], Failed to build engine !\n");
@@ -334,8 +334,12 @@ bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, fl
     return false;
 }
 
-bool MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts, bool is_p6, float gd, float gw)
+bool MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num)
 {
+    this->max_batchsize = max_batchsize;
+    this->input_H = input_H;
+    this->input_W = input_W;
+    this->cls_num = cls_num;
     if (this->build_model(yolov5wts, tensorrtEngienPath, is_p6, gd, gw))
     {
         TRTLogger logger;
@@ -362,8 +366,8 @@ bool MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts, bool 
         this->outputIndex = this->engine->getBindingIndex(OUTPUT_BLOB_NAME);
         assert(this->inputIndex == 0);
         assert(this->outputIndex == 1);
-        CUDA_CHECK(cudaMalloc(&this->buffers[this->inputIndex], TensorRTMaxBatchSize * 3 * TRT_INPUT_H * TRT_INPUT_W * sizeof(float)));
-        CUDA_CHECK(cudaMalloc(&this->buffers[this->outputIndex], TensorRTMaxBatchSize * TRT_OUTPUT_SIZE * sizeof(float)));
+        CUDA_CHECK(cudaMalloc(&this->buffers[this->inputIndex], this->max_batchsize * 3 * this->input_H * this->input_W * sizeof(float)));
+        CUDA_CHECK(cudaMalloc(&this->buffers[this->outputIndex], this->max_batchsize * TRT_OUTPUT_SIZE * sizeof(float)));
         CUDA_CHECK(cudaMallocHost((void **)&this->img_host, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
         CUDA_CHECK(cudaMalloc((void **)&this->img_device, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
     }
@@ -388,7 +392,7 @@ void MyTensorRT::unInitMyTensorRT()
 vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int batchSize, float confidence_threshold, float nms_threshold)
 {
     assert(this->context != nullptr);
-    static float output[TensorRTMaxBatchSize * TRT_OUTPUT_SIZE * sizeof(float)];
+    float output[this->max_batchsize * TRT_OUTPUT_SIZE * sizeof(float)];
     vector<vector<Yolo::Detection>> batch_res(batchSize);
     cudaStream_t stream = nullptr;
     CUDA_CHECK(cudaStreamCreate(&stream));
@@ -399,14 +403,14 @@ vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int 
         if (img.empty())
             continue;
         size_t size_image = img.cols * img.rows * 3;
-        size_t size_image_dst = TRT_INPUT_H * TRT_INPUT_W * 3;
+        size_t size_image_dst = this->input_H * this->input_W * 3;
         memcpy(img_host, img.data, size_image);
         CUDA_CHECK(cudaMemcpyAsync(img_device, img_host, size_image, cudaMemcpyHostToDevice, stream));
-        preprocess_kernel_img(img_device, img.cols, img.rows, buffer_idx, TRT_INPUT_W, TRT_INPUT_H, stream);
+        preprocess_kernel_img(img_device, img.cols, img.rows, buffer_idx, this->input_W, this->input_H, stream);
         buffer_idx += size_image_dst;
     }
     // CUDA_CHECK(cudaMemcpyAsync(buffers[inputIndex], input,
-    //                       batchSize * 3 * TRT_INPUT_H * TRT_INPUT_W * sizeof(float),
+    //                       batchSize * 3 * this->input_H * this->input_W * sizeof(float),
     //                       cudaMemcpyHostToDevice, stream));
     auto input_dims = this->engine->getBindingDimensions(0);
     input_dims.d[0] = batchSize;

@@ -11,6 +11,6 @@ Rect rectCenterScale(Rect rect, Size size);
 
 Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH);
 
-bool read_yaml(Mat &K_0, Mat &C_0, Mat &E_0);
+bool read_param(Mat &K_0, Mat &C_0, Mat &E_0);
 
 #endif

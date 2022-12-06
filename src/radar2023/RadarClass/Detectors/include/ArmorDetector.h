@@ -16,7 +16,7 @@ private:
 
 private:
     Mat letterBoxCPU(cv::Mat &src, int h, int w, ReShapeBox *box);
-    vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets, vector<ReShapeBox> *boxs);
+    vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
     void reBuildBoxs(vector<vector<Yolo::Detection>> *armors, vector<ReShapeBox> *boxs);
 
 public:
