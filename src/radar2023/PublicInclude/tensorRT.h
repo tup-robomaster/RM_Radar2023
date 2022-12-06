@@ -22,10 +22,7 @@ private:
     int outputIndex;
     uint8_t *img_host = nullptr;
     uint8_t *img_device = nullptr;
-    bool is_p6 = Is_p6;
-    float gd = G_D;
-    float gw = G_W;
-
+    
 private:
     bool build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw);
     void APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream, bool &is_p6, float &gd, float &gw, std::string &wts_name);
@@ -36,7 +33,7 @@ public:
     MyTensorRT();
     ~MyTensorRT();
 
-    void initMyTensorRT(char *tensorrtMoudlePath, char *onnxMoudlePath);
+    bool initMyTensorRT(char *tensorrtMoudlePath, char *onnxMoudlePath, bool is_p6, float gd, float gw);
     void unInitMyTensorRT();
     vector<vector<Yolo::Detection>> doInference(vector<Mat> *input, int batchSize, float confidence_threshold = 0.25f, float nms_threshold = 0.45f);
 };

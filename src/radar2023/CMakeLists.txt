@@ -52,6 +52,7 @@ cuda_add_executable(radar2023
   RadarClass/UARTPasser.cpp
   RadarClass/UART.cpp
   RadarClass/offical_judge_Handler.cpp
+  RadarClass/CarDetector.cpp
 )
 set_target_properties(radar2023 PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON)

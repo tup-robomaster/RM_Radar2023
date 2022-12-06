@@ -9,13 +9,14 @@ ArmorDetector::~ArmorDetector()
 {
 }
 
-void ArmorDetector::initModel()
+bool ArmorDetector::initModel()
 {
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                "[INFO], {}!\n", "ArmorDetector init Moudel");
-    this->armorTensorRT->initMyTensorRT(TensorRTEnginePath, Yolov5wtsPath);
+    bool check = this->armorTensorRT->initMyTensorRT(TensorRTEnginePath, Yolov5wtsPath, Is_p6, G_D, G_W);
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "[INFO], {}!\n", "ArmorDetector Moudel inited");
+    return check;
 }
 
 vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> targets)
@@ -26,8 +27,6 @@ vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> targets)
         return {};
     vector<Mat> preProcessedImage = this->preProcess(image, targets, &boxs);
     results = this->armorTensorRT->doInference(&preProcessedImage, preProcessedImage.size());
-    if (results.size() == 0)
-        return {};
     this->reBuildBoxs(&results, &boxs);
     return this->results;
 }

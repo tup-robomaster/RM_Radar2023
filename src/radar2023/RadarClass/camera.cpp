@@ -244,8 +244,10 @@ void CameraThread::adjustExposure()
     setTrackbarPos("ex", "EXPOSURE Press Q to Exit", this->_cap.getExposureTime() != -1 ? this->_cap.getExposureTime() : 0);
     createTrackbar("gain", "EXPOSURE Press Q to Exit", 0, 256);
     setTrackbarPos("gain", "EXPOSURE Press Q to Exit", this->_cap.getAnalogGain() != -1 ? this->_cap.getAnalogGain() : 0);
+    createTrackbar("Quit", "EXPOSURE Press Q to Exit", 0, 1);
+    setTrackbarPos("Quit", "EXPOSURE Press Q to Exit", 0);
     FrameBag framebag = this->_cap.read();
-    while (framebag.flag && waitKey(1) != 81 && waitKey(1) != 113)
+    while (framebag.flag && waitKey(1) != 81 && waitKey(1) != 113 && getTrackbarPos("Quit", "EXPOSURE Press Q to Exit") == 0)
     {
         this->_cap.setExposureTime(getTrackbarPos("ex", "EXPOSURE Press Q to Exit"));
         this->_cap.setGain(getTrackbarPos("gain", "EXPOSURE Press Q to Exit"));

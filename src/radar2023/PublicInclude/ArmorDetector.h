@@ -23,7 +23,7 @@ public:
     ArmorDetector();
     ~ArmorDetector();
 
-    void initModel();
+    bool initModel();
     vector<ArmorBoundingBox> infer(Mat &image, vector<Rect> targets);
 };
 

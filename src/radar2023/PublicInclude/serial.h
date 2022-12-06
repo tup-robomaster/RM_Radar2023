@@ -6,7 +6,7 @@
 class MySerial
 {
 public:
-    int fd, flag, wr_num = 0, rr_num = 0;
+    int fd = -1, flag, wr_num = 0, rr_num = 0;
     struct termios options, newstate;
     speed_t baud_rate_i, baud_rate_o;
 

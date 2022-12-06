@@ -10,6 +10,8 @@ MySerial::~MySerial()
 
 void MySerial::initSerial()
 {
+    if(this->fd != -1)
+        return;
     this->fd = open(SerialPortNAME, O_RDWR | O_NONBLOCK | O_NOCTTY | O_NDELAY);
     if (this->fd == -1)
     {

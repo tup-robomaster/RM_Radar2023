@@ -66,7 +66,7 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     INetworkDefinition *network = builder->createNetworkV2(0U);
 
     // Create input tensor of shape {3, INPUT_H, INPUT_W} with name INPUT_BLOB_NAME
-    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{ 3, TRT_INPUT_H, TRT_INPUT_W});
+    ITensor *data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{3, TRT_INPUT_H, TRT_INPUT_W});
     assert(data);
     std::map<std::string, Weights> weightMap = loadWeights(wts_name);
     /* ------ yolov5 backbone------ */
@@ -297,6 +297,7 @@ bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, fl
 {
     char engine_name_c[engine_name.length()];
     strcpy(engine_name_c, engine_name.data());
+
     if (access(engine_name_c, F_OK) == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
@@ -305,6 +306,14 @@ bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, fl
     }
     if (!wts_name.empty())
     {
+        char wts_name_c[wts_name.length()];
+        strcpy(wts_name_c, wts_name.data());
+        if (access(wts_name_c, F_OK) != 0)
+        {
+            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                       "[ERROR], WTS doesn't exists , Stop creation\n");
+            return false;
+        }
         IHostMemory *modelStream{nullptr};
         APIToModel(TensorRTMaxBatchSize, &modelStream, is_p6, gd, gw, wts_name);
         if (modelStream == nullptr)
@@ -325,16 +334,16 @@ bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, fl
     return false;
 }
 
-void MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts)
+bool MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts, bool is_p6, float gd, float gw)
 {
-    if (this->build_model(yolov5wts, tensorrtEngienPath, this->is_p6, this->gd, this->gw))
+    if (this->build_model(yolov5wts, tensorrtEngienPath, is_p6, gd, gw))
     {
         TRTLogger logger;
         std::ifstream file(tensorrtEngienPath, std::ios::binary);
         if (!file.good())
         {
             std::cerr << "read " << tensorrtEngienPath << " error!" << std::endl;
-            return;
+            return false;
         }
         char *trtModelStream = nullptr;
         size_t size = 0;
@@ -358,6 +367,15 @@ void MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts)
         CUDA_CHECK(cudaMallocHost((void **)&this->img_host, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
         CUDA_CHECK(cudaMalloc((void **)&this->img_device, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
     }
+    else
+    {
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
+                   "[ERROR], Failed to build the infer moudle !Please CHECK and Restart the Program.");
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   " TRT LOGIC BREAK.\n");
+        return false;
+    }
+    return true;
 }
 
 void MyTensorRT::unInitMyTensorRT()
@@ -397,7 +415,7 @@ vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int 
     if (!success)
     {
         fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                       "[ERROR], doInference failed\n");
+                   "[ERROR], doInference failed\n");
         CUDA_CHECK(cudaStreamDestroy(stream));
         return {};
     }

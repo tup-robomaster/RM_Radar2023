@@ -5,6 +5,7 @@ static const char lidarTopicName[13] = "/livox/lidar"; //雷达点云节点名�
 static vector<DepthQueue> mainDqBox;       //考虑到后续可能的设备改变，预留容器
 static vector<MovementDetector> mainMDBox; //考虑到后续可能的设备改变，预留容器
 static vector<ArmorDetector> mainADBox;    //考虑到后续可能的设备改变，预留容器
+static vector<CarDetector> mainCDBox;      //考虑到后续可能的设备改变，预留容器
 static vector<CameraThread> mainCamBox;    //考虑到后续可能的设备改变，预留容器
 static vector<MapMapping> mainMMBox;       //考虑到后续可能的设备改变，预留容器
 static vector<UART> mainUARTBox;           //考虑到后续可能的设备改变，预留容器
@@ -12,7 +13,8 @@ static vector<MySerial> mainSerBox;        //考虑到后续可能的设备改�
 static vector<vector<float>> publicDepth;  //共享深度图
 static int depthResourceCount;             //深度图资源计数
 static shared_timed_mutex myMutex;         //读写锁
-static vector<Rect> MTs;                   //共享运动目标
+static vector<Rect> SeqTargets;            //共享分割目标
+static int separation_mode = 0;            //图像分割模式
 
 static void armor_filter(vector<ArmorBoundingBox> &armors)
 {
@@ -97,11 +99,12 @@ static void send_judge(judge_message &message, UART &myUART)
 
 Radar::Radar(int argc, char **argv)
 {
-    this->init(argc, argv);
 }
 
 Radar::~Radar()
 {
+    if(this->is_alive)
+        this->stop();
 }
 
 void Radar::init(int argc, char **argv)
@@ -109,13 +112,13 @@ void Radar::init(int argc, char **argv)
     if (this->_init_flag)
         return;
     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                "[INFO], Initing ...Process\n");
+               "[INFO], Initing ...Process\n");
     if (ENEMY)
         fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
-                    "[GAME], YOU ARE RED\n");
+                   "[GAME], YOU ARE RED\n");
     else
         fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
-                    "[GAME], YOU ARE BLUE\n");
+                   "[GAME], YOU ARE BLUE\n");
     Matrix<float, 3, 3> K_0;
     Matrix<float, 1, 5> C_0;
     Matrix<float, 4, 4> E_0;
@@ -125,7 +128,7 @@ void Radar::init(int argc, char **argv)
     if (!read_yaml(K_0_Mat, C_0_Mat, E_0_Mat))
     {
         fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                    "[ERROR], Can't read yaml !\n");
+                   "[ERROR], Can't read yaml !\n");
         return;
     }
     cv2eigen(K_0_Mat, K_0);
@@ -135,77 +138,103 @@ void Radar::init(int argc, char **argv)
     if (mainDqBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                    "[INFO], Adding DepthQueue ...");
+                   "[INFO], Adding DepthQueue ...");
         mainDqBox.emplace_back(DepthQueue(K_0, C_0, E_0));
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "Done.\n");
+                   "Done.\n");
     }
     if (mainMDBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                    "[INFO], Adding MovementDetector ...");
+                   "[INFO], Adding MovementDetector ...");
         mainMDBox.emplace_back(MovementDetector());
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "Done.\n");
+                   "Done.\n");
     }
     if (mainADBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                    "[INFO], Adding ArmorDetector ...");
+                   "[INFO], Adding ArmorDetector ...");
         mainADBox.emplace_back(ArmorDetector());
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "Done.\n");
+                   "Done.\n");
+    }
+    if (mainCDBox.size() == 0)
+    {
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Adding CarDetector ...");
+        mainCDBox.emplace_back(CarDetector());
+        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                   "Done.\n");
     }
     if (mainCamBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                    "[INFO], Adding CameraThread ...");
+                   "[INFO], Adding CameraThread ...");
         mainCamBox.emplace_back(CameraThread());
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "Done.\n");
+                   "Done.\n");
     }
     if (mainMMBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                    "[INFO], Adding MapMapping ...");
+                   "[INFO], Adding MapMapping ...");
         mainMMBox.emplace_back(MapMapping());
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "Done.\n");
+                   "Done.\n");
     }
     if (mainUARTBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                    "[INFO], Adding UART ...");
+                   "[INFO], Adding UART ...");
         mainUARTBox.emplace_back(UART());
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "Done.\n");
+                   "Done.\n");
     }
     if (mainSerBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                    "[INFO], Adding MySerial ...");
+                   "[INFO], Adding MySerial ...");
         mainSerBox.emplace_back(MySerial());
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "Done.\n");
+                   "Done.\n");
     }
     if (!this->_init_flag)
     {
+        namedWindow("ControlPanel", WindowFlags::WINDOW_NORMAL);
+        createTrackbar("Exit Program", "ControlPanel", 0, 1, nullptr);
+        setTrackbarPos("Exit Program", "ControlPanel", 0);
+        createTrackbar("Locate Pick", "ControlPanel", 0, 1, nullptr);
+        setTrackbarPos("Locate Pick", "ControlPanel", 0);
+        createTrackbar("Separation mode", "ControlPanel", 0, 1, nullptr);
+        setTrackbarPos("Separation mode", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
-        mainADBox[0].initModel();
+        if (!mainADBox[0].initModel())
+        {
+            this->stop();
+            return;
+        }
+        if (!mainCDBox[0].initModel())
+        {
+            this->stop();
+            return;
+        }
         mainSerBox[0].initSerial();
         mainCamBox[0].start();
         this->_init_flag = true;
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                    "[INFO], Init Done\n");
+                   "[INFO], Init Done\n");
     }
-    
 }
 
 void Radar::LidarListenerBegin(int argc, char **argv)
 {
+    if (this->_is_LidarInited)
+        return;
     ros::init(argc, argv, "laser_listener");
     ros::NodeHandle nh;
     sub = nh.subscribe(lidarTopicName, LidarQueueSize, &Radar::LidarCallBack, this);
+    this->_is_LidarInited = true;
 }
 
 void Radar::LidarMainLoop(future<void> futureObj)
@@ -222,7 +251,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     clock_t start, finish;
     start = clock();
 #endif
-        
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *pc);
     std::vector<std::vector<float>> tempDepth = mainDqBox[0].pushback(*pc);
@@ -238,7 +267,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 #endif
 }
 
-void Radar::MovementDetectorLoop(future<void> futureObj)
+void Radar::SeparationLoop(future<void> futureObj)
 {
     unique_lock<shared_timed_mutex> ulk(myMutex);
     ulk.unlock();
@@ -253,15 +282,23 @@ void Radar::MovementDetectorLoop(future<void> futureObj)
             clock_t start, finish;
             start = clock();
 #endif
-
+            vector<Rect> tempSeqTargets;
             ulk.lock();
             depthResourceCount--;
             ulk.unlock();
-            slk.lock();
-            vector<Rect> tempMTs = mainMDBox[0].applyMovementDetector(publicDepth);
-            slk.unlock();
+            if (separation_mode == 0)
+            {
+                slk.lock();
+                tempSeqTargets = mainMDBox[0].applyMovementDetector(publicDepth);
+                slk.unlock();
+            }
+            else if (separation_mode == 1)
+            {
+                FrameBag image = mainCamBox[0].read();
+                tempSeqTargets = mainCDBox[0].infer(image.frame);
+            }
             ulk.lock();
-            MTs.swap(tempMTs);
+            SeqTargets.swap(tempSeqTargets);
             ulk.unlock();
 
 #ifdef ThreadSpeedTest
@@ -295,7 +332,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
         start = clock();
 #endif
         slk.lock();
-        int check_count = MTs.size();
+        int check_count = SeqTargets.size();
         slk.unlock();
         if (check_count > 0)
         {
@@ -309,10 +346,10 @@ void Radar::MainProcessLoop(future<void> futureObj)
             if (frameBag.flag)
             {
                 slk.lock();
-                vector<Rect> tempMTs = MTs;
+                vector<Rect> tempSeqTargets = SeqTargets;
                 slk.unlock();
 
-                armorBoundingBoxs = mainADBox[0].infer(frameBag.frame, tempMTs);
+                armorBoundingBoxs = mainADBox[0].infer(frameBag.frame, tempSeqTargets);
                 if (armorBoundingBoxs.size() == 0)
                     continue;
                 // TODO: 加入防抖层
@@ -344,8 +381,15 @@ void Radar::spin(int argc, char **argv)
     this->init(argc, argv);
     if (!this->_init_flag)
         return;
-    if (!mainMMBox[0]._is_pass())
+    if (getTrackbarPos("Exit Program", "ControlPanel") == 1)
     {
+        this->stop();
+        return;
+    }
+    separation_mode = getTrackbarPos("Separation mode", "ControlPanel");
+    if (!mainMMBox[0]._is_pass() || getTrackbarPos("Locate Pick", "ControlPanel") == 1)
+    {
+        setTrackbarPos("Locate Pick", "ControlPanel", 0);
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], Locate pick start ...Process\n");
         Location myLocation = Location();
@@ -368,7 +412,7 @@ void Radar::spin(int argc, char **argv)
         future<void> futureObj2 = exitSignal2.get_future();
         future<void> futureObj3 = exitSignal3.get_future();
         this->mainloop = thread(&this->LidarMainLoop, move(futureObj1));
-        this->MDloop = thread(&this->MovementDetectorLoop, move(futureObj2));
+        this->Seqloop = thread(&this->SeparationLoop, move(futureObj2));
         this->processLoop = thread(&this->MainProcessLoop, move(futureObj3));
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
@@ -395,6 +439,9 @@ void Radar::spin(int argc, char **argv)
 
 void Radar::stop()
 {
+    fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
+               "[WARN], Start Shutdown Process...");
+    this->is_alive = false;
     if (this->_thread_working)
     {
         this->_thread_working = false;
@@ -402,8 +449,15 @@ void Radar::stop()
         this->exitSignal2.set_value();
         this->exitSignal3.set_value();
         this->mainloop.join();
-        this->MDloop.join();
+        this->Seqloop.join();
         this->processLoop.join();
         mainCamBox[0].stop();
     }
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+               "Done.\n");
+}
+
+bool Radar::alive()
+{
+    return this->is_alive;
 }

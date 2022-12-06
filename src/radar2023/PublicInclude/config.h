@@ -26,8 +26,13 @@
 #define Is_p6               false
 #define G_D                 0.67                            //n:0.33 s:0.33 m:0.67 l:1.0 x:1.33
 #define G_W                 0.75                            //n:0.25 s:0.50 m:0.75 l:1.0 x:1.25
+#define Is_p6_c             false
+#define G_D_c               0.67                            //n:0.33 s:0.33 m:0.67 l:1.0 x:1.33
+#define G_W_c               0.75                            //n:0.25 s:0.50 m:0.75 l:1.0 x:1.25
 #define TensorRTEnginePath  (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/Moudles/yolov5.engine"   //Engine
 #define Yolov5wtsPath       (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/Moudles/yolov5.wts"      //wts
+#define TensorRTEnginePath_c  (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/Moudles/yolov5_c.engine"   //Engine
+#define Yolov5wtsPath_c       (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/Moudles/yolov5_c.wts"      //wts
 #define TensorRTMaxBatchSize 10                             //转换TRT最大BatchSize
 #define INPUT_BLOB_NAME     (char*)"images"                 //输入名
 #define OUTPUT_BLOB_NAME    (char*)"output0"                //输出名

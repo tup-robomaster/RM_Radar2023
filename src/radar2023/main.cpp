@@ -3,12 +3,11 @@
 int main(int argc, char **argv)
 {
     Radar myLidar(argc, argv);
-    while (true)
+    while (myLidar.alive())
     {
         myLidar.spin(argc, argv);
         waitKey(1);
     }
-    myLidar.stop();
-    cout << "---------Programe Ended---------" << endl;
+    cout << "---------Program END---------" << endl;
     return 0;
 }
