@@ -43,8 +43,6 @@
 #define TRT_INPUT_W_c       640                             //输入尺寸_宽
 #define TRT_CLS_NUM         36                              //分类数量
 #define TRT_CLS_NUM_c       1                               //分类数量
-#define TRT_ANCHOR_OUTPUT_NUM 25200                         //先验框数量
-#define TensorRTBatchSize   1                               //TRT单次推理数量
 #define MAX_OUTPUT_BBOX_COUNT   1000
 #define MAX_IMAGE_INPUT_SIZE_THRESH 3088 * 2064
 #define TRT_OUTPUT_SIZE     MAX_OUTPUT_BBOX_COUNT*24UL/sizeof(float) + 1 //TRT_输出大小
