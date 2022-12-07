@@ -15,6 +15,7 @@ static int depthResourceCount;             //深度图资源计数
 static shared_timed_mutex myMutex;         //读写锁
 static vector<Rect> SeqTargets;            //共享分割目标
 static int separation_mode = 0;            //图像分割模式
+static SharedQueue<Mat> myFrames;          //图像帧队列
 
 static void armor_filter(vector<ArmorBoundingBox> &armors)
 {
@@ -258,7 +259,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     unique_lock<shared_timed_mutex> ulk(myMutex);
     publicDepth.swap(tempDepth);
     if (depthResourceCount < 5)
-        depthResourceCount++;
+        ++depthResourceCount;
     ulk.unlock();
 
 #ifdef ThreadSpeedTest
@@ -275,37 +276,34 @@ void Radar::SeparationLoop(future<void> futureObj)
     slk.unlock();
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
-        if (depthResourceCount > 0)
-        {
 
 #ifdef ThreadSpeedTest
-            clock_t start, finish;
-            start = clock();
+        clock_t start, finish;
+        start = clock();
 #endif
-            vector<Rect> tempSeqTargets;
+        vector<Rect> tempSeqTargets;
+        if (separation_mode == 0 && depthResourceCount > 0)
+        {
             ulk.lock();
             depthResourceCount--;
             ulk.unlock();
-            if (separation_mode == 0)
-            {
-                slk.lock();
-                tempSeqTargets = mainMDBox[0].applyMovementDetector(publicDepth);
-                slk.unlock();
-            }
-            else if (separation_mode == 1)
-            {
-                FrameBag image = mainCamBox[0].read();
-                tempSeqTargets = mainCDBox[0].infer(image.frame);
-            }
-            ulk.lock();
-            SeqTargets.swap(tempSeqTargets);
-            ulk.unlock();
+            slk.lock();
+            tempSeqTargets = mainMDBox[0].applyMovementDetector(publicDepth);
+            slk.unlock();
+        }
+        else if (separation_mode == 1)
+        {
+            FrameBag image = mainCamBox[0].read();
+            tempSeqTargets = mainCDBox[0].infer(image.frame);
+        }
+        ulk.lock();
+        SeqTargets.swap(tempSeqTargets);
+        ulk.unlock();
 
 #ifdef ThreadSpeedTest
-            finish = clock();
-            cout << "Lidar::MovementDetectorLoop()|" << depthResourceCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
+        finish = clock();
+        cout << "Lidar::MovementDetectorLoop()|" << depthResourceCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
 #endif
-        }
     }
 }
 
@@ -334,6 +332,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
         slk.lock();
         int check_count = SeqTargets.size();
         slk.unlock();
+        FrameBag frameBag = mainCamBox[0].read();
         if (check_count > 0)
         {
             if (!mainCamBox[0].is_open())
@@ -341,7 +340,6 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 mainCamBox[0].open();
                 continue;
             }
-            FrameBag frameBag = mainCamBox[0].read();
             vector<ArmorBoundingBox> armorBoundingBoxs;
             if (frameBag.flag)
             {
@@ -357,7 +355,6 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 slk.lock();
                 detectDepth(armorBoundingBoxs);
                 slk.unlock();
-                // TODO: working here
                 vector<ArmorBoundingBox> IouArmors;
                 mainMMBox[0].mergeUpdata(armorBoundingBoxs, IouArmors);
                 judge_message myJudge_message;
@@ -368,6 +365,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
             else
                 continue;
         }
+        myFrames.push(frameBag.frame);
 
 #ifdef ThreadSpeedTest
         finish = clock();
