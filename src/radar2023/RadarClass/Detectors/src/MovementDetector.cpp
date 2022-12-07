@@ -1,4 +1,5 @@
 #include "../include/MovementDetector.h"
+//TODO: 此部分源码需要并行优化
 
 MovementDetector::MovementDetector()
 {

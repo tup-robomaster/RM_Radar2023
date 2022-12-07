@@ -15,16 +15,15 @@ private:
     vector<ArmorBoundingBox> results;
 
 private:
-    Mat letterBoxCPU(cv::Mat &src, int h, int w, ReShapeBox *box);
     vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
-    void reBuildBoxs(vector<vector<Yolo::Detection>> *armors, vector<ReShapeBox> *boxs);
+    void reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs);
 
 public:
     ArmorDetector();
     ~ArmorDetector();
 
     bool initModel();
-    vector<ArmorBoundingBox> infer(Mat &image, vector<Rect> targets);
+    vector<ArmorBoundingBox> infer(Mat &image, vector<Rect> &targets);
 };
 
 #endif

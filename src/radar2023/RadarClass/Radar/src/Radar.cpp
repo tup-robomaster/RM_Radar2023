@@ -38,23 +38,23 @@ static void armor_filter(vector<ArmorBoundingBox> &armors)
     armors.swap(results);
 }
 
-static void detectDepth(vector<ArmorBoundingBox> *armorBoundingBoxs)
+static void detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
 {
 #ifdef SpeedTest
     clock_t start, finish;
     start = clock();
 #endif
 
-    if (armorBoundingBoxs->size() == 0)
+    if (armorBoundingBoxs.size() == 0)
         return;
-    for (size_t i = 0; i < armorBoundingBoxs->size(); ++i)
+    for (size_t i = 0; i < armorBoundingBoxs.size(); ++i)
     {
         float count = 0;
         vector<float> tempBox;
-        float center[2] = {armorBoundingBoxs->at(i).x0 + armorBoundingBoxs->at(i).w / 2, armorBoundingBoxs->at(i).y0 + armorBoundingBoxs->at(i).h / 2};
-        for (int j = int(max<float>(center[1] - armorBoundingBoxs->at(i).h, 0.)); j < int(min<float>(center[1] + armorBoundingBoxs->at(i).h, ImageH)); ++j)
+        float center[2] = {armorBoundingBoxs.at(i).x0 + armorBoundingBoxs[i].w / 2, armorBoundingBoxs[i].y0 + armorBoundingBoxs[i].h / 2};
+        for (int j = int(max<float>(center[1] - armorBoundingBoxs[i].h, 0.)); j < int(min<float>(center[1] + armorBoundingBoxs[i].h, ImageH)); ++j)
         {
-            for (int k = int(max<float>(center[0] - armorBoundingBoxs->at(i).w, 0.)); k < int(min<float>(center[0] + armorBoundingBoxs->at(i).w, ImageW)); ++k)
+            for (int k = int(max<float>(center[0] - armorBoundingBoxs[i].w, 0.)); k < int(min<float>(center[0] + armorBoundingBoxs[i].w, ImageW)); ++k)
             {
                 if (publicDepth[i][j] == 0)
                     continue;
@@ -67,7 +67,7 @@ static void detectDepth(vector<ArmorBoundingBox> *armorBoundingBoxs)
         {
             tempNum += jt;
         }
-        armorBoundingBoxs->at(i).depth = tempNum / count;
+        armorBoundingBoxs[i].depth = tempNum / count;
     }
 
 #ifdef SpeedTest
@@ -355,7 +355,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 // TODO: 加入防抖层
                 armor_filter(armorBoundingBoxs);
                 slk.lock();
-                detectDepth(&armorBoundingBoxs);
+                detectDepth(armorBoundingBoxs);
                 slk.unlock();
                 // TODO: working here
                 vector<ArmorBoundingBox> IouArmors;
