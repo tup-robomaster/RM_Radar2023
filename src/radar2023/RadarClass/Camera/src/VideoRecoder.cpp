@@ -17,9 +17,15 @@ void VideoRecoder::init(char *videoPath, int coder, Size size)
         time_t currentTime = time(NULL);
         char chCurrentTime[256];
         strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d %H%M%S", localtime(&currentTime));
+        strcat(chCurrentTime, ".mp4");
         strcpy(filename, videoPath);
         strcat(filename, chCurrentTime);
-        this->vw = VideoWriter(filename, coder, 60.0, size, true);
+        this->vw = VideoWriter();
+        if (!this->vw.open(filename, coder, 15.0, size, true))
+        {
+            fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold,
+                       "[WARN], {}!\n", "Block Video Recoder");
+        }
     }
 }
 

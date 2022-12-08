@@ -1,22 +1,22 @@
 #include "../include/Radar.h"
 
-static const char lidarTopicName[13] = "/livox/lidar"; //雷达点云节点名称
+static const char lidarTopicName[13] = "/livox/lidar"; // 雷达点云节点名称
 
-static vector<DepthQueue> mainDqBox;       //考虑到后续可能的设备改变，预留容器
-static vector<MovementDetector> mainMDBox; //考虑到后续可能的设备改变，预留容器
-static vector<ArmorDetector> mainADBox;    //考虑到后续可能的设备改变，预留容器
-static vector<CarDetector> mainCDBox;      //考虑到后续可能的设备改变，预留容器
-static vector<CameraThread> mainCamBox;    //考虑到后续可能的设备改变，预留容器
-static vector<MapMapping> mainMMBox;       //考虑到后续可能的设备改变，预留容器
-static vector<UART> mainUARTBox;           //考虑到后续可能的设备改变，预留容器
-static vector<MySerial> mainSerBox;        //考虑到后续可能的设备改变，预留容器
-static vector<VideoRecoder> mainVRBox;     //考虑到后续可能的设备改变，预留容器
-static vector<vector<float>> publicDepth;  //共享深度图
-static int depthResourceCount;             //深度图资源计数
-static shared_timed_mutex myMutex;         //读写锁
-static vector<Rect> SeqTargets;            //共享分割目标
-static int separation_mode = 0;            //图像分割模式
-static SharedQueue<Mat> myFrames;          //图像帧队列
+static vector<DepthQueue> mainDqBox;       // 考虑到后续可能的设备改变，预留容器
+static vector<MovementDetector> mainMDBox; // 考虑到后续可能的设备改变，预留容器
+static vector<ArmorDetector> mainADBox;    // 考虑到后续可能的设备改变，预留容器
+static vector<CarDetector> mainCDBox;      // 考虑到后续可能的设备改变，预留容器
+static vector<CameraThread> mainCamBox;    // 考虑到后续可能的设备改变，预留容器
+static vector<MapMapping> mainMMBox;       // 考虑到后续可能的设备改变，预留容器
+static vector<UART> mainUARTBox;           // 考虑到后续可能的设备改变，预留容器
+static vector<MySerial> mainSerBox;        // 考虑到后续可能的设备改变，预留容器
+static vector<VideoRecoder> mainVRBox;     // 考虑到后续可能的设备改变，预留容器
+static vector<vector<float>> publicDepth;  // 共享深度图
+static int depthResourceCount;             // 深度图资源计数
+static shared_timed_mutex myMutex;         // 读写锁
+static vector<Rect> SeqTargets;            // 共享分割目标
+static int separation_mode = 0;            // 图像分割模式
+static SharedQueue<Mat> myFrames;          // 图像帧队列
 
 static void armor_filter(vector<ArmorBoundingBox> &armors)
 {
@@ -178,8 +178,6 @@ void Radar::init(int argc, char **argv)
         namedWindow("ControlPanel", WindowFlags::WINDOW_NORMAL);
         createTrackbar("Exit Program", "ControlPanel", 0, 1, nullptr);
         setTrackbarPos("Exit Program", "ControlPanel", 0);
-        createTrackbar("Locate Pick", "ControlPanel", 0, 1, nullptr);
-        setTrackbarPos("Locate Pick", "ControlPanel", 0);
         createTrackbar("Separation mode", "ControlPanel", 0, 1, nullptr);
         setTrackbarPos("Separation mode", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
@@ -190,7 +188,7 @@ void Radar::init(int argc, char **argv)
         }
         this->carInferAvailable = mainCDBox[0].initModel() ? true : false;
         mainSerBox[0].initSerial();
-        mainVRBox[0].init(VideoRecoderRath, VideoWriter::fourcc('J', 'P', 'M', 'G'), Size(ImageW, ImageH));
+        mainVRBox[0].init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
         mainCamBox[0].start();
         this->_init_flag = true;
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
@@ -262,7 +260,9 @@ void Radar::SeparationLoop(future<void> futureObj)
         }
         else if (separation_mode == 1)
         {
+            slk.lock();
             FrameBag image = mainCamBox[0].read();
+            slk.unlock();
             tempSeqTargets = mainCDBox[0].infer(image.frame);
         }
         ulk.lock();
@@ -365,15 +365,20 @@ void Radar::spin(int argc, char **argv)
         separation_mode = getTrackbarPos("Separation mode", "ControlPanel");
     else
         separation_mode = 0;
-    if (!mainMMBox[0]._is_pass() || getTrackbarPos("Locate Pick", "ControlPanel") == 1)
+    if (!mainMMBox[0]._is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
     {
-        setTrackbarPos("Locate Pick", "ControlPanel", 0);
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], Locate pick start ...Process\n");
+        // TODO: Fix here
         Location myLocation = Location();
         Mat rvec, tvec;
+        unique_lock<shared_timed_mutex> ulk(myMutex);
         if (!myLocation.locate_pick(mainCamBox[0], ENEMY, rvec, tvec))
+        {
+            ulk.unlock();
             return;
+        }
+        ulk.unlock();
         mainMMBox[0].push_T(rvec, tvec);
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "[INFO], Locate pick Done \n");
@@ -429,9 +434,7 @@ void Radar::stop()
 {
     fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
                "[WARN], Start Shutdown Process...");
-    destroyAllWindows();
-    waitKey(100);           
-    this->is_alive = false;
+    cv::destroyAllWindows();
     if (this->_thread_working)
     {
         this->_thread_working = false;
@@ -439,13 +442,16 @@ void Radar::stop()
         this->exitSignal2.set_value();
         this->exitSignal3.set_value();
         this->exitSignal4.set_value();
-        this->mainloop.join();
-        this->Seqloop.join();
-        this->processLoop.join();
-        this->videoRecoderLoop.join();
+        // TODO: Fix here
+        this->mainloop.detach();
+        this->Seqloop.detach();
+        this->processLoop.detach();
+        this->videoRecoderLoop.detach();
     }
-    mainCamBox[0].stop();
+    if (mainCamBox[0].is_open())
+        mainCamBox[0].stop();
     mainVRBox[0].close();
+    this->is_alive = false;
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Done.\n");
 }
