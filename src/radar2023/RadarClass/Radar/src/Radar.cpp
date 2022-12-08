@@ -424,12 +424,15 @@ void Radar::spin(int argc, char **argv)
         this->exitSignal1 = promise<void>();
         this->exitSignal2 = promise<void>();
         this->exitSignal3 = promise<void>();
+        this->exitSignal4 = promise<void>();
         future<void> futureObj1 = exitSignal1.get_future();
         future<void> futureObj2 = exitSignal2.get_future();
         future<void> futureObj3 = exitSignal3.get_future();
+        future<void> futureObj4 = exitSignal4.get_future();
         this->mainloop = thread(&this->LidarMainLoop, move(futureObj1));
         this->Seqloop = thread(&this->SeparationLoop, move(futureObj2));
         this->processLoop = thread(&this->MainProcessLoop, move(futureObj3));
+        this->videoRecoderLoop = thread(&this->VideoRecoderLoop, move(futureObj4));
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
     }
@@ -454,8 +457,8 @@ void Radar::spin(int argc, char **argv)
     if (myFrames.size() > 0)
     {
         Mat frame = myFrames.front();
-        myFrames.pop();
         imshow("ControlPanel", frame);
+        myFrames.pop();
     }
 }
 
@@ -463,19 +466,22 @@ void Radar::stop()
 {
     fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
                "[WARN], Start Shutdown Process...");
-    this->is_alive = false;
+    this->is_alive = false; 
     if (this->_thread_working)
     {
         this->_thread_working = false;
         this->exitSignal1.set_value();
         this->exitSignal2.set_value();
         this->exitSignal3.set_value();
+        this->exitSignal4.set_value();
         this->mainloop.join();
         this->Seqloop.join();
         this->processLoop.join();
-        mainCamBox[0].stop();
+        this->videoRecoderLoop.join();    
     }
     destroyAllWindows();
+    mainCamBox[0].stop();
+    mainVRBox[0].release();
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Done.\n");
 }
