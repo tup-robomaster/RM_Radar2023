@@ -1,5 +1,5 @@
 #include "../include/MovementDetector.h"
-//TODO: 此部分源码需要并行优化
+// TODO: 此部分源码需要并行优化
 
 MovementDetector::MovementDetector()
 {
@@ -51,8 +51,8 @@ vector<Rect> MovementDetector::applyMovementDetector(vector<vector<float>> &inpu
         ++this->historyCount;
 
 #ifdef SpeedTest
-    finish = clock();
-    cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
+        finish = clock();
+        cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
 #endif
 
         return {};
@@ -63,8 +63,8 @@ vector<Rect> MovementDetector::applyMovementDetector(vector<vector<float>> &inpu
         ++this->historyCount;
 
 #ifdef SpeedTest
-    finish = clock();
-    cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
+        finish = clock();
+        cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
 #endif
 
         return {};
@@ -101,8 +101,8 @@ vector<Rect> MovementDetector::applyMovementDetector(vector<vector<float>> &inpu
         }
 
 #ifdef SpeedTest
-    finish = clock();
-    cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
+        finish = clock();
+        cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
 #endif
 
         return this->detectMovementTarget(tmpImg);
@@ -187,17 +187,17 @@ vector<Rect> MovementDetector::detectMovementTarget(float input[int(ImageH / _bl
     cout << "MovementDetector::detectMovementTarget()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
 #endif
 
-    //TODO:结果有效性评估
-    //TODO:加入神经网络作为备选
+    // TODO:结果有效性评估
+    // TODO:加入神经网络作为备选
     return this->movementTargets;
 }
 // TODO:待验证
 Rect MovementDetector::rebuildRect(Rect input)
 {
-    //TODO:进阶预测框滤除
+    // TODO:进阶预测框滤除
     input = reMapRect(input, _blockSizeW, _blockSizeH);
     input = rectCenterScale(input, Size(int(input.width * (MTBoxRatio - 1)), int(input.height * (MTBoxRatio - 1))));
-    //TODO:重合框合并
-    //TODO:历史帧预测框判断（IOU）
+    // TODO:重合框合并
+    // TODO:历史帧预测框判断（IOU）
     return input;
 }

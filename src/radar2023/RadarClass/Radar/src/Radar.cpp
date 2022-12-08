@@ -10,6 +10,7 @@ static vector<CameraThread> mainCamBox;    //考虑到后续可能的设备改�
 static vector<MapMapping> mainMMBox;       //考虑到后续可能的设备改变，预留容器
 static vector<UART> mainUARTBox;           //考虑到后续可能的设备改变，预留容器
 static vector<MySerial> mainSerBox;        //考虑到后续可能的设备改变，预留容器
+static vector<VideoRecoder> mainVRBox;     //考虑到后续可能的设备改变，预留容器
 static vector<vector<float>> publicDepth;  //共享深度图
 static int depthResourceCount;             //深度图资源计数
 static shared_timed_mutex myMutex;         //读写锁
@@ -176,6 +177,14 @@ void Radar::init(int argc, char **argv)
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
     }
+    if (mainVRBox.size() == 0)
+    {
+        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+                   "[INFO], Adding VideoRecoder ...");
+        mainVRBox.emplace_back(VideoRecoder());
+        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+                   "Done.\n");
+    }
     if (mainMMBox.size() == 0)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
@@ -221,6 +230,7 @@ void Radar::init(int argc, char **argv)
             return;
         }
         mainSerBox[0].initSerial();
+        mainVRBox[0].init(VideoRecoderRath, VideoWriter::fourcc('J', 'P', 'M', 'G'), Size(ImageW, ImageH));
         mainCamBox[0].start();
         this->_init_flag = true;
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
@@ -374,6 +384,14 @@ void Radar::MainProcessLoop(future<void> futureObj)
     }
 }
 
+void Radar::VideoRecoderLoop(future<void> futureObj)
+{
+    while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
+    {
+        mainVRBox[0].write(myFrames.front());
+    }
+}
+
 void Radar::spin(int argc, char **argv)
 {
     this->init(argc, argv);
@@ -432,6 +450,12 @@ void Radar::spin(int argc, char **argv)
         this->serWrite = thread(&this->SerWriteLoop);
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
+    }
+    if (myFrames.size() > 0)
+    {
+        Mat frame = myFrames.front();
+        myFrames.pop();
+        imshow("ControlPanel", frame);
     }
 }
 

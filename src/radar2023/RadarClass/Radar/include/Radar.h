@@ -3,6 +3,7 @@
 
 #include "../../Common/include/public.h"
 #include "../../Camera/include/camera.h"
+#include "../../Camera/include/VideoRecoder.h"
 #include "../../Common/include/SharedQueue.h"
 #include "../../Detectors/include/depthProcesser.h"
 #include "../../Detectors/include/MovementDetector.h"
@@ -26,12 +27,14 @@ private:
     thread serRead;
     thread serWrite;
     thread processLoop;
+    thread videoRecoderLoop;
     bool _init_flag = false;
     bool _thread_working = false;
     bool _Ser_working = false;
     promise<void> exitSignal1;
     promise<void> exitSignal2;
     promise<void> exitSignal3;
+    promise<void> exitSignal4;
 
     bool is_alive = true;
 
@@ -48,6 +51,7 @@ public:
     static void SerReadLoop();
     static void SerWriteLoop();
     static void MainProcessLoop(future<void> futureObj);
+    static void VideoRecoderLoop(future<void> futureObj);
 
     void spin(int argc, char **argv);
     void stop();

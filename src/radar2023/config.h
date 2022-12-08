@@ -21,6 +21,7 @@
 #define K_size              3                               //核大小
 
 #define CAMERA_PARAM_PATH   (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/camera0.yaml"     //相机参数文件
+#define VideoRecoderRath    (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/Recoder"                 //录制保存文件
 
 #define USE_FP16
 #define Is_p6               false

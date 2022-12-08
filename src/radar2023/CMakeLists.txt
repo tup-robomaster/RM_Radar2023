@@ -35,6 +35,7 @@ link_directories(/opt/intel/mkl/lib/intel64
 cuda_add_executable(radar2023
   main.cpp
   RadarClass/Camera/src/camera.cpp
+  RadarClass/Camera/src/VideoRecoder.cpp
   RadarClass/Common/src/general.cpp
   RadarClass/Detectors/CUDA/gpu_decode.cu
   RadarClass/Detectors/CUDA/preprocess.cu
