@@ -19,11 +19,6 @@ DepthQueue::~DepthQueue()
 
 vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
 {
-#ifdef SpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     if (this->processQueue.empty())
     {
         this->_initflag = true;
@@ -64,20 +59,10 @@ vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
             break;
     }
     return this->depth;
-
-#ifdef SpeedTest
-    finish = clock();
-    cout << "DepthQueue::pushback()|" << pc_Matrix.size() << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
 }
 
 vector<float> DepthQueue::detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
 {
-#ifdef SpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     vector<float> depthBox;
     if (armorBoundingBoxs.size() == 0)
         return depthBox;
@@ -103,11 +88,5 @@ vector<float> DepthQueue::detectDepth(vector<ArmorBoundingBox> &armorBoundingBox
         }
         depthBox.emplace_back(tempNum / count);
     }
-
-#ifdef SpeedTest
-    finish = clock();
-    cout << "DepthQueue::detectDepth()|" << depthBox.size() << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
-
     return depthBox;
 }

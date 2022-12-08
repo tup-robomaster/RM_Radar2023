@@ -14,11 +14,6 @@ MovementDetector::~MovementDetector()
 
 vector<Rect> MovementDetector::applyMovementDetector(vector<vector<float>> &input)
 {
-#ifdef SpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     if (this->historyCount < MDHistorySize)
     {
         for (int i = 0; i + _blockSizeH < ImageH; i += _blockSizeH)
@@ -49,24 +44,12 @@ vector<Rect> MovementDetector::applyMovementDetector(vector<vector<float>> &inpu
             }
         }
         ++this->historyCount;
-
-#ifdef SpeedTest
-        finish = clock();
-        cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
-
         return {};
     }
     else if (this->historyCount == MDHistorySize)
     {
         this->buildBackground();
         ++this->historyCount;
-
-#ifdef SpeedTest
-        finish = clock();
-        cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
-
         return {};
     }
     else
@@ -99,23 +82,12 @@ vector<Rect> MovementDetector::applyMovementDetector(vector<vector<float>> &inpu
                 tmpImg[i / _blockSizeH][j / _blockSizeW] = currentNum;
             }
         }
-
-#ifdef SpeedTest
-        finish = clock();
-        cout << "MovementDetector::applyMovementDetector()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
-
         return this->detectMovementTarget(tmpImg);
     }
 }
 
 void MovementDetector::buildBackground()
 {
-#ifdef SpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     for (int i = 0; i < MDHistorySize; ++i)
     {
         for (int m = 0; m < int(ImageH / _blockSizeH); ++m)
@@ -136,20 +108,10 @@ void MovementDetector::buildBackground()
             }
         }
     }
-
-#ifdef SpeedTest
-    finish = clock();
-    cout << "MovementDetector::buildBackground()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
 }
 
 vector<Rect> MovementDetector::detectMovementTarget(float input[int(ImageH / _blockSizeH)][int(ImageW / _blockSizeW)])
 {
-#ifdef SpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     for (int m = 0; m < int(ImageH / _blockSizeH); ++m)
     {
         for (int n = 0; n < int(ImageW / _blockSizeW); ++n)
@@ -180,11 +142,6 @@ vector<Rect> MovementDetector::detectMovementTarget(float input[int(ImageH / _bl
 #ifdef Test
     imshow("Test_MovementMask", this->tempDepth * 255);
     waitKey(1);
-#endif
-
-#ifdef SpeedTest
-    finish = clock();
-    cout << "MovementDetector::detectMovementTarget()|" << this->historyCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
 #endif
 
     // TODO:结果有效性评估

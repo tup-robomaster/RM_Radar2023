@@ -16,6 +16,7 @@ Location::Location()
     this->location_targets["b_lt"] = Point3f(19.200, -9.272, 0.120 + 0.495);
     vector<Point2f>().swap(pick_points);
     frame = FrameBag();
+    flag = false;
 }
 
 Location::~Location()
@@ -145,7 +146,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
             destroyWindow("PickPoints");
             destroyWindow("ZOOM_WINDOW");
             return false;
-        }  
+        }
     }
     destroyWindow("PickPoints");
     destroyWindow("ZOOM_WINDOW");

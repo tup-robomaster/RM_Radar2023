@@ -71,11 +71,6 @@ MV_Camera::~MV_Camera()
 
 FrameBag MV_Camera::read()
 {
-#ifdef SpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     FrameBag framebag;
     if (this->hCamera == -1)
     {
@@ -96,13 +91,6 @@ FrameBag MV_Camera::read()
         this->pFrameBuffer);
     CameraReleaseImageBuffer(this->hCamera, this->pRawDataBuffer);
     framebag.flag = true;
-    return framebag;
-
-#ifdef SpeedTest
-    finish = clock();
-    cout << "MV_Camera::read()|" << framebag.flag << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
-
     return framebag;
 }
 

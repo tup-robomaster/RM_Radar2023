@@ -42,11 +42,6 @@ static void armor_filter(vector<ArmorBoundingBox> &armors)
 
 static void detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
 {
-#ifdef SpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     if (armorBoundingBoxs.size() == 0)
         return;
     for (size_t i = 0; i < armorBoundingBoxs.size(); ++i)
@@ -71,11 +66,6 @@ static void detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
         }
         armorBoundingBoxs[i].depth = tempNum / count;
     }
-
-#ifdef SpeedTest
-    finish = clock();
-    cout << "DepthQueue::detectDepth()|" << depthBox.size() << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
 }
 
 static void send_judge(judge_message &message, UART &myUART)
@@ -216,11 +206,6 @@ void Radar::LidarMainLoop(future<void> futureObj)
 
 void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {
-#ifdef ThreadSpeedTest
-    clock_t start, finish;
-    start = clock();
-#endif
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *pc);
     std::vector<std::vector<float>> tempDepth = mainDqBox[0].pushback(*pc);
@@ -229,11 +214,6 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     if (depthResourceCount < 5)
         ++depthResourceCount;
     ulk.unlock();
-
-#ifdef ThreadSpeedTest
-    finish = clock();
-    cout << "Lidar::LidarCallBack()|" << pc->points.size() << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
 }
 
 void Radar::SeparationLoop(future<void> futureObj)
@@ -244,10 +224,6 @@ void Radar::SeparationLoop(future<void> futureObj)
     slk.unlock();
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
-#ifdef ThreadSpeedTest
-        clock_t start, finish;
-        start = clock();
-#endif
         vector<Rect> tempSeqTargets;
         if (separation_mode == 0 && depthResourceCount > 0)
         {
@@ -268,11 +244,6 @@ void Radar::SeparationLoop(future<void> futureObj)
         ulk.lock();
         SeqTargets.swap(tempSeqTargets);
         ulk.unlock();
-
-#ifdef ThreadSpeedTest
-        finish = clock();
-        cout << "Lidar::MovementDetectorLoop()|" << depthResourceCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
     }
 }
 
@@ -294,10 +265,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
     slk.unlock();
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
-#ifdef ThreadSpeedTest
-        clock_t start, finish;
-        start = clock();
-#endif
+
         slk.lock();
         int check_count = SeqTargets.size();
         slk.unlock();
@@ -335,11 +303,6 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 continue;
         }
         myFrames.push(frameBag.frame);
-
-#ifdef ThreadSpeedTest
-        finish = clock();
-        cout << "Lidar::MovementDetectorLoop()|" << depthResourceCount << "|" << double(finish - start) / CLOCKS_PER_SEC * 1000 << "|FPS:" << 1000 / (double(finish - start) / CLOCKS_PER_SEC * 1000) << endl;
-#endif
     }
 }
 
