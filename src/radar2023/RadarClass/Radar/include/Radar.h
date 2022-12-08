@@ -36,6 +36,8 @@ private:
     promise<void> exitSignal3;
     promise<void> exitSignal4;
 
+    bool carInferAvailable = false;
+
     bool is_alive = true;
 
 public:

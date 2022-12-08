@@ -139,75 +139,39 @@ void Radar::init(int argc, char **argv)
     // TODO: CHECK HERE
     if (mainDqBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding DepthQueue ...");
         mainDqBox.emplace_back(DepthQueue(K_0, C_0, E_0));
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainMDBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding MovementDetector ...");
         mainMDBox.emplace_back(MovementDetector());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainADBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding ArmorDetector ...");
         mainADBox.emplace_back(ArmorDetector());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainCDBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding CarDetector ...");
         mainCDBox.emplace_back(CarDetector());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainCamBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding CameraThread ...");
         mainCamBox.emplace_back(CameraThread());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainVRBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding VideoRecoder ...");
         mainVRBox.emplace_back(VideoRecoder());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainMMBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding MapMapping ...");
         mainMMBox.emplace_back(MapMapping());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainUARTBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding UART ...");
         mainUARTBox.emplace_back(UART());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (mainSerBox.size() == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Adding MySerial ...");
         mainSerBox.emplace_back(MySerial());
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
     }
     if (!this->_init_flag)
     {
@@ -224,11 +188,7 @@ void Radar::init(int argc, char **argv)
             this->stop();
             return;
         }
-        if (!mainCDBox[0].initModel())
-        {
-            this->stop();
-            return;
-        }
+        this->carInferAvailable = mainCDBox[0].initModel() ? true : false;
         mainSerBox[0].initSerial();
         mainVRBox[0].init(VideoRecoderRath, VideoWriter::fourcc('J', 'P', 'M', 'G'), Size(ImageW, ImageH));
         mainCamBox[0].start();
@@ -286,7 +246,6 @@ void Radar::SeparationLoop(future<void> futureObj)
     slk.unlock();
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
-
 #ifdef ThreadSpeedTest
         clock_t start, finish;
         start = clock();
@@ -402,7 +361,10 @@ void Radar::spin(int argc, char **argv)
         this->stop();
         return;
     }
-    separation_mode = getTrackbarPos("Separation mode", "ControlPanel");
+    if (this->carInferAvailable)
+        separation_mode = getTrackbarPos("Separation mode", "ControlPanel");
+    else
+        separation_mode = 0;
     if (!mainMMBox[0]._is_pass() || getTrackbarPos("Locate Pick", "ControlPanel") == 1)
     {
         setTrackbarPos("Locate Pick", "ControlPanel", 0);
@@ -458,6 +420,7 @@ void Radar::spin(int argc, char **argv)
     {
         Mat frame = myFrames.front();
         imshow("ControlPanel", frame);
+        resizeWindow("ControlPanel", 1920, 1080);
         myFrames.pop();
     }
 }
@@ -466,7 +429,9 @@ void Radar::stop()
 {
     fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
                "[WARN], Start Shutdown Process...");
-    this->is_alive = false; 
+    destroyAllWindows();
+    waitKey(100);           
+    this->is_alive = false;
     if (this->_thread_working)
     {
         this->_thread_working = false;
@@ -477,11 +442,10 @@ void Radar::stop()
         this->mainloop.join();
         this->Seqloop.join();
         this->processLoop.join();
-        this->videoRecoderLoop.join();    
+        this->videoRecoderLoop.join();
     }
-    destroyAllWindows();
     mainCamBox[0].stop();
-    mainVRBox[0].release();
+    mainVRBox[0].close();
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Done.\n");
 }

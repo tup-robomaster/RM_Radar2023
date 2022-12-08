@@ -80,31 +80,23 @@ FrameBag MV_Camera::read()
     if (this->hCamera == -1)
     {
         fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}\n", "None handled camera found!");
+                   "[ERROR], {}\n", "No handled camera found!");
         return framebag;
     }
-    try
+    CameraGetImageBuffer(this->hCamera, &this->sFrameInfo, &this->pRawDataBuffer, 200);
+    if (CameraImageProcess(this->hCamera, this->pRawDataBuffer, this->pFrameBuffer, &this->sFrameInfo) != CAMERA_STATUS_SUCCESS)
     {
-        CameraGetImageBuffer(this->hCamera, &this->sFrameInfo, &this->pRawDataBuffer, 200);
-        if (CameraImageProcess(this->hCamera, this->pRawDataBuffer, this->pFrameBuffer, &this->sFrameInfo) != CAMERA_STATUS_SUCCESS)
-        {
-            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                       "[ERROR], {}\n", "Can not process Image!");
-            return framebag;
-        }
-        framebag.frame = cv::Mat(
-            Size(this->sFrameInfo.iWidth, this->sFrameInfo.iHeight),
-            CV_8UC3,
-            this->pFrameBuffer);
-        CameraReleaseImageBuffer(this->hCamera, this->pRawDataBuffer);
-        framebag.flag = true;
+        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+                   "[ERROR], {}\n", "Can not process Image!");
         return framebag;
     }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << "[ERROR]Failed to get frame!" << '\n';
-        return framebag;
-    }
+    framebag.frame = cv::Mat(
+        Size(this->sFrameInfo.iWidth, this->sFrameInfo.iHeight),
+        CV_8UC3,
+        this->pFrameBuffer);
+    CameraReleaseImageBuffer(this->hCamera, this->pRawDataBuffer);
+    framebag.flag = true;
+    return framebag;
 
 #ifdef SpeedTest
     finish = clock();
@@ -174,7 +166,7 @@ CameraThread::CameraThread()
 }
 
 CameraThread::~CameraThread()
-{ 
+{
 }
 
 void CameraThread::start()

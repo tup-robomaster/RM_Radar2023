@@ -14,7 +14,7 @@ public:
 
     void init(char *videoPath, int coder, Size size);
     void write(Mat &src);
-    void release();
+    void close();
 };
 
 #endif

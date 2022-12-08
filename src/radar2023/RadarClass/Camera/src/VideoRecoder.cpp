@@ -6,7 +6,7 @@ VideoRecoder::VideoRecoder()
 
 VideoRecoder::~VideoRecoder()
 {
-    this->release();
+    this->close();
 }
 
 void VideoRecoder::init(char *videoPath, int coder, Size size)
@@ -30,7 +30,7 @@ void VideoRecoder::write(Mat &src)
     this->vw.write(src);
 }
 
-void VideoRecoder::release()
+void VideoRecoder::close()
 {
     if (this->vw.isOpened())
         this->vw.release();

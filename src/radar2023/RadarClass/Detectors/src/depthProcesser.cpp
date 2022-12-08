@@ -49,7 +49,7 @@ vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
         {
             if (this->depth[outpoints(1, i)][outpoints(0, i)] == 0.)
                 continue;
-            this->depth[outpoints(1, i)][outpoints(0, i)] = 0;
+            this->depth[outpoints(1, i)][outpoints(0, i)] = 0.;
         }
         this->processQueue.pop();
     }
@@ -90,7 +90,7 @@ vector<float> DepthQueue::detectDepth(vector<ArmorBoundingBox> &armorBoundingBox
         {
             for (int j = int(max<float>(center[0] - it.w, 0.)); j < int(min<float>(center[0] + it.w, ImageW)); ++j)
             {
-                if (this->depth[i][j] == 0)
+                if (this->depth[i][j] == 0.)
                     continue;
                 tempBox.emplace_back(this->depth[i][j]);
                 ++count;

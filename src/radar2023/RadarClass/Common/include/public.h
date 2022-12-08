@@ -1,4 +1,5 @@
 #define EIGEN_USE_MKL_ALL
+#define EIGEN_VECTORIZE_SSE4_2
 
 #ifndef __PUBLIC_H
 #define __PUBLIC_H
