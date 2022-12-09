@@ -200,7 +200,7 @@ void Radar::LidarMainLoop(future<void> futureObj)
 {
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
-        ros::spin();
+        ros::spinOnce();
     }
 }
 
@@ -283,7 +283,6 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 slk.lock();
                 vector<Rect> tempSeqTargets = SeqTargets;
                 slk.unlock();
-
                 armorBoundingBoxs = mainADBox[0].infer(frameBag.frame, tempSeqTargets);
                 if (armorBoundingBoxs.size() == 0)
                     continue;
@@ -302,7 +301,8 @@ void Radar::MainProcessLoop(future<void> futureObj)
             else
                 continue;
         }
-        myFrames.push(frameBag.frame);
+        if(frameBag.flag)
+            myFrames.push(frameBag.frame);
     }
 }
 
@@ -406,10 +406,10 @@ void Radar::stop()
         this->exitSignal3.set_value();
         this->exitSignal4.set_value();
         // TODO: Fix here
-        this->mainloop.detach();
-        this->Seqloop.detach();
-        this->processLoop.detach();
-        this->videoRecoderLoop.detach();
+        this->mainloop.join();
+        this->Seqloop.join();
+        this->processLoop.join();
+        this->videoRecoderLoop.join();
     }
     if (mainCamBox[0].is_open())
         mainCamBox[0].stop();

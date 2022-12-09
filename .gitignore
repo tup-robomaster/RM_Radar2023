@@ -5,4 +5,4 @@ install/
 .catkin_workspace
 src/radar2023/RadarClass/Detectors/Moudles/
 src/radar2023/RadarClass/Camera/params/
-src/radar2023/RadarClass/Camera/Recoder/
+src/radar2023/Recoder/
