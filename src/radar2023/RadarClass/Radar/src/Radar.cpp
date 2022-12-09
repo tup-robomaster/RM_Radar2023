@@ -200,7 +200,8 @@ void Radar::LidarMainLoop(future<void> futureObj)
 {
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
-        ros::spinOnce();
+        if (ros::ok())
+            ros::spinOnce();
     }
 }
 
@@ -301,7 +302,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
             else
                 continue;
         }
-        if(frameBag.flag)
+        if (frameBag.flag)
             myFrames.push(frameBag.frame);
     }
 }
@@ -380,7 +381,9 @@ void Radar::spin(int argc, char **argv)
                    "[INFO], SerThread initing ...");
         this->_Ser_working = true;
         this->serRead = thread(&this->SerReadLoop);
+        this->serR_t = this->serRead.native_handle();
         this->serWrite = thread(&this->SerWriteLoop);
+        this->serW_t = this->serWrite.native_handle();
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
     }
@@ -405,7 +408,8 @@ void Radar::stop()
         this->exitSignal2.set_value();
         this->exitSignal3.set_value();
         this->exitSignal4.set_value();
-        // TODO: Fix here
+        pthread_cancel(this->serR_t);
+        pthread_cancel(this->serW_t);
         this->mainloop.join();
         this->Seqloop.join();
         this->processLoop.join();
