@@ -333,9 +333,9 @@ void Radar::spin(int argc, char **argv)
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], Locate pick start ...Process\n");
         // TODO: Fix here
+        unique_lock<shared_timed_mutex> ulk(myMutex);
         Location myLocation = Location();
         Mat rvec, tvec;
-        unique_lock<shared_timed_mutex> ulk(myMutex);
         if (!myLocation.locate_pick(mainCamBox[0], ENEMY, rvec, tvec))
         {
             ulk.unlock();

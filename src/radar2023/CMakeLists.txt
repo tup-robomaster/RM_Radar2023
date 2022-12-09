@@ -16,7 +16,7 @@ add_compile_options(-std=c++17)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=16000000")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O3  -Wall")
 set(CUDA_GEN_CODE "-gencode=arch=compute_86,code=sm_86")
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O0 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
 include_directories(
 
@@ -47,8 +47,8 @@ cuda_add_executable(radar2023
   RadarClass/Detectors/src/depthProcesser.cpp
   RadarClass/Detectors/src/MovementDetector.cpp
   RadarClass/Detectors/src/tensorRT.cpp
-  RadarClass/Radar/src/location.cpp
-  RadarClass/Radar/src/MapMapping.cpp
+  RadarClass/Location/src/location.cpp
+  RadarClass/Location/src/MapMapping.cpp
   RadarClass/Radar/src/Radar.cpp
   RadarClass/UART/src/offical_judge_Handler.cpp
   RadarClass/UART/src/serial.cpp

@@ -9,9 +9,9 @@
 #include "../../Detectors/include/MovementDetector.h"
 #include "../../Detectors/include/ArmorDetector.h"
 #include "../../Detectors/include/CarDetector.h"
-#include "../../Radar/include/MapMapping.h"
+#include "../../Location/include/MapMapping.h"
 #include "../../UART/include/UART.h"
-#include "../../Radar/include/location.h"
+#include "../../Location/include/location.h"
 
 /**
  * @brief 主要雷达类

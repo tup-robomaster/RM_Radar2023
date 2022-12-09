@@ -21,7 +21,6 @@ bool ArmorDetector::initModel()
 
 vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
 {
-    // TODO: Fix here
     vector<vector<Yolo::Detection>> results_pre;
     if (targets.size() == 0)
         return {};
@@ -47,9 +46,11 @@ void ArmorDetector::reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<
     if (armors.size() != boxs.size())
         return;
     for (size_t i = 0; i < boxs.size(); ++i)
+    {
         for (auto &it : armors[i])
         {
             Rect result = get_rect(img[i], it.bbox, TRT_INPUT_H, TRT_INPUT_W);
             this->results.emplace_back(ArmorBoundingBox{true, (float)result.x + boxs[i].x, (float)result.y + boxs[i].y, (float)result.width, (float)result.height, it.class_id, it.conf});
         }
+    }
 }

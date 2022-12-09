@@ -31,12 +31,12 @@ void __callback__click(int event, int x, int y, int flage, void *param)
     switch (event)
     {
     case MouseEventTypes::EVENT_MOUSEMOVE:
-        rect = getWindowImageRect("PickPoints");
+        rect = cv::getWindowImageRect("PickPoints");
         frame.frame(Rect(Point(max(x - 100, 0), max(y - 100, 0)), Point(min(x + 100, frame.frame.cols - 1), min(y + 100, frame.frame.rows - 1)))).copyTo(img_cut(Rect(0, 0, min(x + 100, frame.frame.cols - 1) - max(x - 100, 0), min(y + 100, frame.frame.rows - 1) - max(y - 100, 0))));
         circle(img_cut, Point(100, 100), 1, Scalar(0, 255, 0), 1);
         imshow("ZOOM_WINDOW", img_cut);
-        moveWindow("ZOOM_WINDOW", rect.width - 400, rect.height + 200);
-        resizeWindow("ZOOM_WINDOW", 400, 400);
+        cv::moveWindow("ZOOM_WINDOW", rect.width - 400, rect.height + 200);
+        cv::resizeWindow("ZOOM_WINDOW", 400, 400);
         break;
     case MouseEventTypes::EVENT_LBUTTONDOWN:
         if (!flag)
@@ -92,14 +92,14 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         return false;
     int tip_w = floor(frame.frame.cols / 2);
     int tip_h = frame.frame.rows - 200;
-    namedWindow("PickPoints", WindowFlags::WINDOW_NORMAL);
-    resizeWindow("PickPoints", Size(1280, 780));
-    setWindowProperty("PickPoints", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
-    moveWindow("PickPoints", 500, 300);
-    namedWindow("ZOOM_WINDOW", WindowFlags::WINDOW_NORMAL);
-    resizeWindow("ZOOM_WINDOW", 400, 400);
-    setWindowProperty("ZOOM_WINDOW", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
-    setMouseCallback("PickPoints", __callback__click);
+    cv::namedWindow("PickPoints", WindowFlags::WINDOW_NORMAL);
+    cv::resizeWindow("PickPoints", Size(1280, 780));
+    cv::setWindowProperty("PickPoints", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
+    cv::moveWindow("PickPoints", 500, 300);
+    cv::namedWindow("ZOOM_WINDOW", WindowFlags::WINDOW_NORMAL);
+    cv::resizeWindow("ZOOM_WINDOW", 400, 400);
+    cv::setWindowProperty("ZOOM_WINDOW", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
+    cv::setMouseCallback("PickPoints", __callback__click);
     while (true)
     {
         putText(frame.frame, tips[(int)(enemy)][pick_points.size()], Point(tip_w, tip_h), HersheyFonts::FONT_HERSHEY_SIMPLEX, 3, Scalar(0, 255, 0), 2);
@@ -128,8 +128,8 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
             }
             else if (key == 81 || key == 113)
             {
-                destroyWindow("PickPoints");
-                destroyWindow("ZOOM_WINDOW");
+                cv::destroyWindow("PickPoints");
+                cv::destroyWindow("ZOOM_WINDOW");
                 return false;
             }
             flag = false;
@@ -143,13 +143,13 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         frame = cap.read();
         if (!cap.is_open() || !frame.flag)
         {
-            destroyWindow("PickPoints");
-            destroyWindow("ZOOM_WINDOW");
+            cv::destroyWindow("PickPoints");
+            cv::destroyWindow("ZOOM_WINDOW");
             return false;
         }
     }
-    destroyWindow("PickPoints");
-    destroyWindow("ZOOM_WINDOW");
+    cv::destroyWindow("PickPoints");
+    cv::destroyWindow("ZOOM_WINDOW");
     if (!solvePnP(ops, pick_points, K_0, C_0, rvec_Mat, tvec_Mat, false, SolvePnPMethod::SOLVEPNP_P3P))
     {
         fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,

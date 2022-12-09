@@ -27,6 +27,8 @@ private:
     int input_H = 0;
     int input_W = 0;
     int cls_num = 0;
+
+    float *output;
     
 private:
     bool build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw);

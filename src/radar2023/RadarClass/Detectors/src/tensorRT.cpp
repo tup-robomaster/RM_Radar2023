@@ -370,6 +370,7 @@ bool MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts, bool 
         CUDA_CHECK(cudaMalloc(&this->buffers[this->outputIndex], this->max_batchsize * TRT_OUTPUT_SIZE * sizeof(float)));
         CUDA_CHECK(cudaMallocHost((void **)&this->img_host, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
         CUDA_CHECK(cudaMalloc((void **)&this->img_device, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
+        this->output = (float *)malloc(this->max_batchsize * TRT_OUTPUT_SIZE * sizeof(float));
     }
     else
     {
@@ -392,7 +393,7 @@ void MyTensorRT::unInitMyTensorRT()
 vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int batchSize, float confidence_threshold, float nms_threshold)
 {
     assert(this->context != nullptr);
-    float output[this->max_batchsize * TRT_OUTPUT_SIZE * sizeof(float)];
+    
     vector<vector<Yolo::Detection>> batch_res(batchSize);
     cudaStream_t stream = nullptr;
     CUDA_CHECK(cudaStreamCreate(&stream));
@@ -423,13 +424,13 @@ vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int 
         CUDA_CHECK(cudaStreamDestroy(stream));
         return {};
     }
-    CUDA_CHECK(cudaMemcpyAsync(output, buffers[outputIndex], batchSize * TRT_OUTPUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost, stream));
+    CUDA_CHECK(cudaMemcpyAsync(this->output, buffers[outputIndex], batchSize * TRT_OUTPUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost, stream));
     CUDA_CHECK(cudaStreamSynchronize(stream));
     CUDA_CHECK(cudaStreamDestroy(stream));
     for (int b = 0; b < batchSize; ++b)
     {
         auto &res = batch_res[b];
-        nms(res, &output[b * TRT_OUTPUT_SIZE], confidence_threshold, nms_threshold);
+        nms(res, &this->output[b * TRT_OUTPUT_SIZE], confidence_threshold, nms_threshold);
     }
     return batch_res;
 }
