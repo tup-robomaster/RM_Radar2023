@@ -145,7 +145,6 @@ vector<Rect> MovementDetector::detectMovementTarget(float input[int(ImageH / _bl
 #endif
 
     // TODO:结果有效性评估
-    // TODO:加入神经网络作为备选
     return this->movementTargets;
 }
 // TODO:待验证

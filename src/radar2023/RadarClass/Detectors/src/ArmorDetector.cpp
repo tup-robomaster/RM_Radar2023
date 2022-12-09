@@ -27,7 +27,7 @@ vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
         return {};
     vector<Mat> preProcessedImage = this->preProcess(image, targets);
     results_pre = this->armorTensorRT->doInference(&preProcessedImage, preProcessedImage.size());
-    this->reBuildBoxs(results_pre, targets);
+    this->reBuildBoxs(results_pre, targets, preProcessedImage);
     return this->results;
 }
 
@@ -41,16 +41,15 @@ vector<Mat> ArmorDetector::preProcess(Mat &image, vector<Rect> &movingTargets)
     return output;
 }
 
-void ArmorDetector::reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs)
+void ArmorDetector::reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs, vector<Mat> &img)
 {
     vector<ArmorBoundingBox>().swap(this->results);
     if (armors.size() != boxs.size())
         return;
     for (size_t i = 0; i < boxs.size(); ++i)
-    {
-        for (const auto &it : armors[i])
+        for (auto &it : armors[i])
         {
-            this->results.emplace_back(ArmorBoundingBox{true, (it.bbox[0] - it.bbox[2] / 2) + boxs[i].x, (it.bbox[1] - it.bbox[3] / 2) + boxs[i].y, it.bbox[2], it.bbox[3], it.class_id, it.conf});
+            Rect result = get_rect(img[i], it.bbox, TRT_INPUT_H, TRT_INPUT_W);
+            this->results.emplace_back(ArmorBoundingBox{true, (float)result.x + boxs[i].x, (float)result.y + boxs[i].y, (float)result.width, (float)result.height, it.class_id, it.conf});
         }
-    }
 }

@@ -16,7 +16,7 @@ private:
 
 private:
     vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
-    void reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs);
+    void reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs, vector<Mat> &img);
 
 public:
     ArmorDetector();

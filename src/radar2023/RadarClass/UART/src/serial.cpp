@@ -25,7 +25,7 @@ void MySerial::initSerial()
                    "[ERROR], {}!\n", "fcntl failed");
     else
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], fcntl={}...", fcntl(this->fd, F_SETFL, 0));
+                   "[INFO], fcntl={}...\n", fcntl(this->fd, F_SETFL, 0));
 
     tcgetattr(this->fd, &this->options);
 
