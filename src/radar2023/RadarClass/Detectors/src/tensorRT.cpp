@@ -289,8 +289,8 @@ void MyTensorRT::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream
 
     // Close everything down
     engine->destroy();
-    builder->destroy();
     config->destroy();
+    builder->destroy();
 }
 
 bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw)
@@ -393,7 +393,6 @@ void MyTensorRT::unInitMyTensorRT()
 vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int batchSize, float confidence_threshold, float nms_threshold)
 {
     assert(this->context != nullptr);
-    
     vector<vector<Yolo::Detection>> batch_res(batchSize);
     cudaStream_t stream = nullptr;
     CUDA_CHECK(cudaStreamCreate(&stream));

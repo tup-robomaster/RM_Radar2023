@@ -266,7 +266,6 @@ void Radar::MainProcessLoop(future<void> futureObj)
     slk.unlock();
     while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
     {
-
         slk.lock();
         int check_count = SeqTargets.size();
         slk.unlock();
@@ -280,10 +279,11 @@ void Radar::MainProcessLoop(future<void> futureObj)
             }
             vector<ArmorBoundingBox> armorBoundingBoxs;
             if (frameBag.flag)
-            {
-                slk.lock();
-                vector<Rect> tempSeqTargets = SeqTargets;
-                slk.unlock();
+            {   
+                vector<Rect> tempSeqTargets;
+                ulk.lock();
+                tempSeqTargets.swap(SeqTargets);
+                ulk.unlock();
                 armorBoundingBoxs = mainADBox[0].infer(frameBag.frame, tempSeqTargets);
                 if (armorBoundingBoxs.size() == 0)
                     continue;
