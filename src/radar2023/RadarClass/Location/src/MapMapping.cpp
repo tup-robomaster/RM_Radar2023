@@ -25,11 +25,34 @@ bool MapMapping::_is_pass()
     return this->_pass_flag;
 }
 
+void MapMapping::_location_prediction()
+{
+    for (size_t i = 0; i < this->_location3D.size(); ++i)
+    {
+        bool do_pre = this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && (this->_location_cache[0][i].x != 0 || this->_location_cache[0][i].y != 0) && (this->_location_cache[i][1].x != 0 || this->_location_cache[1][i].y != 0) && this->_location_pred_time[i] != 1;
+        if (do_pre)
+        {
+            float m_v[2] = {Pre_radio * (this->_location_cache[1][i].x - this->_location_cache[1][i].x), Pre_radio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};
+            this->_location3D[i].x = m_v[0] + this->_location_cache[1][i].x;
+            this->_location3D[i].y = m_v[0] + this->_location_cache[1][i].y;
+            
+        }
+        if(this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_pred_time[i] == 1)
+            this->_location_pred_time[i] = 0;
+        if(do_pre && this->_location_pred_time[i] == 0)
+            this->_location_pred_time[i] = Pre_Time + 1;  
+        if(do_pre)
+            --this->_location_pred_time[i];
+        this->_location_cache[0] = this->_location_cache[1];
+        this->_location_cache[1] = this->_location3D;
+    }
+}
+
 void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
 {
     rvec_input.copyTo(this->rvec);
     tvec_input.copyTo(this->tvec);
-    Mat rvec_Matrix;             
+    Mat rvec_Matrix;
     Rodrigues(this->rvec, rvec_Matrix);
     Mat T_Matrix = Mat::zeros(Size(4, 4), CV_16F);
     rvec_Matrix.copyTo(T_Matrix(Rect(0, 0, 3, 3)));
@@ -44,7 +67,7 @@ void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
     this->_pass_flag = true;
 }
 
-vector<MapLocation3D> MapMapping::updata()
+vector<MapLocation3D> MapMapping::getloc()
 {
     return this->_location3D;
 }
@@ -54,7 +77,7 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
     if (!this->_pass_flag)
     {
         fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                       "[ERROR], Can't get _T !\n");
+                   "[ERROR], Can't get _T !\n");
         return;
     }
     vector<MapLocation3D> temp(10, MapLocation3D());
@@ -83,7 +106,7 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
         {
             int key = iter->first;
             MapLocation3D al;
-            bool TRTtype = false; //神经网络预测标志位
+            bool TRTtype = false; // 神经网络预测标志位
             for (const auto &it : locations)
             {
                 if ((int)it.cls == key)
@@ -132,6 +155,8 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
             pred_loc[i].z += Real_Size_W;
             this->_location3D[this->_ids[(int)pred_loc[i].id]] = pred_loc[i];
         }
+        if(L_P)
+            this->_location_prediction();
     }
 }
 // TODO: 待验证

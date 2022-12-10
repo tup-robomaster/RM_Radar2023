@@ -55,6 +55,6 @@
 #define L_P                 true                            //位置预测
 #define Z_THRE              0.2                             //Z轴突变阈值
 #define Pre_Time            10                              //预测次数
-#define Pre_radio           0.2                             //预测速度比例            
+#define Pre_radio           0.2f                            //预测速度比例            
 #define Real_Size_W         15.                             //真实宽度
 #define Real_Size_H         28.                             //真实高度（长）

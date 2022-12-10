@@ -279,7 +279,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
             }
             vector<ArmorBoundingBox> armorBoundingBoxs;
             if (frameBag.flag)
-            {   
+            {
                 vector<Rect> tempSeqTargets;
                 ulk.lock();
                 tempSeqTargets.swap(SeqTargets);
@@ -296,7 +296,7 @@ void Radar::MainProcessLoop(future<void> futureObj)
                 mainMMBox[0].mergeUpdata(armorBoundingBoxs, IouArmors);
                 judge_message myJudge_message;
                 myJudge_message.task = 1;
-                myJudge_message.loc = mainMMBox[0].updata();
+                myJudge_message.loc = mainMMBox[0].getloc();
                 send_judge(myJudge_message, mainUARTBox[0]);
             }
             else

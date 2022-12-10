@@ -64,7 +64,7 @@ void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char Receiv
 {
     unsigned char local_buffer[200];
     local_buffer[0] = 0xA5;
-    local_buffer[1] = 10; //数据帧中 data 的长度,占两个字节
+    local_buffer[1] = 10; // 数据帧中 data 的长度,占两个字节
     local_buffer[2] = 0;
     local_buffer[3] = 0;
     local_buffer[4] = this->myHandler.myGet_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);
@@ -97,7 +97,7 @@ void UART::Referee_Transmit_Map(unsigned int cmdID, int datalength, int targetId
     this->FloatToBytes(t_y, y);
     unsigned char local_buffer[200];
     local_buffer[0] = 0xA5;
-    local_buffer[1] = (datalength)&0x00ff; //数据帧中 data 的长度,占两个字节
+    local_buffer[1] = (datalength)&0x00ff; // 数据帧中 data 的长度,占两个字节
     local_buffer[2] = ((datalength)&0xff00) >> 8;
     local_buffer[3] = 0;
     local_buffer[4] = this->myHandler.myGet_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);

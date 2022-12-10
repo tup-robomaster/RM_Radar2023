@@ -15,15 +15,21 @@ private:
     Mat rvec, tvec;
     bool _pass_flag = false;
 
+    int _location_pred_time[10] = {0};
+    vector<vector<MapLocation3D>> _location_cache = vector<vector<MapLocation3D>>(2, vector<MapLocation3D>(10, MapLocation3D()));
+
+private:
+    void adjust_z_one(MapLocation3D &locs);
+    void _location_prediction();
+
 public:
     MapMapping();
     ~MapMapping();
 
     bool _is_pass();
     void push_T(Mat &rvec, Mat &tvec);
-    vector<MapLocation3D> updata();
+    vector<MapLocation3D> getloc();
     void mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<ArmorBoundingBox> &Ioubbox);
-    void adjust_z_one(MapLocation3D &locs);
 };
 
 #endif
