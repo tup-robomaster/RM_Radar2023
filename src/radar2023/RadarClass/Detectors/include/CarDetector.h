@@ -1,13 +1,13 @@
 #ifndef __CARDETECTOR_H
 #define __CARDETECTOR_H
 
-#include "./tensorRT.h"
+#include "./tensorRT_v5.h"
 #include "../../Common/include/general.h"
 
 class CarDetector
 {
 private:
-    MyTensorRT *carTensorRT;
+    MyTensorRT_v5 *carTensorRT;
     vector<ArmorBoundingBox> results;
 
 public:

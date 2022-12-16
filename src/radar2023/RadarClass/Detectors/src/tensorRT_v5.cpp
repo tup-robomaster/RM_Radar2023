@@ -1,4 +1,4 @@
-#include "../include/tensorRT.h"
+#include "../include/tensorRT_v5.h"
 
 static int get_width(int x, float gw, int divisor = 8)
 {
@@ -53,15 +53,15 @@ public:
     }
 };
 
-MyTensorRT::MyTensorRT()
+MyTensorRT_v5::MyTensorRT_v5()
 {
 }
 
-MyTensorRT::~MyTensorRT()
+MyTensorRT_v5::~MyTensorRT_v5()
 {
 }
 
-ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *builder, IBuilderConfig *config, nvinfer1::DataType dt, float &gd, float &gw, std::string &wts_name)
+ICudaEngine *MyTensorRT_v5::build_engine(unsigned int maxBatchSize, IBuilder *builder, IBuilderConfig *config, nvinfer1::DataType dt, float &gd, float &gw, std::string &wts_name)
 {
     INetworkDefinition *network = builder->createNetworkV2(0U);
 
@@ -152,7 +152,7 @@ ICudaEngine *MyTensorRT::build_engine(unsigned int maxBatchSize, IBuilder *build
     return engine;
 }
 
-ICudaEngine *MyTensorRT::build_engine_p6(unsigned int maxBatchSize, IBuilder *builder, IBuilderConfig *config, nvinfer1::DataType dt, float &gd, float &gw, std::string &wts_name)
+ICudaEngine *MyTensorRT_v5::build_engine_p6(unsigned int maxBatchSize, IBuilder *builder, IBuilderConfig *config, nvinfer1::DataType dt, float &gd, float &gw, std::string &wts_name)
 {
     INetworkDefinition *network = builder->createNetworkV2(0U);
     // Create input tensor of shape {3, INPUT_H, INPUT_W} with name INPUT_BLOB_NAME
@@ -261,7 +261,7 @@ ICudaEngine *MyTensorRT::build_engine_p6(unsigned int maxBatchSize, IBuilder *bu
     return engine;
 }
 
-void MyTensorRT::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream, bool &is_p6, float &gd, float &gw, std::string &wts_name)
+void MyTensorRT_v5::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream, bool &is_p6, float &gd, float &gw, std::string &wts_name)
 {
     TRTLogger logger;
     // Create builder
@@ -293,7 +293,7 @@ void MyTensorRT::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream
     builder->destroy();
 }
 
-bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw)
+bool MyTensorRT_v5::build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw)
 {
     char engine_name_c[engine_name.length()];
     strcpy(engine_name_c, engine_name.data());
@@ -334,7 +334,7 @@ bool MyTensorRT::build_model(string wts_name, string engine_name, bool is_p6, fl
     return false;
 }
 
-bool MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num)
+bool MyTensorRT_v5::initMyTensorRT_v5(char *tensorrtEngienPath, char *yolov5wts, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num)
 {
     this->max_batchsize = max_batchsize;
     this->input_H = input_H;
@@ -383,14 +383,14 @@ bool MyTensorRT::initMyTensorRT(char *tensorrtEngienPath, char *yolov5wts, bool 
     return true;
 }
 
-void MyTensorRT::unInitMyTensorRT()
+void MyTensorRT_v5::unInitMyTensorRT_v5()
 {
     CUDA_CHECK(cudaFree(this->buffers[this->inputIndex]));
     CUDA_CHECK(cudaFree(this->buffers[this->outputIndex]));
     this->runtime->destroy();
 }
 
-vector<vector<Yolo::Detection>> MyTensorRT::doInference(vector<Mat> *input, int batchSize, float confidence_threshold, float nms_threshold)
+vector<vector<Yolo::Detection>> MyTensorRT_v5::doInference(vector<Mat> *input, int batchSize, float confidence_threshold, float nms_threshold)
 {
     assert(this->context != nullptr);
     vector<vector<Yolo::Detection>> batch_res(batchSize);

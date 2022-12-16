@@ -1,5 +1,5 @@
-#ifndef MY_TENSORRT_H
-#define MY_TENSORRT_H
+#ifndef MY_TENSORRT_V7_H
+#define MY_TENSORRT_V7_H
 
 #include "../../Common/include/public.h"
 #include <NvInferRuntime.h>
@@ -11,7 +11,7 @@
  * @brief Tensorrt
  * CPU/GPU预（后）处理的Tensorrt推理
  */
-class MyTensorRT
+class MyTensorRT_v7
 {
 private:
     IRuntime *runtime;
@@ -33,15 +33,15 @@ private:
 private:
     bool build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw);
     void APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream, bool &is_p6, float &gd, float &gw, std::string &wts_name);
-    ICudaEngine *build_engine(unsigned int maxBatchSize, IBuilder *builder, IBuilderConfig *config, nvinfer1::DataType dt, float &gd, float &gw, std::string &wts_name);
+    ICudaEngine *build_engine_yolov7e6e(unsigned int maxBatchSize, IBuilder *builder, IBuilderConfig *config, nvinfer1::DataType dt, float &gd, float &gw, std::string &wts_name);
     ICudaEngine *build_engine_p6(unsigned int maxBatchSize, IBuilder *builder, IBuilderConfig *config, nvinfer1::DataType dt, float &gd, float &gw, std::string &wts_name);
 
 public:
-    MyTensorRT();
-    ~MyTensorRT();
+    MyTensorRT_v7();
+    ~MyTensorRT_v7();
 
-    bool initMyTensorRT(char *tensorrtMoudlePath, char *onnxMoudlePath, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num);
-    void unInitMyTensorRT();
+    bool initMyTensorRT_v7(char *tensorrtMoudlePath, char *onnxMoudlePath, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num);
+    void unInitMyTensorRT_v7();
     vector<vector<Yolo::Detection>> doInference(vector<Mat> *input, int batchSize, float confidence_threshold = 0.25f, float nms_threshold = 0.45f);
 };
 

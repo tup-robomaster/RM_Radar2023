@@ -46,7 +46,8 @@ cuda_add_executable(radar2023
   RadarClass/Detectors/src/common.cpp
   RadarClass/Detectors/src/depthProcesser.cpp
   RadarClass/Detectors/src/MovementDetector.cpp
-  RadarClass/Detectors/src/tensorRT.cpp
+  RadarClass/Detectors/src/tensorRT_v5.cpp
+  #RadarClass/Detectors/src/tensorRT_v7.cpp #V7 is untested for future develop
   RadarClass/Location/src/location.cpp
   RadarClass/Location/src/MapMapping.cpp
   RadarClass/Radar/src/Radar.cpp

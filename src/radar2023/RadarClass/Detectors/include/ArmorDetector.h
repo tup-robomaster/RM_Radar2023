@@ -1,7 +1,7 @@
 #ifndef __ARMORDETECTOR_H
 #define __ARMORDETECTOR_H
 
-#include "./tensorRT.h"
+#include "./tensorRT_v5.h"
 #include "../../Common/include/general.h"
 
 /**
@@ -11,7 +11,7 @@
 class ArmorDetector
 {
 private:
-    MyTensorRT *armorTensorRT;
+    MyTensorRT_v5 *armorTensorRT;
     vector<ArmorBoundingBox> results;
 
 private:
