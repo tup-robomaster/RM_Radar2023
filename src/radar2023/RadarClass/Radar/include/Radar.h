@@ -3,7 +3,7 @@
 
 #include "../../Common/include/public.h"
 #include "../../Camera/include/camera.h"
-#include "../../Camera/include/VideoRecoder.h"
+#include "../../Camera/include/VideoRecorder.h"
 #include "../../Common/include/SharedQueue.h"
 #include "../../Detectors/include/depthProcesser.h"
 #include "../../Detectors/include/MovementDetector.h"

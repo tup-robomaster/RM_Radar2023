@@ -21,6 +21,7 @@ private:
 private:
     void adjust_z_one(MapLocation3D &locs);
     void _location_prediction();
+    vector<ArmorBoundingBox> _IoU_prediction();
 
 public:
     MapMapping();

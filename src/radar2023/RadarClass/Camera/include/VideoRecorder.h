@@ -1,16 +1,16 @@
-#ifndef _VIDEORECODER_H
-#define _VIDEORECODER_H
+#ifndef _VIDEORECORDER_H
+#define _VIDEORECORDER_H
 
 #include "../../Common/include/public.h"
 
-class VideoRecoder
+class VideoRecorder
 {
 private:
     VideoWriter vw;
 
 public:
-    VideoRecoder();
-    ~VideoRecoder();
+    VideoRecorder();
+    ~VideoRecorder();
 
     void init(char *videoPath, int coder, Size size);
     void write(Mat &src);

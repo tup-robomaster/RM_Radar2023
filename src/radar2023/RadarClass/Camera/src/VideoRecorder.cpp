@@ -1,15 +1,15 @@
-#include "../include/VideoRecoder.h"
+#include "../include/VideoRecorder.h"
 
-VideoRecoder::VideoRecoder()
+VideoRecorder::VideoRecorder()
 {
 }
 
-VideoRecoder::~VideoRecoder()
+VideoRecorder::~VideoRecorder()
 {
     this->close();
 }
 
-void VideoRecoder::init(char *videoPath, int coder, Size size)
+void VideoRecorder::init(char *videoPath, int coder, Size size)
 {
     if (!this->vw.isOpened())
     {
@@ -29,14 +29,14 @@ void VideoRecoder::init(char *videoPath, int coder, Size size)
     }
 }
 
-void VideoRecoder::write(Mat &src)
+void VideoRecorder::write(Mat &src)
 {
     if (!this->vw.isOpened())
         return;
     this->vw.write(src);
 }
 
-void VideoRecoder::close()
+void VideoRecorder::close()
 {
     if (this->vw.isOpened())
         this->vw.release();

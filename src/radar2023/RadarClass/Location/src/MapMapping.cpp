@@ -35,16 +35,25 @@ void MapMapping::_location_prediction()
             float m_v[2] = {Pre_radio * (this->_location_cache[1][i].x - this->_location_cache[1][i].x), Pre_radio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};
             this->_location3D[i].x = m_v[0] + this->_location_cache[1][i].x;
             this->_location3D[i].y = m_v[0] + this->_location_cache[1][i].y;
-            
         }
-        if(this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_pred_time[i] == 1)
+        if (this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_pred_time[i] == 1)
             this->_location_pred_time[i] = 0;
-        if(do_pre && this->_location_pred_time[i] == 0)
-            this->_location_pred_time[i] = Pre_Time + 1;  
-        if(do_pre)
+        if (do_pre && this->_location_pred_time[i] == 0)
+            this->_location_pred_time[i] = Pre_Time + 1;
+        if (do_pre)
             --this->_location_pred_time[i];
         this->_location_cache[0] = this->_location_cache[1];
         this->_location_cache[1] = this->_location3D;
+    }
+}
+
+vector<ArmorBoundingBox> MapMapping::_IoU_prediction()
+{
+    map<int, int>::iterator iter;
+        iter = this->_ids.begin();
+    while (iter != this->_ids.end())
+    {
+        
     }
 }
 
@@ -155,7 +164,7 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
             pred_loc[i].z += Real_Size_W;
             this->_location3D[this->_ids[(int)pred_loc[i].id]] = pred_loc[i];
         }
-        if(L_P)
+        if (L_P)
             this->_location_prediction();
     }
 }
