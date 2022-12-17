@@ -27,8 +27,6 @@ public:
 
     int getProcessQueueSize() { return processQueue.size(); };
 
-    vector<float> detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs);
-
     vector<vector<float>> pushback(pcl::PointCloud<pcl::PointXYZ> &pc);
 };
 

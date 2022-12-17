@@ -64,33 +64,3 @@ vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
     }
     return this->depth;
 }
-
-vector<float> DepthQueue::detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
-{
-    vector<float> depthBox;
-    if (armorBoundingBoxs.size() == 0)
-        return depthBox;
-    for (const auto &it : armorBoundingBoxs)
-    {
-        int count = 0;
-        vector<float> tempBox;
-        float center[2] = {it.x0 + it.w / 2, it.y0 + it.h / 2};
-        for (int i = int(max<float>(center[1] - it.h, 0.)); i < int(min<float>(center[1] + it.h, ImageH)); ++i)
-        {
-            for (int j = int(max<float>(center[0] - it.w, 0.)); j < int(min<float>(center[0] + it.w, ImageW)); ++j)
-            {
-                if (this->depth[i][j] == 0.)
-                    continue;
-                tempBox.emplace_back(this->depth[i][j]);
-                ++count;
-            }
-        }
-        int tempNum = 0;
-        for (const auto &jt : tempBox)
-        {
-            tempNum += jt;
-        }
-        depthBox.emplace_back(tempNum / count);
-    }
-    return depthBox;
-}
