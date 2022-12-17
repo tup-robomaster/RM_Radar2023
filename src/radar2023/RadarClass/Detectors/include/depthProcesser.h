@@ -21,6 +21,7 @@ private:
     vector<vector<float>> depth;
 
 public:
+    DepthQueue();
     DepthQueue(Matrix<float, 3, 3> &K_0, Matrix<float, 1, 5> &C_0, Matrix<float, 4, 4> &E_0);
     ~DepthQueue();
 

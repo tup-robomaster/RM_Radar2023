@@ -22,8 +22,8 @@ class Radar
 private:
     bool _is_LidarInited = false;
     ros::Subscriber sub;
-    thread mainloop;
-    thread Seqloop;
+    thread lidarMainloop;
+    thread seqloop;
     thread serRead;
     thread serWrite;
     pthread_t serR_t;
@@ -33,14 +33,37 @@ private:
     bool _init_flag = false;
     bool _thread_working = false;
     bool _Ser_working = false;
-    promise<void> exitSignal1;
-    promise<void> exitSignal2;
-    promise<void> exitSignal3;
-    promise<void> exitSignal4;
+
+    bool __LidarMainLoop_working = false;
+    bool __SeparationLoop_working = false;
+    bool __MainProcessLoop_working = false;
+    bool __VideoRecorderLoop_working = false;
+
+    DepthQueue depthQueue;
+    MovementDetector movementDetector;
+    ArmorDetector armorDetector;
+    CarDetector carDetector;
+    CameraThread cameraThread;
+    MapMapping mapMapping;
+    UART myUART;
+    MySerial mySerial;
+    VideoRecorder videoRecorder;
 
     bool carInferAvailable = false;
 
     bool is_alive = true;
+
+    vector<vector<float>> publicDepth; // 共享深度图
+    int depthResourceCount;            // 深度图资源计数
+    shared_timed_mutex myMutex;        // 读写锁
+    vector<Rect> SeqTargets;           // 共享分割目标
+    int separation_mode = 0;           // 图像分割模式
+    SharedQueue<Mat> myFrames;         // 图像帧队列
+
+private:
+    void armor_filter(vector<ArmorBoundingBox> &armors);
+    void detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs);
+    void send_judge(judge_message &message, UART &myUART);
 
 public:
     Radar(int argc, char **argv);
@@ -49,13 +72,13 @@ public:
     void init(int argc, char **argv);
 
     void LidarListenerBegin(int argc, char **argv);
-    static void LidarMainLoop(future<void> futureObj);
+    static void LidarMainLoop(Radar *radar);
     void LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg);
-    static void SeparationLoop(future<void> futureObj);
-    static void SerReadLoop();
-    static void SerWriteLoop();
-    static void MainProcessLoop(future<void> futureObj);
-    static void VideoRecoderLoop(future<void> futureObj);
+    static void SeparationLoop(Radar *radar);
+    static void SerReadLoop(Radar *radar);
+    static void SerWriteLoop(Radar *radar);
+    static void MainProcessLoop(Radar *radar);
+    static void VideoRecorderLoop(Radar *radar);
 
     void spin(int argc, char **argv);
     void stop();

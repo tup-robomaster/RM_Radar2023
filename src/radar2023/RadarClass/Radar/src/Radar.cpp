@@ -1,24 +1,6 @@
 #include "../include/Radar.h"
 
-static const char lidarTopicName[13] = "/livox/lidar"; // 雷达点云节点名称
-
-static vector<DepthQueue> mainDqBox;       // 考虑到后续可能的设备改变，预留容器
-static vector<MovementDetector> mainMDBox; // 考虑到后续可能的设备改变，预留容器
-static vector<ArmorDetector> mainADBox;    // 考虑到后续可能的设备改变，预留容器
-static vector<CarDetector> mainCDBox;      // 考虑到后续可能的设备改变，预留容器
-static vector<CameraThread> mainCamBox;    // 考虑到后续可能的设备改变，预留容器
-static vector<MapMapping> mainMMBox;       // 考虑到后续可能的设备改变，预留容器
-static vector<UART> mainUARTBox;           // 考虑到后续可能的设备改变，预留容器
-static vector<MySerial> mainSerBox;        // 考虑到后续可能的设备改变，预留容器
-static vector<VideoRecoder> mainVRBox;     // 考虑到后续可能的设备改变，预留容器
-static vector<vector<float>> publicDepth;  // 共享深度图
-static int depthResourceCount;             // 深度图资源计数
-static shared_timed_mutex myMutex;         // 读写锁
-static vector<Rect> SeqTargets;            // 共享分割目标
-static int separation_mode = 0;            // 图像分割模式
-static SharedQueue<Mat> myFrames;          // 图像帧队列
-
-static void armor_filter(vector<ArmorBoundingBox> &armors)
+void Radar::armor_filter(vector<ArmorBoundingBox> &armors)
 {
     vector<ArmorBoundingBox> results;
     int ids[10] = {1, 2, 3, 4, 5, 8, 9, 10, 11, 12};
@@ -40,7 +22,7 @@ static void armor_filter(vector<ArmorBoundingBox> &armors)
     armors.swap(results);
 }
 
-static void detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
+void Radar::detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
 {
     if (armorBoundingBoxs.size() == 0)
         return;
@@ -68,7 +50,7 @@ static void detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
     }
 }
 
-static void send_judge(judge_message &message, UART &myUART)
+void Radar::send_judge(judge_message &message, UART &myUART)
 {
     vector<vector<float>> loc;
     switch (message.task)
@@ -127,42 +109,15 @@ void Radar::init(int argc, char **argv)
     cv2eigen(C_0_Mat, C_0);
     cv2eigen(E_0_Mat, E_0);
     // TODO: CHECK HERE
-    if (mainDqBox.size() == 0)
-    {
-        mainDqBox.emplace_back(DepthQueue(K_0, C_0, E_0));
-    }
-    if (mainMDBox.size() == 0)
-    {
-        mainMDBox.emplace_back(MovementDetector());
-    }
-    if (mainADBox.size() == 0)
-    {
-        mainADBox.emplace_back(ArmorDetector());
-    }
-    if (mainCDBox.size() == 0)
-    {
-        mainCDBox.emplace_back(CarDetector());
-    }
-    if (mainCamBox.size() == 0)
-    {
-        mainCamBox.emplace_back(CameraThread());
-    }
-    if (mainVRBox.size() == 0)
-    {
-        mainVRBox.emplace_back(VideoRecoder());
-    }
-    if (mainMMBox.size() == 0)
-    {
-        mainMMBox.emplace_back(MapMapping());
-    }
-    if (mainUARTBox.size() == 0)
-    {
-        mainUARTBox.emplace_back(UART());
-    }
-    if (mainSerBox.size() == 0)
-    {
-        mainSerBox.emplace_back(MySerial());
-    }
+    this->depthQueue = DepthQueue(K_0, C_0, E_0);
+    this->movementDetector = MovementDetector();
+    this->armorDetector = ArmorDetector();
+    this->carDetector = CarDetector();
+    this->cameraThread = CameraThread();
+    this->videoRecorder = VideoRecorder();
+    this->mapMapping = MapMapping();
+    this->myUART = UART();
+    this->mySerial = MySerial();
     if (!this->_init_flag)
     {
         namedWindow("ControlPanel", WindowFlags::WINDOW_NORMAL);
@@ -171,15 +126,15 @@ void Radar::init(int argc, char **argv)
         createTrackbar("Separation mode", "ControlPanel", 0, 1, nullptr);
         setTrackbarPos("Separation mode", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
-        if (!mainADBox[0].initModel())
+        if (!this->armorDetector.initModel())
         {
             this->stop();
             return;
         }
-        this->carInferAvailable = mainCDBox[0].initModel() ? true : false;
-        mainSerBox[0].initSerial();
-        mainVRBox[0].init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
-        mainCamBox[0].start();
+        this->carInferAvailable = this->carDetector.initModel() ? true : false;
+        this->mySerial.initSerial();
+        this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
+        this->cameraThread.start();
         this->_init_flag = true;
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "[INFO], Init Done\n");
@@ -196,9 +151,9 @@ void Radar::LidarListenerBegin(int argc, char **argv)
     this->_is_LidarInited = true;
 }
 
-void Radar::LidarMainLoop(future<void> futureObj)
+void Radar::LidarMainLoop(Radar *radar)
 {
-    while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
+    while (radar->__LidarMainLoop_working)
     {
         if (ros::ok())
             ros::spinOnce();
@@ -209,7 +164,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *pc);
-    std::vector<std::vector<float>> tempDepth = mainDqBox[0].pushback(*pc);
+    std::vector<std::vector<float>> tempDepth = this->depthQueue.pushback(*pc);
     unique_lock<shared_timed_mutex> ulk(myMutex);
     publicDepth.swap(tempDepth);
     if (depthResourceCount < 5)
@@ -217,64 +172,64 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     ulk.unlock();
 }
 
-void Radar::SeparationLoop(future<void> futureObj)
+void Radar::SeparationLoop(Radar *radar)
 {
-    unique_lock<shared_timed_mutex> ulk(myMutex);
+    unique_lock<shared_timed_mutex> ulk(radar->myMutex);
     ulk.unlock();
-    shared_lock<shared_timed_mutex> slk(myMutex);
+    shared_lock<shared_timed_mutex> slk(radar->myMutex);
     slk.unlock();
-    while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
+    while (radar->__SeparationLoop_working)
     {
         vector<Rect> tempSeqTargets;
-        if (separation_mode == 0 && depthResourceCount > 0)
+        if (radar->separation_mode == 0 && radar->depthResourceCount > 0)
         {
             ulk.lock();
-            depthResourceCount--;
+            radar->depthResourceCount--;
             ulk.unlock();
             slk.lock();
-            tempSeqTargets = mainMDBox[0].applyMovementDetector(publicDepth);
+            tempSeqTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
             slk.unlock();
         }
-        else if (separation_mode == 1)
+        else if (radar->separation_mode == 1)
         {
             slk.lock();
-            FrameBag image = mainCamBox[0].read();
+            FrameBag image = radar->cameraThread.read();
             slk.unlock();
-            tempSeqTargets = mainCDBox[0].infer(image.frame);
+            tempSeqTargets = radar->carDetector.infer(image.frame);
         }
         ulk.lock();
-        SeqTargets.swap(tempSeqTargets);
+        radar->SeqTargets.swap(tempSeqTargets);
         ulk.unlock();
     }
 }
 
-void Radar::SerReadLoop()
+void Radar::SerReadLoop(Radar *radar)
 {
-    mainUARTBox[0].read(mainSerBox[0]);
+    radar->myUART.read(radar->mySerial);
 }
 
-void Radar::SerWriteLoop()
+void Radar::SerWriteLoop(Radar *radar)
 {
-    mainUARTBox[0].write(mainSerBox[0]);
+    radar->myUART.write(radar->mySerial);
 }
 
-void Radar::MainProcessLoop(future<void> futureObj)
+void Radar::MainProcessLoop(Radar *radar)
 {
-    unique_lock<shared_timed_mutex> ulk(myMutex);
+    unique_lock<shared_timed_mutex> ulk(radar->myMutex);
     ulk.unlock();
-    shared_lock<shared_timed_mutex> slk(myMutex);
+    shared_lock<shared_timed_mutex> slk(radar->myMutex);
     slk.unlock();
-    while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
+    while (radar->__MainProcessLoop_working)
     {
         slk.lock();
-        int check_count = SeqTargets.size();
+        int check_count = radar->SeqTargets.size();
         slk.unlock();
-        FrameBag frameBag = mainCamBox[0].read();
+        FrameBag frameBag = radar->cameraThread.read();
         if (check_count > 0)
         {
-            if (!mainCamBox[0].is_open())
+            if (!radar->cameraThread.is_open())
             {
-                mainCamBox[0].open();
+                radar->cameraThread.open();
                 continue;
             }
             vector<ArmorBoundingBox> armorBoundingBoxs;
@@ -282,36 +237,36 @@ void Radar::MainProcessLoop(future<void> futureObj)
             {
                 vector<Rect> tempSeqTargets;
                 ulk.lock();
-                tempSeqTargets.swap(SeqTargets);
+                tempSeqTargets.swap(radar->SeqTargets);
                 ulk.unlock();
-                armorBoundingBoxs = mainADBox[0].infer(frameBag.frame, tempSeqTargets);
+                armorBoundingBoxs = radar->armorDetector.infer(frameBag.frame, tempSeqTargets);
                 if (armorBoundingBoxs.size() == 0)
                     continue;
                 // TODO: 加入防抖层
-                armor_filter(armorBoundingBoxs);
+                radar->armor_filter(armorBoundingBoxs);
                 slk.lock();
-                detectDepth(armorBoundingBoxs);
+                radar->detectDepth(armorBoundingBoxs);
                 slk.unlock();
                 vector<ArmorBoundingBox> IouArmors;
-                mainMMBox[0].mergeUpdata(armorBoundingBoxs, IouArmors);
+                radar->mapMapping.mergeUpdata(armorBoundingBoxs, IouArmors);
                 judge_message myJudge_message;
                 myJudge_message.task = 1;
-                myJudge_message.loc = mainMMBox[0].getloc();
-                send_judge(myJudge_message, mainUARTBox[0]);
+                myJudge_message.loc = radar->mapMapping.getloc();
+                radar->send_judge(myJudge_message, radar->myUART);
             }
             else
                 continue;
         }
         if (frameBag.flag)
-            myFrames.push(frameBag.frame);
+            radar->myFrames.push(frameBag.frame);
     }
 }
 
-void Radar::VideoRecoderLoop(future<void> futureObj)
+void Radar::VideoRecorderLoop(Radar *radar)
 {
-    while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
+    while (radar->__VideoRecorderLoop_working)
     {
-        mainVRBox[0].write(myFrames.front());
+        radar->videoRecorder.write(radar->myFrames.front());
     }
 }
 
@@ -329,7 +284,7 @@ void Radar::spin(int argc, char **argv)
         separation_mode = getTrackbarPos("Separation mode", "ControlPanel");
     else
         separation_mode = 0;
-    if (!mainMMBox[0]._is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
+    if (!this->mapMapping._is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], Locate pick start ...Process\n");
@@ -337,13 +292,13 @@ void Radar::spin(int argc, char **argv)
         unique_lock<shared_timed_mutex> ulk(myMutex);
         Location myLocation = Location();
         Mat rvec, tvec;
-        if (!myLocation.locate_pick(mainCamBox[0], ENEMY, rvec, tvec))
+        if (!myLocation.locate_pick(this->cameraThread, ENEMY, rvec, tvec))
         {
             ulk.unlock();
             return;
         }
         ulk.unlock();
-        mainMMBox[0].push_T(rvec, tvec);
+        this->mapMapping.push_T(rvec, tvec);
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "[INFO], Locate pick Done \n");
     }
@@ -352,37 +307,44 @@ void Radar::spin(int argc, char **argv)
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], Thread starting ...");
         this->_thread_working = true;
-        this->exitSignal1 = promise<void>();
-        this->exitSignal2 = promise<void>();
-        this->exitSignal3 = promise<void>();
-        this->exitSignal4 = promise<void>();
-        future<void> futureObj1 = exitSignal1.get_future();
-        future<void> futureObj2 = exitSignal2.get_future();
-        future<void> futureObj3 = exitSignal3.get_future();
-        future<void> futureObj4 = exitSignal4.get_future();
-        this->mainloop = thread(&this->LidarMainLoop, move(futureObj1));
-        this->Seqloop = thread(&this->SeparationLoop, move(futureObj2));
-        this->processLoop = thread(&this->MainProcessLoop, move(futureObj3));
-        this->videoRecoderLoop = thread(&this->VideoRecoderLoop, move(futureObj4));
+        if (!this->__LidarMainLoop_working)
+        {
+            this->__LidarMainLoop_working = true;
+            this->lidarMainloop = thread(std::bind(&Radar::LidarMainLoop, this));
+        }
+        if (!this->__SeparationLoop_working)
+        {
+            this->__SeparationLoop_working = true;
+            this->seqloop = thread(std::bind(&Radar::SeparationLoop, this));
+        }
+        if (!this->__MainProcessLoop_working)
+        {
+            this->__MainProcessLoop_working = true;
+            this->processLoop = thread(std::bind(&Radar::MainProcessLoop, this));
+        }
+        if (!this->__VideoRecorderLoop_working)
+        {
+            this->videoRecoderLoop = thread(std::bind(&Radar::VideoRecorderLoop, this));
+        }
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
     }
-    if (!mainSerBox[0]._is_open())
+    if (!this->mySerial._is_open())
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], Serial initing ...");
-        mainSerBox[0].initSerial();
+        this->mySerial.initSerial();
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
     }
-    if (!this->_Ser_working && mainSerBox[0]._is_open())
+    if (!this->_Ser_working && this->mySerial._is_open())
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], SerThread initing ...");
         this->_Ser_working = true;
-        this->serRead = thread(&this->SerReadLoop);
+        this->serRead = thread(std::bind(&Radar::SerReadLoop, this));
         this->serR_t = this->serRead.native_handle();
-        this->serWrite = thread(&this->SerWriteLoop);
+        this->serWrite = thread(std::bind(&Radar::SerWriteLoop, this));
         this->serW_t = this->serWrite.native_handle();
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
@@ -404,20 +366,20 @@ void Radar::stop()
     if (this->_thread_working)
     {
         this->_thread_working = false;
-        this->exitSignal1.set_value();
-        this->exitSignal2.set_value();
-        this->exitSignal3.set_value();
-        this->exitSignal4.set_value();
+        this->__LidarMainLoop_working = false;
+        this->__MainProcessLoop_working = false;
+        this->__SeparationLoop_working = false;
+        this->__VideoRecorderLoop_working = false;
         pthread_cancel(this->serR_t);
         pthread_cancel(this->serW_t);
-        this->mainloop.join();
-        this->Seqloop.join();
+        this->lidarMainloop.join();
+        this->seqloop.join();
         this->processLoop.join();
         this->videoRecoderLoop.join();
     }
-    if (mainCamBox[0].is_open())
-        mainCamBox[0].stop();
-    mainVRBox[0].close();
+    if (this->cameraThread.is_open())
+        this->cameraThread.stop();
+    this->videoRecorder.close();
     this->is_alive = false;
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Done.\n");

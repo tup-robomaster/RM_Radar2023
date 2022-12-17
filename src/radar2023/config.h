@@ -4,6 +4,7 @@
 // #define UsingVideo                                          //是否使用视频
 
 #define SerialPortNAME      (char*)"/dev/ttyUSB0" 
+#define lidarTopicName      (char*)"/livox/lidar"
 
 #define CameraConfigPath    (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/Config_0.Config"        //相机配置文件名称
 #define TestVideoPath       (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/demo_resource/video0.mp4"      //DEMO视频路径

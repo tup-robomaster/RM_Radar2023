@@ -1,5 +1,9 @@
 #include "../include/depthProcesser.h"
 
+DepthQueue::DepthQueue()
+{
+}
+
 DepthQueue::DepthQueue(Matrix<float, 3, 3> &K_0, Matrix<float, 1, 5> &C_0, Matrix<float, 4, 4> &E_0)
 {
     this->K_0 = K_0;
