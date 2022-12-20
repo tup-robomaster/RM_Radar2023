@@ -44,17 +44,18 @@ private:
     ArmorDetector armorDetector;
     CarDetector carDetector;
     CameraThread cameraThread;
+    Location myLocation;
     MapMapping mapMapping;
     UART myUART;
     MySerial mySerial;
     VideoRecorder videoRecorder;
 
     bool carInferAvailable = false;
+    bool _if_record = false;
 
     bool is_alive = true;
 
     vector<vector<float>> publicDepth; // 共享深度图
-    int depthResourceCount;            // 深度图资源计数
     shared_timed_mutex myMutex;        // 读写锁
     vector<Rect> SeqTargets;           // 共享分割目标
     int separation_mode = 0;           // 图像分割模式
@@ -66,7 +67,7 @@ private:
     void send_judge(judge_message &message, UART &myUART);
 
 public:
-    Radar(int argc, char **argv);
+    Radar();
     ~Radar();
 
     void init(int argc, char **argv);

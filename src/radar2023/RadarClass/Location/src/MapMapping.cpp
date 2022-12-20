@@ -2,18 +2,10 @@
 
 MapMapping::MapMapping()
 {
-    vector<MapLocation3D> temp(10, MapLocation3D());
-    this->_location3D.swap(temp);
-    this->_ids[1] = 6;
-    this->_ids[2] = 7;
-    this->_ids[3] = 8;
-    this->_ids[4] = 9;
-    this->_ids[5] = 10;
-    this->_ids[8] = 1;
-    this->_ids[9] = 2;
-    this->_ids[10] = 3;
-    this->_ids[11] = 4;
-    this->_ids[12] = 5;
+    vector<MapLocation3D> temp_1(10, MapLocation3D());
+    this->_location3D.swap(temp_1);
+    vector<vector<MapLocation3D>> temp_2(2, vector<MapLocation3D>(10, MapLocation3D()));
+    this->_location_cache.swap(temp_2);
 }
 
 MapMapping::~MapMapping()

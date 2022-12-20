@@ -29,7 +29,7 @@ void VideoRecorder::init(char *videoPath, int coder, Size size)
     }
 }
 
-void VideoRecorder::write(Mat &src)
+void VideoRecorder::write(Mat src)
 {
     if (!this->vw.isOpened())
         return;
@@ -38,6 +38,5 @@ void VideoRecorder::write(Mat &src)
 
 void VideoRecorder::close()
 {
-    if (this->vw.isOpened())
-        this->vw.release();
+    this->vw.release();
 }

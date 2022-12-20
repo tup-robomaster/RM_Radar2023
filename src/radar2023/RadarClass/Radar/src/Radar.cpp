@@ -35,9 +35,9 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
         {
             for (int k = int(max<float>(center[0] - armorBoundingBoxs[i].w, 0.)); k < int(min<float>(center[0] + armorBoundingBoxs[i].w, ImageW)); ++k)
             {
-                if (publicDepth[i][j] == 0)
+                if (this->publicDepth[i][j] == 0)
                     continue;
-                tempBox.emplace_back(publicDepth[i][j]);
+                tempBox.emplace_back(this->publicDepth[i][j]);
                 ++count;
             }
         }
@@ -71,7 +71,7 @@ void Radar::send_judge(judge_message &message, UART &myUART)
     }
 }
 
-Radar::Radar(int argc, char **argv)
+Radar::Radar()
 {
 }
 
@@ -115,6 +115,7 @@ void Radar::init(int argc, char **argv)
     this->carDetector = CarDetector();
     this->cameraThread = CameraThread();
     this->videoRecorder = VideoRecorder();
+    this->myLocation = Location();
     this->mapMapping = MapMapping();
     this->myUART = UART();
     this->mySerial = MySerial();
@@ -125,6 +126,8 @@ void Radar::init(int argc, char **argv)
         setTrackbarPos("Exit Program", "ControlPanel", 0);
         createTrackbar("Separation mode", "ControlPanel", 0, 1, nullptr);
         setTrackbarPos("Separation mode", "ControlPanel", 0);
+        createTrackbar("Recorder", "ControlPanel", 0, 1, nullptr);
+        setTrackbarPos("Recorder", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
         if (!this->armorDetector.initModel())
         {
@@ -166,9 +169,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     pcl::fromROSMsg(*msg, *pc);
     std::vector<std::vector<float>> tempDepth = this->depthQueue.pushback(*pc);
     unique_lock<shared_timed_mutex> ulk(myMutex);
-    publicDepth.swap(tempDepth);
-    if (depthResourceCount < 5)
-        ++depthResourceCount;
+    this->publicDepth.swap(tempDepth);
     ulk.unlock();
 }
 
@@ -181,20 +182,18 @@ void Radar::SeparationLoop(Radar *radar)
     while (radar->__SeparationLoop_working)
     {
         vector<Rect> tempSeqTargets;
-        if (radar->separation_mode == 0 && radar->depthResourceCount > 0)
+        if (radar->separation_mode == 0)
         {
-            ulk.lock();
-            radar->depthResourceCount--;
-            ulk.unlock();
             slk.lock();
-            tempSeqTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
+            if(radar->publicDepth.size() > 0)
+                tempSeqTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
             slk.unlock();
         }
         else if (radar->separation_mode == 1)
         {
-            slk.lock();
+            ulk.lock();
             FrameBag image = radar->cameraThread.read();
-            slk.unlock();
+            ulk.unlock();
             tempSeqTargets = radar->carDetector.infer(image.frame);
         }
         ulk.lock();
@@ -266,7 +265,8 @@ void Radar::VideoRecorderLoop(Radar *radar)
 {
     while (radar->__VideoRecorderLoop_working)
     {
-        radar->videoRecorder.write(radar->myFrames.front());
+        if (radar->_if_record && radar->myFrames.size() > 0)
+            radar->videoRecorder.write(radar->myFrames.front());
     }
 }
 
@@ -280,6 +280,7 @@ void Radar::spin(int argc, char **argv)
         this->stop();
         return;
     }
+    this->_if_record = getTrackbarPos("Recorder", "ControlPanel");
     if (this->carInferAvailable)
         separation_mode = getTrackbarPos("Separation mode", "ControlPanel");
     else
@@ -289,10 +290,9 @@ void Radar::spin(int argc, char **argv)
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
                    "[INFO], Locate pick start ...Process\n");
         // TODO: Fix here
-        unique_lock<shared_timed_mutex> ulk(myMutex);
-        Location myLocation = Location();
         Mat rvec, tvec;
-        if (!myLocation.locate_pick(this->cameraThread, ENEMY, rvec, tvec))
+        unique_lock<shared_timed_mutex> ulk(myMutex);
+        if (!this->myLocation.locate_pick(this->cameraThread, ENEMY, rvec, tvec))
         {
             ulk.unlock();
             return;
@@ -324,6 +324,7 @@ void Radar::spin(int argc, char **argv)
         }
         if (!this->__VideoRecorderLoop_working)
         {
+            this->__VideoRecorderLoop_working = true;
             this->videoRecoderLoop = thread(std::bind(&Radar::VideoRecorderLoop, this));
         }
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
@@ -360,6 +361,7 @@ void Radar::spin(int argc, char **argv)
 
 void Radar::stop()
 {
+    this->is_alive = false;
     fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
                "[WARN], Start Shutdown Process...");
     cv::destroyAllWindows();
@@ -372,15 +374,14 @@ void Radar::stop()
         this->__VideoRecorderLoop_working = false;
         pthread_cancel(this->serR_t);
         pthread_cancel(this->serW_t);
-        this->lidarMainloop.join();
+        this->videoRecoderLoop.join(); 
         this->seqloop.join();
         this->processLoop.join();
-        this->videoRecoderLoop.join();
+        this->lidarMainloop.join(); 
     }
     if (this->cameraThread.is_open())
         this->cameraThread.stop();
     this->videoRecorder.close();
-    this->is_alive = false;
     fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "Done.\n");
 }

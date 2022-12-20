@@ -2,7 +2,7 @@
 
 void __callback__click(int event, int x, int y, int flage, void *param)
 {
-    Location *location = reinterpret_cast<Location*>(param);
+    Location *location = reinterpret_cast<Location *>(param);
     Mat img_cut = Mat::zeros(Size(200, 200), CV_8UC3);
     cv::TermCriteria criteria = cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 30, 0.001);
     Rect rect;
@@ -36,9 +36,6 @@ void __callback__click(int event, int x, int y, int flage, void *param)
 
 Location::Location()
 {
-    vector<Point2f>().swap(this->pick_points);
-    this->frame = FrameBag();
-    this->flag = false;
 }
 
 Location::~Location()
@@ -47,19 +44,22 @@ Location::~Location()
 
 bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tvec_Mat)
 {
+    this->frame = FrameBag();
+    this->flag = false;
+    vector<Point2f>().swap(this->pick_points);
     Mat K_0;
     Mat C_0;
     Mat E_0;
     if (!read_param(K_0, C_0, E_0))
         return false;
-    Point3f red_base = location_targets["red_base"];
-    Point3f blue_outpost = location_targets["blue_outpost"];
-    Point3f red_outpost = location_targets["red_outpost"];
-    Point3f blue_base = location_targets["blue_base"];
-    Point3f r_rt = location_targets["r_rt"];
-    Point3f r_lt = location_targets["r_lt"];
-    Point3f b_rt = location_targets["b_rt"];
-    Point3f b_lt = location_targets["b_lt"];
+    Point3f red_base = location_targets.find("red_base")->second;
+    Point3f blue_outpost = location_targets.find("blue_outpost")->second;
+    Point3f red_outpost = location_targets.find("red_outpost")->second;
+    Point3f blue_base = location_targets.find("blue_base")->second;
+    Point3f r_rt = location_targets.find("r_rt")->second;
+    Point3f r_lt = location_targets.find("r_lt")->second;
+    Point3f b_rt = location_targets.find("b_rt")->second;
+    Point3f b_lt = location_targets.find("b_lt")->second;
     map<int, vector<string>> tips{{0, {"red_base", "blue_outpost", "b_right_top", "red_outpost"}}, {1, {"blue_base", "red_outpost", "r_right_top", "blue_outpost"}}};
     vector<Point3f> ops;
     if (enemy == 0)
@@ -88,7 +88,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     cv::namedWindow("ZOOM_WINDOW", WindowFlags::WINDOW_NORMAL);
     cv::resizeWindow("ZOOM_WINDOW", 400, 400);
     cv::setWindowProperty("ZOOM_WINDOW", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
-    cv::setMouseCallback("PickPoints", __callback__click, reinterpret_cast<void*>(this));
+    cv::setMouseCallback("PickPoints", __callback__click, reinterpret_cast<void *>(this));
     while (true)
     {
         putText(frame.frame, tips[(int)(enemy)][pick_points.size()], Point(tip_w, tip_h), HersheyFonts::FONT_HERSHEY_SIMPLEX, 3, Scalar(0, 255, 0), 2);
