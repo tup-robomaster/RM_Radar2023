@@ -44,7 +44,7 @@ vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
     if (this->processQueue.size() > maxQueueSize)
     {
         Matrix<int, 2, MaxPointsNum> outpoints = this->processQueue.front();
-        for (int i = 0; i < MaxPointsNum; i++)
+        for (int i = 0; i < MaxPointsNum; ++i)
         {
             if (this->depth[outpoints(1, i)][outpoints(0, i)] == 0.)
                 continue;
@@ -52,7 +52,7 @@ vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
         }
         this->processQueue.pop();
     }
-    for (int i = 0; i < MaxPointsNum; i++)
+    for (int i = 0; i < MaxPointsNum; ++i)
     {
         if (dptBox(0, i) > 0)
         {

@@ -7,9 +7,6 @@
 
 class Location
 {
-private:
-    map<string, Point3f> location_targets = {{}};
-
 public:
     vector<Point2f> pick_points;
     FrameBag frame;

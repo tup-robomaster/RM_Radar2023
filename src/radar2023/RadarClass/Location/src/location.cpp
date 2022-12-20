@@ -36,14 +36,6 @@ void __callback__click(int event, int x, int y, int flage, void *param)
 
 Location::Location()
 {
-    this->location_targets["red_base"] = Point3f(1.760, -15. + 7.539, 0.200 + 0.920);
-    this->location_targets["blue_outpost"] = Point3f(16.776, -15. + 12.565, 1.760);
-    this->location_targets["red_outpost"] = Point3f(11.176, -15. + 2.435, 1.760);
-    this->location_targets["blue_base"] = Point3f(26.162, -15. + 7.539, 0.200 + 0.920);
-    this->location_targets["r_rt"] = Point3f(8.805, -5.728 - 0.660, 0.120 + 0.495);
-    this->location_targets["r_lt"] = Point3f(8.805, -5.728, 0.120 + 0.495);
-    this->location_targets["b_rt"] = Point3f(19.200, -9.272 + 0.660, 0.120 + 0.495);
-    this->location_targets["b_lt"] = Point3f(19.200, -9.272, 0.120 + 0.495);
     vector<Point2f>().swap(this->pick_points);
     this->frame = FrameBag();
     this->flag = false;
@@ -60,14 +52,14 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     Mat E_0;
     if (!read_param(K_0, C_0, E_0))
         return false;
-    Point3f red_base = this->location_targets["red_base"];
-    Point3f blue_outpost = this->location_targets["blue_outpost"];
-    Point3f red_outpost = this->location_targets["red_outpost"];
-    Point3f blue_base = this->location_targets["blue_base"];
-    Point3f r_rt = this->location_targets["r_rt"];
-    Point3f r_lt = this->location_targets["r_lt"];
-    Point3f b_rt = this->location_targets["b_rt"];
-    Point3f b_lt = this->location_targets["b_lt"];
+    Point3f red_base = location_targets["red_base"];
+    Point3f blue_outpost = location_targets["blue_outpost"];
+    Point3f red_outpost = location_targets["red_outpost"];
+    Point3f blue_base = location_targets["blue_base"];
+    Point3f r_rt = location_targets["r_rt"];
+    Point3f r_lt = location_targets["r_lt"];
+    Point3f b_rt = location_targets["b_rt"];
+    Point3f b_lt = location_targets["b_lt"];
     map<int, vector<string>> tips{{0, {"red_base", "blue_outpost", "b_right_top", "red_outpost"}}, {1, {"blue_base", "red_outpost", "r_right_top", "blue_outpost"}}};
     vector<Point3f> ops;
     if (enemy == 0)
