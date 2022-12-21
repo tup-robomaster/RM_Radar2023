@@ -200,6 +200,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     std::vector<std::vector<float>> tempDepth = this->depthQueue.pushback(*pc);
     unique_lock<shared_timed_mutex> ulk(myMutex);
     this->publicDepth.swap(tempDepth);
+    ++this->_if_DepthUpdated;
     ulk.unlock();
 }
 
@@ -215,9 +216,12 @@ void Radar::SeparationLoop(Radar *radar)
         if (radar->separation_mode == 0)
         {
             slk.lock();
-            if(radar->publicDepth.size() > 0)
+            if(radar->_if_DepthUpdated > 0)
                 tempSeqTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
             slk.unlock();
+            ulk.lock();
+            --radar->_if_DepthUpdated;
+            ulk.unlock();
         }
         else if (radar->separation_mode == 1)
         {

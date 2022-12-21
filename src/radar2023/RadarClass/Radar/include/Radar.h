@@ -56,6 +56,7 @@ private:
     bool is_alive = true;
 
     vector<vector<float>> publicDepth; // 共享深度图
+    int _if_DepthUpdated = 0;
     shared_timed_mutex myMutex;        // 读写锁
     vector<Rect> SeqTargets;           // 共享分割目标
     int separation_mode = 0;           // 图像分割模式
