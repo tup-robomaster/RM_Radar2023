@@ -19,7 +19,7 @@ bool ArmorDetector::initModel()
     return check;
 }
 
-vector<ArmorBoundingBox> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
+vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
 {
     vector<vector<Yolo::Detection>> results_pre;
     if (targets.size() == 0)
@@ -42,7 +42,7 @@ vector<Mat> ArmorDetector::preProcess(Mat &image, vector<Rect> &movingTargets)
 
 void ArmorDetector::reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs, vector<Mat> &img)
 {
-    vector<ArmorBoundingBox>().swap(this->results);
+    vector<bboxAndRect>().swap(this->results);
     if (armors.size() != boxs.size())
         return;
     for (size_t i = 0; i < boxs.size(); ++i)
@@ -50,7 +50,7 @@ void ArmorDetector::reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<
         for (auto &it : armors[i])
         {
             Rect result = get_rect(img[i], it.bbox, TRT_INPUT_H, TRT_INPUT_W);
-            this->results.emplace_back(ArmorBoundingBox{true, (float)result.x + boxs[i].x, (float)result.y + boxs[i].y, (float)result.width, (float)result.height, it.class_id, it.conf});
+            this->results.emplace_back(bboxAndRect{ArmorBoundingBox{true, (float)result.x + boxs[i].x, (float)result.y + boxs[i].y, (float)result.width, (float)result.height, it.class_id, it.conf}, boxs[i]});
         }
     }
 }

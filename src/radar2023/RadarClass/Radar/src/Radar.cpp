@@ -1,39 +1,39 @@
 #include "../include/Radar.h"
 
-void Radar::armor_filter(vector<ArmorBoundingBox> &armors)
+void Radar::armor_filter(vector<bboxAndRect> &pred)
 {
-    vector<ArmorBoundingBox> results;
+    vector<bboxAndRect> results;
     int ids[10] = {1, 2, 3, 4, 5, 8, 9, 10, 11, 12};
     for (int i = 0; i < 10; ++i)
     {
         int max_id = 0;
         float max_conf = 0.f;
-        for (size_t j = 0; j < armors.size(); ++j)
+        for (size_t j = 0; j < pred.size(); ++j)
         {
-            if ((int)armors[j].cls == ids[i] && armors[j].conf - max_conf > 0)
+            if ((int)pred[j].armor.cls == ids[i] && pred[j].armor.conf - max_conf > 0)
             {
                 max_id = j;
-                max_conf = armors[j].conf;
+                max_conf = pred[j].armor.conf;
             }
         }
         if (max_conf != 0.f)
-            results.emplace_back(armors[max_id]);
+            results.emplace_back(pred[max_id]);
     }
-    armors.swap(results);
+    pred.swap(results);
 }
 
-void Radar::detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
+void Radar::detectDepth(vector<bboxAndRect> &pred)
 {
-    if (armorBoundingBoxs.size() == 0)
+    if (pred.size() == 0)
         return;
-    for (size_t i = 0; i < armorBoundingBoxs.size(); ++i)
+    for (size_t i = 0; i < pred.size(); ++i)
     {
         float count = 0;
         vector<float> tempBox;
-        float center[2] = {armorBoundingBoxs.at(i).x0 + armorBoundingBoxs[i].w / 2, armorBoundingBoxs[i].y0 + armorBoundingBoxs[i].h / 2};
-        for (int j = int(max<float>(center[1] - armorBoundingBoxs[i].h, 0.)); j < int(min<float>(center[1] + armorBoundingBoxs[i].h, ImageH)); ++j)
+        float center[2] = {pred.at(i).armor.x0 + pred[i].armor.w / 2, pred[i].armor.y0 + pred[i].armor.h / 2};
+        for (int j = int(max<float>(center[1] - pred[i].armor.h, 0.)); j < int(min<float>(center[1] + pred[i].armor.h, ImageH)); ++j)
         {
-            for (int k = int(max<float>(center[0] - armorBoundingBoxs[i].w, 0.)); k < int(min<float>(center[0] + armorBoundingBoxs[i].w, ImageW)); ++k)
+            for (int k = int(max<float>(center[0] - pred[i].armor.w, 0.)); k < int(min<float>(center[0] + pred[i].armor.w, ImageW)); ++k)
             {
                 if (this->publicDepth[i][j] == 0)
                     continue;
@@ -46,7 +46,35 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs)
         {
             tempNum += jt;
         }
-        armorBoundingBoxs[i].depth = tempNum / count;
+        pred[i].armor.depth = tempNum / count;
+    }
+}
+
+void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
+{
+    if (armors.size() == 0)
+        return;
+    for (size_t i = 0; i < armors.size(); ++i)
+    {
+        float count = 0;
+        vector<float> tempBox;
+        float center[2] = {armors.at(i).x0 + armors[i].w / 2, armors[i].y0 + armors[i].h / 2};
+        for (int j = int(max<float>(center[1] - armors[i].h, 0.)); j < int(min<float>(center[1] + armors[i].h, ImageH)); ++j)
+        {
+            for (int k = int(max<float>(center[0] - armors[i].w, 0.)); k < int(min<float>(center[0] + armors[i].w, ImageW)); ++k)
+            {
+                if (this->publicDepth[i][j] == 0)
+                    continue;
+                tempBox.emplace_back(this->publicDepth[i][j]);
+                ++count;
+            }
+        }
+        float tempNum = 0;
+        for (const auto &jt : tempBox)
+        {
+            tempNum += jt;
+        }
+        armors[i].depth = tempNum / count;
     }
 }
 
@@ -135,6 +163,8 @@ void Radar::init(int argc, char **argv)
             return;
         }
         this->carInferAvailable = this->carDetector.initModel() ? true : false;
+        if(this->carInferAvailable)
+            setTrackbarPos("Separation mode", "ControlPanel", 1);
         this->mySerial.initSerial();
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
         this->cameraThread.start();
@@ -231,23 +261,27 @@ void Radar::MainProcessLoop(Radar *radar)
                 radar->cameraThread.open();
                 continue;
             }
-            vector<ArmorBoundingBox> armorBoundingBoxs;
+            vector<bboxAndRect> pred;
             if (frameBag.flag)
             {
                 vector<Rect> tempSeqTargets;
                 ulk.lock();
                 tempSeqTargets.swap(radar->SeqTargets);
                 ulk.unlock();
-                armorBoundingBoxs = radar->armorDetector.infer(frameBag.frame, tempSeqTargets);
-                if (armorBoundingBoxs.size() == 0)
+                pred = radar->armorDetector.infer(frameBag.frame, tempSeqTargets);
+                if (pred.size() == 0)
                     continue;
-                // TODO: 加入防抖层
-                radar->armor_filter(armorBoundingBoxs);
+                radar->armor_filter(pred);
                 slk.lock();
-                radar->detectDepth(armorBoundingBoxs);
+                radar->detectDepth(pred);
                 slk.unlock();
                 vector<ArmorBoundingBox> IouArmors;
-                radar->mapMapping.mergeUpdata(armorBoundingBoxs, IouArmors);
+                if(radar->separation_mode == 1)
+                {
+                    IouArmors = radar->mapMapping._IoU_prediction(pred);
+                    radar->detectDepth(IouArmors);
+                }
+                radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
                 judge_message myJudge_message;
                 myJudge_message.task = 1;
                 myJudge_message.loc = radar->mapMapping.getloc();

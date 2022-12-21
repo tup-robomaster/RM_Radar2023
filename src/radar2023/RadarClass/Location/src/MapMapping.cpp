@@ -39,14 +39,59 @@ void MapMapping::_location_prediction()
     }
 }
 
-vector<ArmorBoundingBox> MapMapping::_IoU_prediction()
+vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred)
 {
+    vector<ArmorBoundingBox> pred_bbox;
     map<int, int>::iterator iter;
-        iter = this->_ids.begin();
-    while (iter != this->_ids.end())
+    iter = this->_ids.begin();
+    if (this->_IoU_pred_cache.size() > 0)
     {
-        
+        bboxAndRect cached_pred;
+        while (iter != this->_ids.end())
+        {
+            bool cache_check = false;
+            bool pred_check = false;
+            for (const auto &it : this->_IoU_pred_cache)
+            {
+                cache_check = it.armor.cls == iter->first ? true : false;
+                if (cache_check)
+                    cached_pred.armor = it.armor;
+            }
+            for (const auto &it : pred)
+            {
+                pred_check = it.armor.cls != iter->first ? true : false;
+            }
+            if (cache_check && pred_check)
+            {
+                vector<float> iou;
+                for (const auto &it : pred)
+                {
+                    float x1 = f_max(cached_pred.armor.x0, it.rect.x);
+                    float x2 = f_min(cached_pred.armor.x0 + cached_pred.armor.w, it.rect.x + it.rect.width);
+                    float y1 = f_max(cached_pred.armor.y0, it.rect.y);
+                    float y2 = f_min(cached_pred.armor.y0 + cached_pred.armor.h, it.rect.y + it.rect.height);
+                    float overlap = f_max(0, x2 - x1) * f_max(0, y2 - y1);
+                    float area = cached_pred.armor.w * cached_pred.armor.h;
+                    iou.emplace_back(overlap / area);
+                }
+                int max_index = max_element(iou.begin(), iou.end()) - iou.begin();
+                if (iou[max_index] > IoU_THRE)
+                {
+                    Rect current_rect = pred[max_index].rect;
+                    current_rect.width = floor(current_rect.width / 3);
+                    current_rect.height = floor(current_rect.height / 5);
+                    current_rect.x += current_rect.width;
+                    current_rect.y += current_rect.height * 3;
+                    pred_bbox.emplace_back(ArmorBoundingBox{true, (float)current_rect.x, (float)current_rect.y, (float)current_rect.width, (float)current_rect.height, pred[max_index].armor.cls});
+                }
+            }
+        }
     }
+    if (pred.size() > 0)
+        this->_IoU_pred_cache.swap(pred);
+    else
+        vector<bboxAndRect>().swap(this->_IoU_pred_cache);
+    return pred_bbox;
 }
 
 void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
@@ -73,7 +118,7 @@ vector<MapLocation3D> MapMapping::getloc()
     return this->_location3D;
 }
 
-void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<ArmorBoundingBox> &Ioubbox)
+void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, int &seqMode)
 {
     if (!this->_pass_flag)
     {
@@ -84,17 +129,30 @@ void MapMapping::mergeUpdata(vector<ArmorBoundingBox> &tensorRTbbox, vector<Armo
     vector<MapLocation3D> temp(10, MapLocation3D());
     this->_location3D.swap(temp);
     vector<ArmorBoundingBox> locations;
-    if (tensorRTbbox.size() > 0)
+    if (pred.size() > 0)
     {
-        for (size_t i = 0; i < tensorRTbbox.size(); ++i)
+        for (size_t i = 0; i < pred.size(); ++i)
         {
-            if (tensorRTbbox[i].depth != 0)
+            if (pred[i].armor.depth != 0)
             {
-                tensorRTbbox[i].flag = true;
-                locations.emplace_back(tensorRTbbox[i]);
+                pred[i].armor.flag = true;
+                locations.emplace_back(pred[i].armor);
             }
             else
-                tensorRTbbox[i].flag = false;
+                pred[i].armor.flag = false;
+        }
+    }
+    if(Ioubbox.size()>0 && seqMode == 1)
+    {
+        for (size_t i = 0; i < Ioubbox.size(); ++i)
+        {
+            if (Ioubbox[i].depth != 0)
+            {
+                Ioubbox[i].flag = true;
+                locations.emplace_back(Ioubbox[i]);
+            }
+            else
+                Ioubbox[i].flag = false;
         }
     }
     if (locations.size() > 0)

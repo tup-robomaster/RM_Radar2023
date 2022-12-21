@@ -62,8 +62,9 @@ private:
     SharedQueue<Mat> myFrames;         // 图像帧队列
 
 private:
-    void armor_filter(vector<ArmorBoundingBox> &armors);
-    void detectDepth(vector<ArmorBoundingBox> &armorBoundingBoxs);
+    void armor_filter(vector<bboxAndRect> &pred);
+    void detectDepth(vector<bboxAndRect> &pred);
+    void detectDepth(vector<ArmorBoundingBox> &armors);
     void send_judge(judge_message &message, UART &myUART);
 
 public:

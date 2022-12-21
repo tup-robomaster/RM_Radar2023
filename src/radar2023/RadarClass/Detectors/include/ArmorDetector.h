@@ -12,7 +12,7 @@ class ArmorDetector
 {
 private:
     MyTensorRT_v5 *armorTensorRT;
-    vector<ArmorBoundingBox> results;
+    vector<bboxAndRect> results;
 
 private:
     vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
@@ -23,7 +23,7 @@ public:
     ~ArmorDetector();
 
     bool initModel();
-    vector<ArmorBoundingBox> infer(Mat &image, vector<Rect> &targets);
+    vector<bboxAndRect> infer(Mat &image, vector<Rect> &targets);
 };
 
 #endif
