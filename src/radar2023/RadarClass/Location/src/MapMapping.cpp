@@ -39,7 +39,7 @@ void MapMapping::_location_prediction()
     }
 }
 
-vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred)
+vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> seqboxs)
 {
     vector<ArmorBoundingBox> pred_bbox;
     map<int, int>::iterator iter;
@@ -64,12 +64,12 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred)
             if (cache_check && pred_check)
             {
                 vector<float> iou;
-                for (const auto &it : pred)
+                for (const auto &it : seqboxs)
                 {
-                    float x1 = f_max(cached_pred.armor.x0, it.rect.x);
-                    float x2 = f_min(cached_pred.armor.x0 + cached_pred.armor.w, it.rect.x + it.rect.width);
-                    float y1 = f_max(cached_pred.armor.y0, it.rect.y);
-                    float y2 = f_min(cached_pred.armor.y0 + cached_pred.armor.h, it.rect.y + it.rect.height);
+                    float x1 = f_max(cached_pred.armor.x0, it.x);
+                    float x2 = f_min(cached_pred.armor.x0 + cached_pred.armor.w, it.x + it.width);
+                    float y1 = f_max(cached_pred.armor.y0, it.y);
+                    float y2 = f_min(cached_pred.armor.y0 + cached_pred.armor.h, it.y + it.height);
                     float overlap = f_max(0, x2 - x1) * f_max(0, y2 - y1);
                     float area = cached_pred.armor.w * cached_pred.armor.h;
                     iou.emplace_back(overlap / area);
@@ -77,7 +77,7 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred)
                 int max_index = max_element(iou.begin(), iou.end()) - iou.begin();
                 if (iou[max_index] > IoU_THRE)
                 {
-                    Rect current_rect = pred[max_index].rect;
+                    Rect current_rect = seqboxs[max_index];
                     current_rect.width = floor(current_rect.width / 3);
                     current_rect.height = floor(current_rect.height / 5);
                     current_rect.x += current_rect.width;

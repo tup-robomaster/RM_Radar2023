@@ -29,7 +29,7 @@ public:
 
     bool _is_pass();
     void push_T(Mat &rvec, Mat &tvec);
-    vector<ArmorBoundingBox> _IoU_prediction(vector<bboxAndRect> pred);
+    vector<ArmorBoundingBox> _IoU_prediction(vector<bboxAndRect> pred, vector<Rect> seqboxs);
     vector<MapLocation3D> getloc();
     void mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, int &seqMode);
 };

@@ -163,7 +163,7 @@ void Radar::init(int argc, char **argv)
             return;
         }
         this->carInferAvailable = this->carDetector.initModel() ? true : false;
-        if(this->carInferAvailable)
+        if (this->carInferAvailable)
             setTrackbarPos("Separation mode", "ControlPanel", 1);
         this->mySerial.initSerial();
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
@@ -216,7 +216,7 @@ void Radar::SeparationLoop(Radar *radar)
         if (radar->separation_mode == 0)
         {
             slk.lock();
-            if(radar->_if_DepthUpdated > 0)
+            if (radar->_if_DepthUpdated > 0)
                 tempSeqTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
             slk.unlock();
             ulk.lock();
@@ -280,9 +280,9 @@ void Radar::MainProcessLoop(Radar *radar)
                 radar->detectDepth(pred);
                 slk.unlock();
                 vector<ArmorBoundingBox> IouArmors;
-                if(radar->separation_mode == 1)
+                if (radar->separation_mode == 1)
                 {
-                    IouArmors = radar->mapMapping._IoU_prediction(pred);
+                    IouArmors = radar->mapMapping._IoU_prediction(pred, tempSeqTargets);
                     radar->detectDepth(IouArmors);
                 }
                 radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
@@ -412,10 +412,10 @@ void Radar::stop()
         this->__VideoRecorderLoop_working = false;
         pthread_cancel(this->serR_t);
         pthread_cancel(this->serW_t);
-        this->videoRecoderLoop.join(); 
+        this->videoRecoderLoop.join();
         this->seqloop.join();
         this->processLoop.join();
-        this->lidarMainloop.join(); 
+        this->lidarMainloop.join();
     }
     if (this->cameraThread.is_open())
         this->cameraThread.stop();
