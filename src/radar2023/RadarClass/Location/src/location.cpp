@@ -81,11 +81,11 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         return false;
     int tip_w = floor(frame.frame.cols / 2);
     int tip_h = frame.frame.rows - 200;
-    cv::namedWindow("PickPoints", WindowFlags::WINDOW_NORMAL);
+    cv::namedWindow("PickPoints", WindowFlags::WINDOW_GUI_NORMAL);
     cv::resizeWindow("PickPoints", Size(1280, 780));
     cv::setWindowProperty("PickPoints", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
     cv::moveWindow("PickPoints", 500, 300);
-    cv::namedWindow("ZOOM_WINDOW", WindowFlags::WINDOW_NORMAL);
+    cv::namedWindow("ZOOM_WINDOW", WindowFlags::WINDOW_GUI_NORMAL);
     cv::resizeWindow("ZOOM_WINDOW", 400, 400);
     cv::setWindowProperty("ZOOM_WINDOW", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
     cv::setMouseCallback("PickPoints", __callback__click, reinterpret_cast<void *>(this));

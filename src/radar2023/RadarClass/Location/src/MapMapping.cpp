@@ -39,7 +39,7 @@ void MapMapping::_location_prediction()
     }
 }
 
-vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> seqboxs)
+vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
 {
     vector<ArmorBoundingBox> pred_bbox;
     map<int, int>::iterator iter;
@@ -64,7 +64,7 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
             if (cache_check && pred_check)
             {
                 vector<float> iou;
-                for (const auto &it : seqboxs)
+                for (const auto &it : sepboxs)
                 {
                     float x1 = f_max(cached_pred.armor.x0, it.x);
                     float x2 = f_min(cached_pred.armor.x0 + cached_pred.armor.w, it.x + it.width);
@@ -77,7 +77,7 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
                 int max_index = max_element(iou.begin(), iou.end()) - iou.begin();
                 if (iou[max_index] > IoU_THRE)
                 {
-                    Rect current_rect = seqboxs[max_index];
+                    Rect current_rect = sepboxs[max_index];
                     current_rect.width = floor(current_rect.width / 3);
                     current_rect.height = floor(current_rect.height / 5);
                     current_rect.x += current_rect.width;
@@ -118,7 +118,7 @@ vector<MapLocation3D> MapMapping::getloc()
     return this->_location3D;
 }
 
-void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, int &seqMode)
+void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, int &sepMode)
 {
     if (!this->_pass_flag)
     {
@@ -142,7 +142,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                 pred[i].armor.flag = false;
         }
     }
-    if(Ioubbox.size()>0 && seqMode == 1)
+    if(Ioubbox.size()>0 && sepMode == 1)
     {
         for (size_t i = 0; i < Ioubbox.size(); ++i)
         {

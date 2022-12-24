@@ -172,6 +172,7 @@ void Radar::init(int argc, char **argv)
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "[INFO], Init Done\n");
     }
+    this->is_alive = true;
 }
 
 void Radar::LidarListenerBegin(int argc, char **argv)
@@ -191,6 +192,7 @@ void Radar::LidarMainLoop(Radar *radar)
         if (ros::ok())
             ros::spinOnce();
     }
+    cout << "[LidarMainLoop Exit]" << endl;
 }
 
 void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
@@ -198,7 +200,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *pc);
     std::vector<std::vector<float>> tempDepth = this->depthQueue.pushback(*pc);
-    unique_lock<shared_timed_mutex> ulk(myMutex);
+    unique_lock<shared_timed_mutex> ulk(this->myMutex_publicDepth);
     this->publicDepth.swap(tempDepth);
     ++this->_if_DepthUpdated;
     ulk.unlock();
@@ -206,34 +208,32 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 
 void Radar::SeparationLoop(Radar *radar)
 {
-    unique_lock<shared_timed_mutex> ulk(radar->myMutex);
-    ulk.unlock();
-    shared_lock<shared_timed_mutex> slk(radar->myMutex);
-    slk.unlock();
     while (radar->__SeparationLoop_working)
     {
-        vector<Rect> tempSeqTargets;
+        vector<Rect> tempSepTargets;
         if (radar->separation_mode == 0)
         {
-            slk.lock();
+            unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
             if (radar->_if_DepthUpdated > 0)
-                tempSeqTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
-            slk.unlock();
-            ulk.lock();
-            --radar->_if_DepthUpdated;
+            {
+                tempSepTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
+                --radar->_if_DepthUpdated;
+                radar->SeqTargets.swap(tempSepTargets);
+            }
             ulk.unlock();
         }
         else if (radar->separation_mode == 1)
         {
-            ulk.lock();
+            unique_lock<shared_timed_mutex> ulk(radar->myMutex_cameraThread);
             FrameBag image = radar->cameraThread.read();
             ulk.unlock();
-            tempSeqTargets = radar->carDetector.infer(image.frame);
-        }
-        ulk.lock();
-        radar->SeqTargets.swap(tempSeqTargets);
-        ulk.unlock();
+            tempSepTargets = radar->carDetector.infer(image.frame);
+            ulk.lock();
+            radar->SeqTargets.swap(tempSepTargets);
+            ulk.unlock();
+        } 
     }
+    cout << "[SeparationLoop Exit]" << endl;
 }
 
 void Radar::SerReadLoop(Radar *radar)
@@ -248,13 +248,9 @@ void Radar::SerWriteLoop(Radar *radar)
 
 void Radar::MainProcessLoop(Radar *radar)
 {
-    unique_lock<shared_timed_mutex> ulk(radar->myMutex);
-    ulk.unlock();
-    shared_lock<shared_timed_mutex> slk(radar->myMutex);
-    slk.unlock();
     while (radar->__MainProcessLoop_working)
     {
-        slk.lock();
+        shared_lock<shared_timed_mutex> slk(radar->myMutex_SeqTargets);
         int check_count = radar->SeqTargets.size();
         slk.unlock();
         FrameBag frameBag = radar->cameraThread.read();
@@ -268,11 +264,11 @@ void Radar::MainProcessLoop(Radar *radar)
             vector<bboxAndRect> pred;
             if (frameBag.flag)
             {
-                vector<Rect> tempSeqTargets;
-                ulk.lock();
-                tempSeqTargets.swap(radar->SeqTargets);
+                vector<Rect> tempSepTargets;
+                unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
+                tempSepTargets.swap(radar->SeqTargets);
                 ulk.unlock();
-                pred = radar->armorDetector.infer(frameBag.frame, tempSeqTargets);
+                pred = radar->armorDetector.infer(frameBag.frame, tempSepTargets);
                 if (pred.size() == 0)
                     continue;
                 radar->armor_filter(pred);
@@ -282,7 +278,7 @@ void Radar::MainProcessLoop(Radar *radar)
                 vector<ArmorBoundingBox> IouArmors;
                 if (radar->separation_mode == 1)
                 {
-                    IouArmors = radar->mapMapping._IoU_prediction(pred, tempSeqTargets);
+                    IouArmors = radar->mapMapping._IoU_prediction(pred, tempSepTargets);
                     radar->detectDepth(IouArmors);
                 }
                 radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
@@ -297,6 +293,7 @@ void Radar::MainProcessLoop(Radar *radar)
         if (frameBag.flag)
             radar->myFrames.push(frameBag.frame);
     }
+    cout << "[MainProcessLoop Exit]" << endl;
 }
 
 void Radar::VideoRecorderLoop(Radar *radar)
@@ -304,8 +301,12 @@ void Radar::VideoRecorderLoop(Radar *radar)
     while (radar->__VideoRecorderLoop_working)
     {
         if (radar->_if_record && radar->myFrames.size() > 0)
+        {
             radar->videoRecorder.write(radar->myFrames.front());
+        }
+            
     }
+    cout << "[VideoRecorderLoop Exit]" << endl;
 }
 
 void Radar::spin(int argc, char **argv)
@@ -329,21 +330,28 @@ void Radar::spin(int argc, char **argv)
                    "[INFO], Locate pick start ...Process\n");
         // TODO: Fix here
         Mat rvec, tvec;
-        unique_lock<shared_timed_mutex> ulk(myMutex);
-        if (!this->myLocation.locate_pick(this->cameraThread, ENEMY, rvec, tvec))
+        unique_lock<shared_timed_mutex> ulk(myMutex_cameraThread);
+        try
         {
+            if (!this->myLocation.locate_pick(this->cameraThread, ENEMY, rvec, tvec))
+            {
+                ulk.unlock();
+                return;
+            }
             ulk.unlock();
-            return;
         }
-        ulk.unlock();
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+        }
         this->mapMapping.push_T(rvec, tvec);
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "[INFO], Locate pick Done \n");
     }
-    if (!this->_thread_working)
+    if (!this->_thread_working && this->is_alive)
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Thread starting ...");
+                   "[INFO], Thread starting ...\n");
         this->_thread_working = true;
         if (!this->__LidarMainLoop_working)
         {
@@ -371,7 +379,7 @@ void Radar::spin(int argc, char **argv)
     if (!this->mySerial._is_open())
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Serial initing ...");
+                   "[INFO], Serial initing ...\n");
         this->mySerial.initSerial();
         fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                    "Done.\n");
@@ -379,7 +387,7 @@ void Radar::spin(int argc, char **argv)
     if (!this->_Ser_working && this->mySerial._is_open())
     {
         fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], SerThread initing ...");
+                   "[INFO], SerThread initing ...\n");
         this->_Ser_working = true;
         this->serRead = thread(std::bind(&Radar::SerReadLoop, this));
         this->serR_t = this->serRead.native_handle();
@@ -400,8 +408,9 @@ void Radar::spin(int argc, char **argv)
 void Radar::stop()
 {
     this->is_alive = false;
+    cout << "[STOP]" << endl;
     fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
-               "[WARN], Start Shutdown Process...");
+               "[WARN], Start Shutdown Process...\n");
     cv::destroyAllWindows();
     if (this->_thread_working)
     {
