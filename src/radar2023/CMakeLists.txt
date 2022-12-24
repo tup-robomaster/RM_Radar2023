@@ -9,7 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(PCL REQUIRED)
 find_package(CUDA 11.6 REQUIRED)
-find_package(fmt REQUIRED)
+# find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
 message("CUDA_LIBRARIES:${CUDA_LIBRARIES}")
 message("CUDA_INCLUDE_DIRS:${CUDA_INCLUDE_DIRS}")
 include_directories()
@@ -57,6 +58,7 @@ cuda_add_executable(radar2023
   RadarClass/UART/src/serial.cpp
   RadarClass/UART/src/UART.cpp
   RadarClass/UART/src/UARTPasser.cpp
+  RadarClass/Logger/src/Logger.cpp
 )
 set_target_properties(radar2023 PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON)
@@ -73,7 +75,8 @@ target_link_libraries(radar2023
   libdl.so
   MVSDK
   cuda
-  fmt::fmt
+  spdlog::spdlog
+  # fmt::fmt
 )
 
 macro(remove_warnings)

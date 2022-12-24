@@ -11,8 +11,8 @@ MV_Camera::MV_Camera(bool Is_init)
     this->iStatus = CameraEnumerateDevice(this->tCameraEnumList, &this->iCameraCounts);
     if (this->iCameraCounts == 0)
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}\n", "No camera found!");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], {}\n", "No camera found!");
         return;
     }
     // this->iStatus = -1;
@@ -27,8 +27,8 @@ MV_Camera::MV_Camera(bool Is_init)
     try
     {
         this->iStatus = CameraInit(&this->tCameraEnumList[0], -1, -1, &this->hCamera);
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], {}", "CameraIniting ...");
+        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+        //            "[INFO], {}", "CameraIniting ...");
     }
     catch (const std::exception &e)
     {
@@ -37,22 +37,22 @@ MV_Camera::MV_Camera(bool Is_init)
     }
     if (this->iStatus != CAMERA_STATUS_SUCCESS)
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "Failed\n{}{}\n", "CameraInit Failed!", this->iStatus);
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "Failed\n{}{}\n", "CameraInit Failed!", this->iStatus);
         return;
     }
     else
     {
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "Done.\n");
+        // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+        //            "Done.\n");
     }
     CameraGetCapability(this->hCamera, &this->tCapability);
     if (!tCapability.sIspCapacity.bMonoSensor)
         CameraSetIspOutFormat(this->hCamera, CAMERA_MEDIA_TYPE_BGR8);
     else
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}\n", "None suitable camera!");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], {}\n", "None suitable camera!");
     }
     CameraSetTriggerMode(this->hCamera, 0);
     if (Is_init)
@@ -61,8 +61,8 @@ MV_Camera::MV_Camera(bool Is_init)
     CameraPlay(this->hCamera);
     int frameBufferSize = this->tCapability.sResolutionRange.iWidthMax * this->tCapability.sResolutionRange.iHeightMax * 3;
     this->pFrameBuffer = CameraAlignMalloc(frameBufferSize, 16);
-    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-               "[INFO], {}\n", "Camera setup complete");
+    // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+    //            "[INFO], {}\n", "Camera setup complete");
 }
 
 MV_Camera::~MV_Camera()
@@ -74,15 +74,15 @@ FrameBag MV_Camera::read()
     FrameBag framebag;
     if (this->hCamera == -1)
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}\n", "No handled camera found!");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], {}\n", "No handled camera found!");
         return framebag;
     }
     CameraGetImageBuffer(this->hCamera, &this->sFrameInfo, &this->pRawDataBuffer, 200);
     if (CameraImageProcess(this->hCamera, this->pRawDataBuffer, this->pFrameBuffer, &this->sFrameInfo) != CAMERA_STATUS_SUCCESS)
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}\n", "Can not process Image!");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], {}\n", "Can not process Image!");
         return framebag;
     }
     framebag.frame = cv::Mat(
@@ -177,14 +177,14 @@ void CameraThread::openCamera(bool is_init)
     bool initFlag = false;
     try
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], {}", "Camera opening ...Process\n");
+        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+        //            "[INFO], {}", "Camera opening ...Process\n");
         this->_cap = MV_Camera(is_init);
         FrameBag framebag = this->_cap.read();
         if (!framebag.flag)
         {
-            fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold,
-                       "[WARN], {}!\n", "Camera not init");
+            // fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold,
+            //            "[WARN], {}!\n", "Camera not init");
             return;
         }
         framebag = this->_cap.read();
@@ -203,8 +203,8 @@ void CameraThread::openCamera(bool is_init)
             this->_cap.saveParam(CameraConfigPath);
         }
         initFlag = true;
-        fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-                   "[INFO], {}", "Camera opening ...Done.\n");
+        // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+        //            "[INFO], {}", "Camera opening ...Done.\n");
     }
     catch (const std::exception &e)
     {
@@ -237,10 +237,10 @@ void CameraThread::adjustExposure()
     }
     int ex = this->_cap.getExposureTime();
     int gain = this->_cap.getAnalogGain();
-    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-               "[INFO], {}{}us\n", "Setting Expoure Time ", ex);
-    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-               "[INFO], {}{}\n", "Setting analog gain ", gain);
+    // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+    //            "[INFO], {}{}us\n", "Setting Expoure Time ", ex);
+    // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+    //            "[INFO], {}{}\n", "Setting analog gain ", gain);
     destroyWindow("EXPOSURE Press Q to Exit");
 }
 
@@ -284,13 +284,13 @@ FrameBag CameraThread::read()
     }
     else
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[WARN], {}\n", "Camera closed !");
+    //     fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+    //                "[WARN], {}\n", "Camera closed !");
     }
     if (!framebag.flag)
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}\n", "Failed to get frame!");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], {}\n", "Failed to get frame!");
         this->release();
     }
     return framebag;

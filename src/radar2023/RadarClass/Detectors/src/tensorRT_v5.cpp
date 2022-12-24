@@ -134,11 +134,11 @@ ICudaEngine *MyTensorRT_v5::build_engine(unsigned int maxBatchSize, IBuilder *bu
     Int8EntropyCalibrator2 *calibrator = new Int8EntropyCalibrator2(1, INPUT_W, INPUT_H, "./coco_calib/", "int8calib.table", INPUT_BLOB_NAME);
     config->setInt8Calibrator(calibrator);
 #endif
-    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-               "[INFO], Building engine, please wait for a while...\n");
+    // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+    //            "[INFO], Building engine, please wait for a while...\n");
     ICudaEngine *engine = builder->buildEngineWithConfig(*network, *config);
-    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-               "Build engine successfully!\n");
+    // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+    //            "Build engine successfully!\n");
 
     // Don't need the network any more
     network->destroy();
@@ -243,11 +243,11 @@ ICudaEngine *MyTensorRT_v5::build_engine_p6(unsigned int maxBatchSize, IBuilder 
     config->setInt8Calibrator(calibrator);
 #endif
 
-    fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-               "[INFO], Building engine, please wait for a while...\n");
+    // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+    //            "[INFO], Building engine, please wait for a while...\n");
     ICudaEngine *engine = builder->buildEngineWithConfig(*network, *config);
-    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-               "Build engine successfully!\n");
+    // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
+    //            "Build engine successfully!\n");
 
     // Don't need the network any more
     network->destroy();
@@ -272,14 +272,14 @@ void MyTensorRT_v5::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStr
     ICudaEngine *engine = nullptr;
     if (is_p6)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Build P6 Engine\n");
+        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+        //            "[INFO], Build P6 Engine\n");
         engine = this->build_engine_p6(maxBatchSize, builder, config, nvinfer1::DataType::kFLOAT, gd, gw, wts_name);
     }
     else
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], Build Default Engine\n");
+        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+        //            "[INFO], Build Default Engine\n");
         engine = this->build_engine(maxBatchSize, builder, config, nvinfer1::DataType::kFLOAT, gd, gw, wts_name);
     }
     assert(engine != nullptr);
@@ -300,8 +300,8 @@ bool MyTensorRT_v5::build_model(string wts_name, string engine_name, bool is_p6,
 
     if (access(engine_name_c, F_OK) == 0)
     {
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], TRT Moudle exists , Skip creation\n");
+        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+        //            "[INFO], TRT Moudle exists , Skip creation\n");
         return true;
     }
     if (!wts_name.empty())
@@ -310,21 +310,21 @@ bool MyTensorRT_v5::build_model(string wts_name, string engine_name, bool is_p6,
         strcpy(wts_name_c, wts_name.data());
         if (access(wts_name_c, F_OK) != 0)
         {
-            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                       "[ERROR], WTS doesn't exists , Stop creation\n");
+            // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+            //            "[ERROR], WTS doesn't exists , Stop creation\n");
             return false;
         }
         IHostMemory *modelStream{nullptr};
         APIToModel(this->max_batchsize, &modelStream, is_p6, gd, gw, wts_name);
-        if (modelStream == nullptr)
-            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                       "[ERROR], Failed to build engine !\n");
+        // if (modelStream == nullptr)
+        //     fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //                "[ERROR], Failed to build engine !\n");
         assert(modelStream != nullptr);
         std::ofstream p(engine_name, std::ios::binary);
         if (!p)
         {
-            fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                       "[ERROR], could not open plan output file\n");
+            // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+            //            "[ERROR], could not open plan output file\n");
             return false;
         }
         p.write(reinterpret_cast<const char *>(modelStream->data()), modelStream->size());
@@ -374,10 +374,10 @@ bool MyTensorRT_v5::initMyTensorRT_v5(char *tensorrtEngienPath, char *yolov5wts,
     }
     else
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
-                   "[ERROR], Failed to build the infer moudle !Please CHECK and Restart the Program.");
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   " TRT LOGIC BREAK.\n");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
+        //            "[ERROR], Failed to build the infer moudle !Please CHECK and Restart the Program.");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            " TRT LOGIC BREAK.\n");
         return false;
     }
     return true;
@@ -418,8 +418,8 @@ vector<vector<Yolo::Detection>> MyTensorRT_v5::doInference(vector<Mat> *input, i
     bool success = context->enqueueV2(buffers, stream, nullptr);
     if (!success)
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], doInference failed\n");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], doInference failed\n");
         CUDA_CHECK(cudaStreamDestroy(stream));
         return {};
     }

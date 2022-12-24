@@ -15,17 +15,17 @@ void MySerial::initSerial()
     this->fd = open(SerialPortNAME, O_RDWR | O_NONBLOCK | O_NOCTTY | O_NDELAY);
     if (this->fd == -1)
     {
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}!\n", "Serial init failed");
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], {}!\n", "Serial init failed");
         return;
     }
 
-    if (fcntl(this->fd, F_SETFL, 0) < 0) //改为阻塞模式
-        fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-                   "[ERROR], {}!\n", "fcntl failed");
-    else
-        fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-                   "[INFO], fcntl={}...\n", fcntl(this->fd, F_SETFL, 0));
+    // if (fcntl(this->fd, F_SETFL, 0) < 0) //改为阻塞模式
+        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
+        //            "[ERROR], {}!\n", "fcntl failed");
+    // else
+    //     fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
+    //                "[INFO], fcntl={}...\n", fcntl(this->fd, F_SETFL, 0));
 
     tcgetattr(this->fd, &this->options);
 

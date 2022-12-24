@@ -23,8 +23,8 @@ void VideoRecorder::init(char *videoPath, int coder, Size size)
         this->vw = VideoWriter();
         if (!this->vw.open(filename, coder, 15.0, size, true))
         {
-            fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold,
-                       "[WARN], {}!\n", "Block Video Recoder");
+            // fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold,
+            //            "[WARN], {}!\n", "Block Video Recoder");
         }
     }
 }

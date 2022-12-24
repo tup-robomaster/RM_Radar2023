@@ -12,6 +12,7 @@
 #include "../../Location/include/MapMapping.h"
 #include "../../UART/include/UART.h"
 #include "../../Location/include/location.h"
+#include "../../Logger/include/Logger.h"
 
 /**
  * @brief 主要雷达类
@@ -63,6 +64,8 @@ private:
     vector<Rect> SeqTargets;           // 共享分割目标
     int separation_mode = 0;           // 图像分割模式
     SharedQueue<Mat> myFrames;         // 图像帧队列
+
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 private:
     void armor_filter(vector<bboxAndRect> &pred);

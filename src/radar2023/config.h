@@ -60,3 +60,5 @@
 #define Real_Size_W         15.                             //真实宽度
 #define Real_Size_H         28.                             //真实高度（长）
 #define IoU_THRE            0.8f
+
+#define LOGPATH             (char*)"/home/nine-fish/RM_Radar2023/src/radar2023/logs/"
