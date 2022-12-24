@@ -32,10 +32,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <termios.h>
-// #include <fmt/format.h>
-// #include <fmt/color.h>
 
 #include "../../../config.h"
+#include "../../Logger/include/Logger.h"
 
 using namespace std;
 using namespace Eigen;

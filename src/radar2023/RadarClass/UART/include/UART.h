@@ -28,6 +28,7 @@ public:
     supply_projectile_action Game_supply_projectile_action;
     refree_warning Game_refree_warning;
     dart_remaining_time Game_dart_remaining_time;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 private:
     union FloatAndByte

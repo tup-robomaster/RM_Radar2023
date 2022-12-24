@@ -12,6 +12,7 @@ public:
     int rr_num = 0;
     struct termios options, newstate;
     speed_t baud_rate_i, baud_rate_o;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:
     MySerial();

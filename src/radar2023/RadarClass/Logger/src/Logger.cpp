@@ -23,6 +23,7 @@ void Logger::registerLogger(char *logFile, char *loggerName)
     logger = std::make_shared<spdlog::logger>(loggerName, sinks.begin(), sinks.end());
     sink1->set_pattern("[%Y-%m-%d %H:%M:%S.%e][%l]>>>%v");
     sink2->set_pattern("[%H:%M:%S.%e][%L]%v");
+    logger->flush_on(spdlog::level::err);
     spdlog::register_logger(logger);
 }
 

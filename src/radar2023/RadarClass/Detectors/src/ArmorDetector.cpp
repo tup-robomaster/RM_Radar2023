@@ -11,11 +11,9 @@ ArmorDetector::~ArmorDetector()
 
 bool ArmorDetector::initModel()
 {
-    // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-    //            "[INFO], {}!\n", "ArmorDetector init Moudel");
+    this->logger->info("ArmorDetector init Moudel");
     bool check = this->armorTensorRT->initMyTensorRT_v5(TensorRTEnginePath, Yolov5wtsPath, Is_p6, G_D, G_W, TensorRTMaxBatchSize, TRT_INPUT_H, TRT_INPUT_W, TRT_CLS_NUM);
-    // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-    //            "[INFO], {}!\n", "ArmorDetector Moudel inited");
+    this->logger->info("ArmorDetector Moudel inited");
     return check;
 }
 

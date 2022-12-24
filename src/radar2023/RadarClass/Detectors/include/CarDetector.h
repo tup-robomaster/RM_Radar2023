@@ -9,6 +9,7 @@ class CarDetector
 private:
     MyTensorRT_v5 *carTensorRT;
     vector<ArmorBoundingBox> results;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:
     CarDetector();

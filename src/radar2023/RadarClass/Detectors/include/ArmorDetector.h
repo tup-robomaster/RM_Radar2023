@@ -13,7 +13,7 @@ class ArmorDetector
 private:
     MyTensorRT_v5 *armorTensorRT;
     vector<bboxAndRect> results;
-
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 private:
     vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
     void reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs, vector<Mat> &img);

@@ -18,6 +18,7 @@ private:
     int _location_pred_time[10] = {0};
     vector<vector<MapLocation3D>> _location_cache;
     vector<bboxAndRect> _IoU_pred_cache;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 private:
     void adjust_z_one(MapLocation3D &locs);

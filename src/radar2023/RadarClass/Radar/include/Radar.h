@@ -12,7 +12,6 @@
 #include "../../Location/include/MapMapping.h"
 #include "../../UART/include/UART.h"
 #include "../../Location/include/location.h"
-#include "../../Logger/include/Logger.h"
 
 /**
  * @brief 主要雷达类

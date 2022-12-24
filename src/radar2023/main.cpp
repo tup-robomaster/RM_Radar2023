@@ -1,5 +1,4 @@
 #include "./RadarClass/Radar/include/Radar.h"
-#include "./RadarClass/Logger/include/Logger.h"
 
 int main(int argc, char **argv)
 {

@@ -107,6 +107,7 @@ Radar::~Radar()
 {
     if (this->is_alive)
         this->stop();
+    this->logger->flush();
 }
 
 void Radar::init(int argc, char **argv)
@@ -126,8 +127,7 @@ void Radar::init(int argc, char **argv)
     Mat E_0_Mat;
     if (!read_param(K_0_Mat, C_0_Mat, E_0_Mat))
     {
-        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-        //            "[ERROR], Can't read CAMERA_PARAM: {}!\n", CAMERA_PARAM_PATH);
+        this->logger->error("Can't read CAMERA_PARAM: {}!", CAMERA_PARAM_PATH);
         return;
     }
     cv2eigen(K_0_Mat, K_0);
@@ -166,8 +166,7 @@ void Radar::init(int argc, char **argv)
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
         this->cameraThread.start();
         this->_init_flag = true;
-        // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-        //            "[INFO], Init Done\n");
+        this->logger->info("Init Done");
     }
     this->is_alive = true;
 }
@@ -180,6 +179,7 @@ void Radar::LidarListenerBegin(int argc, char **argv)
     ros::NodeHandle nh;
     sub = nh.subscribe(lidarTopicName, LidarQueueSize, &Radar::LidarCallBack, this);
     this->_is_LidarInited = true;
+    this->logger->info("Lidar inited");
 }
 
 void Radar::LidarMainLoop(Radar *radar)
@@ -189,7 +189,7 @@ void Radar::LidarMainLoop(Radar *radar)
         if (ros::ok())
             ros::spinOnce();
     }
-    cout << "[LidarMainLoop Exit]" << endl;
+    radar->logger->critical("LidarMainLoop Exit");
 }
 
 void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
@@ -208,7 +208,8 @@ void Radar::SeparationLoop(Radar *radar)
     while (radar->__SeparationLoop_working)
     {
         vector<Rect> tempSepTargets;
-        if (radar->separation_mode == 0)
+        //TODO:Check here
+        if (radar->separation_mode == 0 || !radar->movementDetector._ifHistoryBuild())
         {
             unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
             if (radar->_if_DepthUpdated > 0)
@@ -219,7 +220,7 @@ void Radar::SeparationLoop(Radar *radar)
             }
             ulk.unlock();
         }
-        else if (radar->separation_mode == 1)
+        if (radar->separation_mode == 1)
         {
             unique_lock<shared_timed_mutex> ulk(radar->myMutex_cameraThread);
             FrameBag image = radar->cameraThread.read();
@@ -230,7 +231,7 @@ void Radar::SeparationLoop(Radar *radar)
             ulk.unlock();
         }
     }
-    cout << "[SeparationLoop Exit]" << endl;
+    radar->logger->critical("SeparationLoop Exit");
 }
 
 void Radar::SerReadLoop(Radar *radar)
@@ -290,7 +291,7 @@ void Radar::MainProcessLoop(Radar *radar)
         if (frameBag.flag)
             radar->myFrames.push(frameBag.frame);
     }
-    cout << "[MainProcessLoop Exit]" << endl;
+    radar->logger->critical("MainProcessLoop Exit");
 }
 
 void Radar::VideoRecorderLoop(Radar *radar)
@@ -302,7 +303,7 @@ void Radar::VideoRecorderLoop(Radar *radar)
             radar->videoRecorder.write(radar->myFrames.front());
         }
     }
-    cout << "[VideoRecorderLoop Exit]" << endl;
+    radar->logger->critical("VideoRecorderLoop Exit");
 }
 
 void Radar::spin(int argc, char **argv)
@@ -322,8 +323,7 @@ void Radar::spin(int argc, char **argv)
         separation_mode = 0;
     if (!this->mapMapping._is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
     {
-        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-        //            "[INFO], Locate pick start ...Process\n");
+        this->logger->info("Locate pick start ...Process");
         // TODO: Fix here
         Mat rvec, tvec;
         unique_lock<shared_timed_mutex> ulk(myMutex_cameraThread);
@@ -341,13 +341,11 @@ void Radar::spin(int argc, char **argv)
             std::cerr << e.what() << '\n';
         }
         this->mapMapping.push_T(rvec, tvec);
-        // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-        //            "[INFO], Locate pick Done \n");
+        this->logger->info("Locate pick Done");
     }
     if (!this->_thread_working && this->is_alive)
     {
-        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-        //            "[INFO], Thread starting ...\n");
+        this->logger->info("Thread starting ...Process");
         this->_thread_working = true;
         if (!this->__LidarMainLoop_working)
         {
@@ -369,28 +367,23 @@ void Radar::spin(int argc, char **argv)
             this->__VideoRecorderLoop_working = true;
             this->videoRecoderLoop = thread(std::bind(&Radar::VideoRecorderLoop, this));
         }
-        // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-        //            "Done.\n");
+        this->logger->info("Thread starting ...Done");
     }
     if (!this->mySerial._is_open())
     {
-        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-        //            "[INFO], Serial initing ...\n");
+        this->logger->info("Serial initing ...Process");
         this->mySerial.initSerial();
-        // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-        //            "Done.\n");
+        this->logger->info("Serial initing ...Done");
     }
     if (!this->_Ser_working && this->mySerial._is_open())
     {
-        // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-        //            "[INFO], SerThread initing ...\n");
+        this->logger->info("SerThread initing ...Process");
         this->_Ser_working = true;
         this->serRead = thread(std::bind(&Radar::SerReadLoop, this));
         this->serR_t = this->serRead.native_handle();
         this->serWrite = thread(std::bind(&Radar::SerWriteLoop, this));
         this->serW_t = this->serWrite.native_handle();
-        // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-        //            "Done.\n");
+        this->logger->info("SerThread initing ...Done");
     }
     if (myFrames.size() > 0)
     {
@@ -404,9 +397,8 @@ void Radar::spin(int argc, char **argv)
 void Radar::stop()
 {
     this->is_alive = false;
-    cout << "[STOP]" << endl;
-    // fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::bold | fmt::v9::bg(fmt::color::white),
-    //            "[WARN], Start Shutdown Process...\n");
+    this->logger->warn("Start Shutdown Process...");
+    this->logger->flush();
     cv::destroyAllWindows();
     if (this->_thread_working)
     {
@@ -425,8 +417,7 @@ void Radar::stop()
     if (this->cameraThread.is_open())
         this->cameraThread.stop();
     this->videoRecorder.close();
-    // fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
-    //            "Done.\n");
+    this->logger->warn("Program Shutdown");
 }
 
 bool Radar::alive()

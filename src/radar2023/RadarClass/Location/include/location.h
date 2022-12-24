@@ -11,6 +11,7 @@ public:
     vector<Point2f> pick_points;
     FrameBag frame;
     bool flag = false;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:
     Location();

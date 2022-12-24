@@ -5,6 +5,9 @@
 
 class UARTPasser
 {
+private:
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
+
 public:
     int _hp_up[9] = {100, 150, 200, 250, 300, 350, 400, 450, 500};
     int _init_hp[10] = {500};

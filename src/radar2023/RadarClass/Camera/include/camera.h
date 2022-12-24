@@ -19,6 +19,8 @@ private:
     tSdkFrameHead sFrameInfo;
     unsigned char *pFrameBuffer;
     unsigned char *pRawDataBuffer;
+    
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:
     bool _openflag = false;
@@ -53,6 +55,7 @@ private:
     MV_Camera _cap;
 #endif
     bool _is_init = false;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:
     void openCamera(bool is_init);

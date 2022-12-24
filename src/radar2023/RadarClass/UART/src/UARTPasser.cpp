@@ -137,14 +137,12 @@ void UARTPasser::Referee_Update_GameData(unsigned char *buffer)
         this->_Game_Start_Flag = true;
         this->_set_max_flag = true;
         this->Remain_time = 420;
-        // fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
-        //                "[GAME], GAME START !\n");
+        this->logger->critical("GAME START !");
     }
     if (this->_Now_stage < 5 && (buffer[7] >> 4) == 5)
     {
         this->_Game_End_Flag = true;
-        // fmt::print(fg(fmt::color::antique_white) | fmt::emphasis::bold,
-        //                "[GAME], GAME END !\n");
+        this->logger->critical("GAME END !");
         for (int i = 0; i < 10; ++i)
         {
             this->_max_hp[i] = this->_init_hp[i];
@@ -189,5 +187,5 @@ bool UARTPasser::One_compete_start()
 void UARTPasser::Receive_Robot_Data(unsigned char *buffer)
 {
     if ((0x0000 | buffer[7]) | ((buffer[8] << 8) == 0x0200))
-        cout << "received" << endl;
+        this->logger->info("received");
 }

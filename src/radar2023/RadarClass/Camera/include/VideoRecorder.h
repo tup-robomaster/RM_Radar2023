@@ -7,7 +7,8 @@ class VideoRecorder
 {
 private:
     VideoWriter vw;
-
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
+    
 public:
     VideoRecorder();
     ~VideoRecorder();

@@ -29,6 +29,8 @@ private:
     int cls_num = 0;
 
     float *output;
+
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
     
 private:
     bool build_model(string wts_name, string engine_name, bool is_p6, float gd, float gw);

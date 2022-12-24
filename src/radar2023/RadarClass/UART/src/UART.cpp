@@ -18,7 +18,7 @@ void UART::Refree_Arial_Message()
 
 void UART::Judge_Refresh_Result()
 {
-    cout << "Judge_Refresh_Result" << endl;
+    this->logger->info("Judge_Refresh_Result");
 }
 
 void UART::Referee_Game_Result()

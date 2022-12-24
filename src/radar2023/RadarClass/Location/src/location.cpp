@@ -6,6 +6,7 @@ void __callback__click(int event, int x, int y, int flage, void *param)
     Mat img_cut = Mat::zeros(Size(200, 200), CV_8UC3);
     cv::TermCriteria criteria = cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 30, 0.001);
     Rect rect;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
     switch (event)
     {
     case MouseEventTypes::EVENT_MOUSEMOVE:
@@ -20,8 +21,7 @@ void __callback__click(int event, int x, int y, int flage, void *param)
         if (!location->flag)
         {
             location->flag = true;
-            // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-            //            "[INFO], Pick {}|{}!\n", x, y);
+            logger->info("Pick:{}|{}", x, y);
             vector<Point2f> temp_corner;
             temp_corner.emplace_back(Point2f(x, y));
             Mat grey;
@@ -141,8 +141,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     cv::destroyWindow("ZOOM_WINDOW");
     if (!solvePnP(ops, pick_points, K_0, C_0, rvec_Mat, tvec_Mat, false, SolvePnPMethod::SOLVEPNP_P3P))
     {
-        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-        //            "[ERROR], {}!\n", "PnP failed");
+        this->logger->error("Solve PnP failed");
         return false;
     }
     return true;

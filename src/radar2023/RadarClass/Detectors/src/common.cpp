@@ -90,8 +90,8 @@ void nms(std::vector<Yolo::Detection> &res, float *output, float conf_thresh, fl
 // [type] [size] <data x size in hex>
 std::map<std::string, Weights> loadWeights(const std::string file)
 {
-    // fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,
-    //            "[INFO], {}{}!\n", "Loading weights:", file);
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
+    logger->info("Loading weights:{}",file);
     std::map<std::string, Weights> weightMap;
 
     // Open weights file

@@ -122,8 +122,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
 {
     if (!this->_pass_flag)
     {
-        // fmt::print(fg(fmt::color::red) | fmt::emphasis::bold,
-        //            "[ERROR], Can't get _T !\n");
+        this->logger->error("Can't get _T !");
         return;
     }
     vector<MapLocation3D> temp(10, MapLocation3D());

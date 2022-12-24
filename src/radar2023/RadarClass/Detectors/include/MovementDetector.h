@@ -29,6 +29,7 @@ public:
     MovementDetector();
     ~MovementDetector();
 
+    bool _ifHistoryBuild();
     vector<Rect> applyMovementDetector(vector<vector<float>> &input);
 };
 

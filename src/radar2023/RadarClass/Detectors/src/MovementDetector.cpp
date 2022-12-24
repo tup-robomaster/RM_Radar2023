@@ -157,3 +157,8 @@ Rect MovementDetector::rebuildRect(Rect input)
     // TODO:历史帧预测框判断（IOU）
     return input;
 }
+
+bool MovementDetector::_ifHistoryBuild()
+{
+    return this->historyCount == MDHistorySize + 1;
+}
