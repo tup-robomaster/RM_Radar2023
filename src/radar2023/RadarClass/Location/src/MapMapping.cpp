@@ -39,6 +39,14 @@ void MapMapping::_location_prediction()
     }
 }
 
+void MapMapping::_plot_region_rect(vector<Point3f> &points, Mat &frame, Mat &K_0, Mat &C_0)
+{
+    vector<Point2i> ips;
+    vector<Point3f> points_4 = {Point3f(points[0].x, points[0].y, points[0].z), Point3f(points[0].x, points[0].y + Real_Size_H, points[0].z), Point3f(points[1].x, points[1].y, points[1].z), Point3f(points[1].x, points[1].y - Real_Size_H, points[1].z)};
+    cv::projectPoints(points_4, this->rvec, this->tvec, K_0, C_0, ips);
+    cv::fillConvexPoly(frame, ips, Scalar(0, 255, 0));
+}
+
 vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
 {
     vector<ArmorBoundingBox> pred_bbox;
@@ -141,7 +149,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                 pred[i].armor.flag = false;
         }
     }
-    if(Ioubbox.size()>0 && sepMode == 1)
+    if (Ioubbox.size() > 0 && sepMode == 1)
     {
         for (size_t i = 0; i < Ioubbox.size(); ++i)
         {

@@ -122,17 +122,14 @@ void Radar::init(int argc, char **argv)
     Matrix<float, 3, 3> K_0;
     Matrix<float, 1, 5> C_0;
     Matrix<float, 4, 4> E_0;
-    Mat K_0_Mat;
-    Mat C_0_Mat;
-    Mat E_0_Mat;
-    if (!read_param(K_0_Mat, C_0_Mat, E_0_Mat))
+    if (!read_param(this->K_0_Mat, this->C_0_Mat, this->E_0_Mat))
     {
         this->logger->error("Can't read CAMERA_PARAM: {}!", CAMERA_PARAM_PATH);
         return;
     }
-    cv2eigen(K_0_Mat, K_0);
-    cv2eigen(C_0_Mat, C_0);
-    cv2eigen(E_0_Mat, E_0);
+    cv2eigen(this->K_0_Mat, K_0);
+    cv2eigen(this->C_0_Mat, C_0);
+    cv2eigen(this->E_0_Mat, E_0);
     // TODO: CHECK HERE
     this->depthQueue = DepthQueue(K_0, C_0, E_0);
     this->movementDetector = MovementDetector();
@@ -208,7 +205,7 @@ void Radar::SeparationLoop(Radar *radar)
     while (radar->__SeparationLoop_working)
     {
         vector<Rect> tempSepTargets;
-        //TODO:Check here
+        // TODO:Check here
         if (radar->separation_mode == 0 || !radar->movementDetector._ifHistoryBuild())
         {
             unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
@@ -300,7 +297,7 @@ void Radar::VideoRecorderLoop(Radar *radar)
     {
         if (radar->_if_record && radar->myFrames.size() > 0)
         {
-            radar->videoRecorder.write(radar->myFrames.front());
+            radar->videoRecorder.write(radar->myFrames.front().clone());
         }
     }
     radar->logger->critical("VideoRecorderLoop Exit");
@@ -338,7 +335,8 @@ void Radar::spin(int argc, char **argv)
         }
         catch (const std::exception &e)
         {
-            std::cerr << e.what() << '\n';
+            this->logger->error(e.what());
+            return;
         }
         this->mapMapping.push_T(rvec, tvec);
         this->logger->info("Locate pick Done");
@@ -387,7 +385,8 @@ void Radar::spin(int argc, char **argv)
     }
     if (myFrames.size() > 0)
     {
-        Mat frame = myFrames.front();
+        Mat frame = myFrames.front().clone();
+        this->mapMapping._plot_region_rect(this->location_show, frame, this->K_0_Mat, this->C_0_Mat);
         imshow("ControlPanel", frame);
         resizeWindow("ControlPanel", 1920, 1080);
         myFrames.pop();

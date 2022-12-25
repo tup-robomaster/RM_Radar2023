@@ -14,7 +14,7 @@ public:
     ~VideoRecorder();
 
     void init(char *videoPath, int coder, Size size);
-    void write(Mat &src);
+    void write(Mat src);
     void close();
 };
 

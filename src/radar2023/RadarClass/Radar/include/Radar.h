@@ -57,12 +57,17 @@ private:
 
     vector<vector<float>> publicDepth; // 共享深度图
     int _if_DepthUpdated = 0;
-    shared_timed_mutex myMutex_publicDepth;        // 读写锁
+    shared_timed_mutex myMutex_publicDepth; // 读写锁
     shared_timed_mutex myMutex_SeqTargets;
     shared_timed_mutex myMutex_cameraThread;
-    vector<Rect> SeqTargets;           // 共享分割目标
-    int separation_mode = 0;           // 图像分割模式
-    SharedQueue<Mat> myFrames;         // 图像帧队列
+    vector<Rect> SeqTargets;   // 共享分割目标
+    int separation_mode = 0;   // 图像分割模式
+    SharedQueue<Mat> myFrames; // 图像帧队列
+
+    Mat K_0_Mat;
+    Mat C_0_Mat;
+    Mat E_0_Mat;
+    vector<Point3f> location_show = vector<Point3f>{Point3f(0., 0., 0.5), Point3f(Real_Size_W, Real_Size_H, 0.5)};
 
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
