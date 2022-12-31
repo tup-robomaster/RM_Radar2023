@@ -63,7 +63,7 @@
     * Location 坐标系处理相关
     * Logger spdlog日志记录器
     * Radar 程序主线程及线程管理
-    * UART 官方裁判系统
+    * UART 官方裁判系统通讯
   * Recorder 录制文件存放
   * CMakeLists.txt CMake文件
   * config.h 程序参数配置文件
@@ -77,7 +77,7 @@
 * 环境配置完成后，需根据运算平台及环境修改src下CMakeLists.txt
 * 创建以下文件夹：src/radar2023/logs 、src/radar2023/Recorder 、  src/radar2023/RadarClass/Detectors/Moudles  、 src/radar2023/RadarClass/Camera/params
 * 修改config.h中的路径
-* 准备装甲板识别及车辆识别模型
+* 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0
 * 使用demo_resource文件夹下get_wts导出模型权重
 * 将导出的.wts文件放置在src/radar2023/RadarClass/Detectors/Moudles文件夹中
 * 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
@@ -86,7 +86,7 @@
   ```
   catkin_make
   ```
-* 为串口添加权限及雷达驱动添加权限
+* 为串口及雷达驱动添加权限
 
 ### 使用
 
@@ -98,6 +98,6 @@
 
 ### 开发日志
 
-Date:2022-12-31 经过一轮调试Debug，发布V0.2a测试版本
+Date:2022-12-31 经过一轮调试Debug与更新，发布V0.2a测试版本
 
 Date:2022-12-04 完成所有基本功能构建，发布V0.1a测试版本
