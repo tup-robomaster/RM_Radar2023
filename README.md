@@ -24,9 +24,12 @@
 
 对每个模块更加具体的说明可以参考文件夹下的README.md文件:
 
-* 
+> [Camera](src/radar2023/RadarClass/Camera/README.md)
+> [Detectors](src/radar2023/RadarClass/Detectors/README.md)
+> [Location](src/radar2023/RadarClass/Location/README.md)
+> [Radar](src/radar2023/RadarClass/Radar/README.md)
 
-## 2.环境配置(recommend)
+## 2.环境配置 (recommend)
 
 * Ubuntu 20.04 LTS
 * GCC 9.3.0
@@ -42,7 +45,7 @@
 * Livox雷达驱动
 * 迈德威视相机驱动
 
-运算平台：
+运算平台 (recommend)：
 
 * AMD R7 5800H CPU
 * 32G RAM
@@ -97,4 +100,4 @@
 
 Date:2022-12-31 经过一轮调试Debug，发布V0.2a测试版本
 
-Date:2022-12-4 完成所有基本功能构建，发布V0.1a测试版本
+Date:2022-12-04 完成所有基本功能构建，发布V0.1a测试版本
