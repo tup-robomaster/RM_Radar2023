@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.9.0)
 SET(CMAKE_BUILD_TYPE "Release")
-# SET(CMAKE_BUILD_TYPE "debug")
 project(radar2023 LANGUAGES CXX CUDA)
 find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
@@ -9,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(PCL REQUIRED)
 find_package(CUDA 11.6 REQUIRED)
-# find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 message("CUDA_LIBRARIES:${CUDA_LIBRARIES}")
 message("CUDA_INCLUDE_DIRS:${CUDA_INCLUDE_DIRS}")
@@ -17,10 +15,8 @@ include_directories()
 add_compile_options(-std=c++17)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=16000000")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O3  -Wall")
-# set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}  -Wall")
 set(CUDA_GEN_CODE "-gencode=arch=compute_86,code=sm_86")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
-# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
 include_directories(
 
@@ -76,7 +72,6 @@ target_link_libraries(radar2023
   MVSDK
   cuda
   spdlog::spdlog
-  # fmt::fmt
 )
 
 macro(remove_warnings)

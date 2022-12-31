@@ -3,6 +3,10 @@
 
 #include "../../Common/include/public.h"
 
+/**
+ * @brief 串口类
+ * 用于串口通讯
+ */
 class MySerial
 {
 public:

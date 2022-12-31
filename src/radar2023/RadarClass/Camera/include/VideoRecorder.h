@@ -3,6 +3,10 @@
 
 #include "../../Common/include/public.h"
 
+/**
+ * @brief 视频录制类
+ * 提供对控制窗口图像的录制功能
+ */
 class VideoRecorder
 {
 private:

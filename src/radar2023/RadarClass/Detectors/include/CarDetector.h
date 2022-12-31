@@ -4,6 +4,10 @@
 #include "./tensorRT_v5.h"
 #include "../../Common/include/general.h"
 
+/**
+ * @brief 车辆识别
+ * 车辆识别器，输出车辆BBox
+ */
 class CarDetector
 {
 private:

@@ -3,6 +3,11 @@
 
 #include "../../Common/include/public.h"
 
+/**
+ * @brief UART传递
+ * 官方裁判系统Demo的C++版本
+ * 负责处理裁判系统数据
+ */
 class UARTPasser
 {
 private:

@@ -305,6 +305,7 @@ void Radar::VideoRecorderLoop(Radar *radar)
 
 void Radar::spin(int argc, char **argv)
 {
+    // TODO: 增加更多标志位来扩展流程控制
     this->init(argc, argv);
     if (!this->_init_flag)
         return;

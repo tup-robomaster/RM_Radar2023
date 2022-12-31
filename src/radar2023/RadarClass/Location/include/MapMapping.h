@@ -4,6 +4,10 @@
 #include "../../Common/include/general.h"
 #include "../../Detectors/include/depthProcesser.h"
 
+/**
+ * @brief 映射类
+ * 使用四点标定所得旋转平移向量进行坐标系转换
+ */
 class MapMapping
 {
 private:

@@ -6,7 +6,7 @@
 
 /**
  * @brief 装甲板识别
- * 装甲板识别器，输出装甲板BBox
+ * 装甲板识别器，输出装甲板BBox和对应分割框
  */
 class ArmorDetector
 {

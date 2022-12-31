@@ -3,6 +3,10 @@
 
 #include "../../Common/include/public.h"
 
+/**
+ * @brief 比赛数据类
+ * 官方裁判系统Demo的C++版本
+ */
 class game_state
 {
 public:

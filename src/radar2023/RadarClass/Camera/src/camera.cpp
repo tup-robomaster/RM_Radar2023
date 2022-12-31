@@ -277,7 +277,6 @@ FrameBag CameraThread::read()
     if (!framebag.flag)
     {
         this->logger->error("Failed to get frame!");
-        this->release();
     }
     return framebag;
 }

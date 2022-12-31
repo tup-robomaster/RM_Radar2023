@@ -7,6 +7,10 @@
 #include "../include/serial.h"
 #include "../include/UARTPasser.h"
 
+/**
+ * @brief UART
+ * 官方裁判系统Demo的C++版本
+ */
 class UART
 {
 public:

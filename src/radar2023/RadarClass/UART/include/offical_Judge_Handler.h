@@ -3,6 +3,10 @@
 
 #include "../../Common/include/public.h"
 
+/**
+ * @brief 数据效验类
+ * 对串口数据进行CRC效验
+ */
 class Offical_Judge_Handler
 {
 private:

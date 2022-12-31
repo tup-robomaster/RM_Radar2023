@@ -5,6 +5,9 @@
 #include <mutex>
 #include <condition_variable>
  
+ /**
+ * @brief 线程安全的共享队列
+ */
 template <typename T>
 class SharedQueue
 {

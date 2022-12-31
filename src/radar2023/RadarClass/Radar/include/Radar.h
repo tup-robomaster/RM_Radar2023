@@ -55,14 +55,14 @@ private:
 
     bool is_alive = true;
 
-    vector<vector<float>> publicDepth; // 共享深度图
+    vector<vector<float>> publicDepth;
     int _if_DepthUpdated = 0;
-    shared_timed_mutex myMutex_publicDepth; // 读写锁
+    shared_timed_mutex myMutex_publicDepth;
     shared_timed_mutex myMutex_SeqTargets;
     shared_timed_mutex myMutex_cameraThread;
-    vector<Rect> SeqTargets;   // 共享分割目标
-    int separation_mode = 0;   // 图像分割模式
-    SharedQueue<Mat> myFrames; // 图像帧队列
+    vector<Rect> SeqTargets;
+    int separation_mode = 0;
+    SharedQueue<Mat> myFrames;
 
     Mat K_0_Mat;
     Mat C_0_Mat;
