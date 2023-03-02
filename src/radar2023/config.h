@@ -1,6 +1,6 @@
 // #define SpeedTest                                           //各环节速度测试（ms/FPS）
 // #define ThreadSpeedTest                                     //线程速度测试（应关闭环节速度测试）
-// #define Test                                                //测试标志
+#define Test                                                //测试标志
 // #define UsingVideo                                          //是否使用视频
 
 #define SerialPortNAME (char *)"/dev/ttyUSB0"

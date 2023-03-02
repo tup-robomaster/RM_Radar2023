@@ -30,7 +30,7 @@ void Radar::detectDepth(vector<bboxAndRect> &pred)
     {
         float count = 0;
         vector<float> tempBox;
-        float center[2] = {pred.at(i).armor.x0 + pred[i].armor.w / 2, pred[i].armor.y0 + pred[i].armor.h / 2};
+        float center[2] = {pred[i].armor.x0 + pred[i].armor.w / 2, pred[i].armor.y0 + pred[i].armor.h / 2};
         for (int j = int(max<float>(center[1] - pred[i].armor.h, 0.)); j < int(min<float>(center[1] + pred[i].armor.h, ImageH)); ++j)
         {
             for (int k = int(max<float>(center[0] - pred[i].armor.w, 0.)); k < int(min<float>(center[0] + pred[i].armor.w, ImageW)); ++k)
@@ -96,6 +96,38 @@ void Radar::send_judge(judge_message &message, UART &myUART)
 
     default:
         break;
+    }
+}
+
+void Radar::drawBbox(vector<Rect> &bboxs, Mat &img)
+{
+    for (Rect &it : bboxs)
+    {
+        cv::rectangle(img, it, Scalar(0, 255, 0), 2);
+    }
+}
+
+void Radar::drawArmorsForDebug(vector<ArmorBoundingBox> &armors, Mat &img)
+{
+    for (auto &it : armors)
+    {
+        Rect temp = Rect(it.x0, it.y0, it.w, it.h);
+        cv::rectangle(img, temp, Scalar(255, 255, 0), 2);
+        stringstream ss;
+        ss << it.cls << "[Depth]" << it.depth << "[Conf]" << it.conf;
+        cv::putText(img, ss.str(), Point2i(int(it.x0 + it.w / 2), int(it.y0 + it.h / 2)), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 255));
+    }
+}
+
+void Radar::drawArmorsForDebug(vector<bboxAndRect> &armors, Mat &img)
+{
+    for (auto &it : armors)
+    {
+        Rect temp = Rect(it.armor.x0, it.armor.y0, it.armor.w, it.armor.h);
+        cv::rectangle(img, temp, Scalar(255, 255, 0), 2);
+        stringstream ss;
+        ss << it.armor.cls << "[Depth]" << it.armor.depth << "[Conf]" << it.armor.conf;
+        cv::putText(img, ss.str(), Point2i(int(it.armor.x0 + it.armor.w / 2), int(it.armor.y0 + it.armor.h / 2)), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 255));
     }
 }
 
@@ -264,6 +296,9 @@ void Radar::MainProcessLoop(Radar *radar)
                 tempSepTargets.swap(radar->SeqTargets);
                 ulk.unlock();
                 pred = radar->armorDetector.infer(frameBag.frame, tempSepTargets);
+#ifdef Test
+                radar->drawBbox(tempSepTargets, frameBag.frame);
+#endif
                 if (pred.size() == 0)
                     continue;
                 radar->armor_filter(pred);
@@ -276,6 +311,10 @@ void Radar::MainProcessLoop(Radar *radar)
                     IouArmors = radar->mapMapping._IoU_prediction(pred, tempSepTargets);
                     radar->detectDepth(IouArmors);
                 }
+#ifdef Test
+                radar->drawArmorsForDebug(pred, frameBag.frame);
+                radar->drawArmorsForDebug(IouArmors, frameBag.frame);
+#endif
                 radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
                 judge_message myJudge_message;
                 myJudge_message.task = 1;

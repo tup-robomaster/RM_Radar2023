@@ -41,10 +41,15 @@ void MapMapping::_location_prediction()
 
 void MapMapping::_plot_region_rect(vector<Point3f> &points, Mat &frame, Mat &K_0, Mat &C_0)
 {
-    vector<Point2i> ips;
+    vector<Point2f> ips_pre;
+    vector<Point2i> ips_dst;
     vector<Point3f> points_4 = {Point3f(points[0].x, points[0].y, points[0].z), Point3f(points[0].x, points[0].y + Real_Size_H, points[0].z), Point3f(points[1].x, points[1].y, points[1].z), Point3f(points[1].x, points[1].y - Real_Size_H, points[1].z)};
-    cv::projectPoints(points_4, this->rvec, this->tvec, K_0, C_0, ips);
-    cv::fillConvexPoly(frame, ips, Scalar(0, 255, 0));
+    cv::projectPoints(points_4, this->rvec, this->tvec, K_0, C_0, ips_pre);
+    cv::Mat(ips_pre).convertTo(ips_dst,CV_32SC1);
+    line(frame,ips_dst[0],ips_dst[1], Scalar(0, 255, 0));
+    line(frame,ips_dst[1],ips_dst[2], Scalar(0, 255, 0));
+    line(frame,ips_dst[2],ips_dst[3], Scalar(0, 255, 0));
+    line(frame,ips_dst[3],ips_dst[0], Scalar(0, 255, 0));
 }
 
 vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
