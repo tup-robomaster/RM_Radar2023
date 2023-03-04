@@ -12,14 +12,14 @@
 
 using namespace spdlog;
 
-class Logger
+class SpdLogger
 {
 public:
     std::shared_ptr<spdlog::logger> logger;
 
 public:
-    Logger();
-    ~Logger();
+    SpdLogger();
+    ~SpdLogger();
     void registerLogger(char *logFile, char *loggerName);
 };
 

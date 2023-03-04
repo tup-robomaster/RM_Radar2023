@@ -65,7 +65,7 @@ void nms(std::vector<Yolo::Detection> &res, float *output, float conf_thresh, fl
             m.emplace(det.class_id, std::vector<Yolo::Detection>());
         m[det.class_id].push_back(det);
     }
-    for (auto it = m.begin(); it != m.end(); ++it)
+    for (auto it = m.begin(); it != m.end(); it++)
     {
         // std::cout << it->second[0].class_id << " --- " << std::endl;
         auto &dets = it->second;

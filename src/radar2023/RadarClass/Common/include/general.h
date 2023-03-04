@@ -17,4 +17,6 @@ float f_min(float x, float y);
 
 float f_max(float x, float y);
 
+void makeRectSafe(Rect &rect, Mat &src);
+
 #endif

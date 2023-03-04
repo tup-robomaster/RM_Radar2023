@@ -1,14 +1,14 @@
 #include "../include/Logger.h"
 
-Logger::Logger()
+SpdLogger::SpdLogger()
 {
 }
 
-Logger::~Logger()
+SpdLogger::~SpdLogger()
 {
 }
 
-void Logger::registerLogger(char *logFile, char *loggerName)
+void SpdLogger::registerLogger(char *logFile, char *loggerName)
 {
     char filename[1024];
     time_t currentTime = time(NULL);

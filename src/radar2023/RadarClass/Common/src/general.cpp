@@ -66,3 +66,8 @@ float f_max(float x, float y)
 {
     return floor((x + y + abs(x - y)) / 2);
 }
+
+void makeRectSafe(Rect &rect, Mat &src)
+{
+    rect &= Rect(0, 0, src.cols, src.rows);
+}

@@ -251,13 +251,15 @@ void Radar::SeparationLoop(Radar *radar)
         }
         if (radar->separation_mode == 1)
         {
-            unique_lock<shared_timed_mutex> ulk(radar->myMutex_cameraThread);
-            FrameBag image = radar->cameraThread.read();
-            ulk.unlock();
-            tempSepTargets = radar->carDetector.infer(image.frame);
-            ulk.lock();
-            radar->SeqTargets.swap(tempSepTargets);
-            ulk.unlock();
+            if (radar->myFrames.size() > 0)
+            {
+                Mat frame = radar->myFrames.front().clone();
+                tempSepTargets = radar->carDetector.infer(frame);
+                unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
+                if(tempSepTargets.size() > 0)
+                    radar->SeqTargets.swap(tempSepTargets);
+                ulk.unlock();
+            }
         }
     }
     radar->logger->critical("SeparationLoop Exit");
@@ -299,27 +301,28 @@ void Radar::MainProcessLoop(Radar *radar)
 #ifdef Test
                 radar->drawBbox(tempSepTargets, frameBag.frame);
 #endif
-                if (pred.size() == 0)
-                    continue;
-                radar->armor_filter(pred);
-                slk.lock();
-                radar->detectDepth(pred);
-                slk.unlock();
-                vector<ArmorBoundingBox> IouArmors;
-                if (radar->separation_mode == 1)
+                if (pred.size() != 0)
                 {
-                    IouArmors = radar->mapMapping._IoU_prediction(pred, tempSepTargets);
-                    radar->detectDepth(IouArmors);
-                }
+                    radar->armor_filter(pred);
+                    slk.lock();
+                    radar->detectDepth(pred);
+                    slk.unlock();
+                    vector<ArmorBoundingBox> IouArmors;
+                    if (radar->separation_mode == 1)
+                    {
+                        IouArmors = radar->mapMapping._IoU_prediction(pred, tempSepTargets);
+                        radar->detectDepth(IouArmors);
+                    }
 #ifdef Test
-                radar->drawArmorsForDebug(pred, frameBag.frame);
-                radar->drawArmorsForDebug(IouArmors, frameBag.frame);
+                    radar->drawArmorsForDebug(pred, frameBag.frame);
+                    radar->drawArmorsForDebug(IouArmors, frameBag.frame);
 #endif
-                radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
-                judge_message myJudge_message;
-                myJudge_message.task = 1;
-                myJudge_message.loc = radar->mapMapping.getloc();
-                radar->send_judge(myJudge_message, radar->myUART);
+//                 radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
+//                 judge_message myJudge_message;
+//                 myJudge_message.task = 1;
+//                 myJudge_message.loc = radar->mapMapping.getloc();
+//                 radar->send_judge(myJudge_message, radar->myUART);
+                }
             }
             else
                 continue;

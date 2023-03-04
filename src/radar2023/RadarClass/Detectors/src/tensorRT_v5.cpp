@@ -1,5 +1,7 @@
 #include "../include/tensorRT_v5.h"
 
+static const int OUTPUT_SIZE = MAX_OUTPUT_BBOX_COUNT * sizeof(Yolo::Detection) / sizeof(float) + 1;
+
 static int get_width(int x, float gw, int divisor = 8)
 {
     return int(ceil((x * gw) / divisor)) * divisor;
@@ -35,23 +37,6 @@ inline const char *severity_string(nvinfer1::ILogger::Severity t)
         return "unknown";
     }
 }
-
-class TRTLogger : public nvinfer1::ILogger
-{
-public:
-    virtual void log(Severity severity, nvinfer1::AsciiChar const *msg) noexcept override
-    {
-        if (severity <= Severity::kWARNING)
-        {
-            if (severity == Severity::kWARNING)
-                printf("\033[33m%s: %s\033[0m\n", severity_string(severity), msg);
-            else if (severity == Severity::kERROR)
-                printf("\031[33m%s: %s\033[0m\n", severity_string(severity), msg);
-            else
-                printf("%s: %s\n", severity_string(severity), msg);
-        }
-    }
-};
 
 MyTensorRT_v5::MyTensorRT_v5()
 {
@@ -257,11 +242,20 @@ ICudaEngine *MyTensorRT_v5::build_engine_p6(unsigned int maxBatchSize, IBuilder 
     return engine;
 }
 
+void MyTensorRT_v5::print_dims(const nvinfer1::Dims &dim)
+{
+    for (int nIdxShape = 0; nIdxShape < dim.nbDims; ++nIdxShape)
+    {
+
+        printf("dim %d=%d\n", nIdxShape, dim.d[nIdxShape]);
+    }
+}
+
 void MyTensorRT_v5::APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream, bool &is_p6, float &gd, float &gw, std::string &wts_name)
 {
-    TRTLogger logger;
+    static sample::Logger gLogger;
     // Create builder
-    IBuilder *builder = createInferBuilder(logger);
+    IBuilder *builder = createInferBuilder(gLogger);
     IBuilderConfig *config = builder->createBuilderConfig();
 
     // Create model to populate the network, then set the outputs and create an engine
@@ -324,15 +318,33 @@ bool MyTensorRT_v5::build_model(string wts_name, string engine_name, bool is_p6,
     return false;
 }
 
-bool MyTensorRT_v5::initMyTensorRT_v5(char *tensorrtEngienPath, char *yolov5wts, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num)
+bool MyTensorRT_v5::build_model(char *onnxMoudlePath, char *trtMoudleSavePath, bool fp16, int width, int height, int kopt, int kmax)
+{
+    if (access(trtMoudleSavePath, F_OK) == 0)
+    {
+        this->logger->info("TRT Moudle exists , Skip creation");
+        return true;
+    }
+    if (access(onnxMoudlePath, F_OK) == 0)
+    {
+        this->buildAndSaveEngineFromOnnx(onnxMoudlePath, trtMoudleSavePath, fp16, width, height, kopt, kmax);
+    }
+    return false;
+}
+
+bool MyTensorRT_v5::initMyTensorRT_v5(char *onnxMoudlePath, char *tensorrtEngienPath, char *yolov5wts, bool is_p6, float gd, float gw, int max_batchsize, int input_H, int input_W, int cls_num, int fp16, int kopt, int kmax)
 {
     this->max_batchsize = max_batchsize;
     this->input_H = input_H;
     this->input_W = input_W;
     this->cls_num = cls_num;
+#ifdef USETRTAPI
     if (this->build_model(yolov5wts, tensorrtEngienPath, is_p6, gd, gw))
+#else
+    if (this->build_model(onnxMoudlePath, tensorrtEngienPath, fp16, input_W, input_H, kopt, kmax))
+#endif
     {
-        TRTLogger logger;
+        static sample::Logger gLogger;
         std::ifstream file(tensorrtEngienPath, std::ios::binary);
         if (!file.good())
         {
@@ -348,19 +360,23 @@ bool MyTensorRT_v5::initMyTensorRT_v5(char *tensorrtEngienPath, char *yolov5wts,
         assert(trtModelStream);
         file.read(trtModelStream, size);
         file.close();
-        this->runtime = createInferRuntime(logger);
-        this->engine = this->runtime->deserializeCudaEngine(trtModelStream, size, nullptr);
+        this->runtime = createInferRuntime(gLogger);
+        assert(runtime != nullptr);
+        this->engine = this->runtime->deserializeCudaEngine(trtModelStream, size);
+        assert(engine != nullptr);
         this->context = this->engine->createExecutionContext();
+        assert(context != nullptr);
+        delete[] trtModelStream;
         assert(this->engine->getNbBindings() == 2);
         this->inputIndex = this->engine->getBindingIndex(INPUT_BLOB_NAME);
         this->outputIndex = this->engine->getBindingIndex(OUTPUT_BLOB_NAME);
         assert(this->inputIndex == 0);
         assert(this->outputIndex == 1);
-        CUDA_CHECK(cudaMalloc(&this->buffers[this->inputIndex], this->max_batchsize * 3 * this->input_H * this->input_W * sizeof(float)));
-        CUDA_CHECK(cudaMalloc(&this->buffers[this->outputIndex], this->max_batchsize * TRT_OUTPUT_SIZE * sizeof(float)));
+        CUDA_CHECK(cudaMalloc((void**)&this->buffers[this->inputIndex], this->max_batchsize * 3 * this->input_H * this->input_W * sizeof(float)));
+        CUDA_CHECK(cudaMalloc((void**)&this->buffers[this->outputIndex], this->max_batchsize * OUTPUT_SIZE * sizeof(float)));
         CUDA_CHECK(cudaMallocHost((void **)&this->img_host, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
         CUDA_CHECK(cudaMalloc((void **)&this->img_device, MAX_IMAGE_INPUT_SIZE_THRESH * 3));
-        this->output = (float *)malloc(this->max_batchsize * TRT_OUTPUT_SIZE * sizeof(float));
+        this->output = (float *)malloc(this->max_batchsize * OUTPUT_SIZE * sizeof(float));
     }
     else
     {
@@ -372,19 +388,79 @@ bool MyTensorRT_v5::initMyTensorRT_v5(char *tensorrtEngienPath, char *yolov5wts,
 
 void MyTensorRT_v5::unInitMyTensorRT_v5()
 {
+    CUDA_CHECK(cudaFree(img_device));
+    CUDA_CHECK(cudaFreeHost(img_host));
     CUDA_CHECK(cudaFree(this->buffers[this->inputIndex]));
     CUDA_CHECK(cudaFree(this->buffers[this->outputIndex]));
     this->runtime->destroy();
 }
 
+bool MyTensorRT_v5::saveEngine(const ICudaEngine &engine, const std::string &fileName)
+{
+    std::ofstream engineFile(fileName, std::ios::binary);
+    if (!engineFile)
+    {
+        this->logger->error("Cannot open engine file: {}", fileName);
+        return false;
+    }
+
+    IHostMemory *serializedEngine = engine.serialize();
+    if (serializedEngine == nullptr)
+    {
+        this->logger->error("Engine serialization failed");
+        return false;
+    }
+
+    engineFile.write(static_cast<char *>(serializedEngine->data()), serializedEngine->size());
+    return !engineFile.fail();
+}
+
+bool MyTensorRT_v5::buildAndSaveEngineFromOnnx(char *onnxMoudlePath, char *trtMoudleSavePath, bool fp16, int width, int height, int kopt, int kmax)
+{
+    static sample::Logger logger;
+    IBuilder *pBuilder = createInferBuilder(logger);
+    INetworkDefinition *pNetwork = pBuilder->createNetworkV2(1U << static_cast<int>(NetworkDefinitionCreationFlag::kEXPLICIT_BATCH));
+
+    nvinfer1::IBuilderConfig *config = pBuilder->createBuilderConfig();
+    IOptimizationProfile *profile = pBuilder->createOptimizationProfile();
+
+    profile->setDimensions("images", OptProfileSelector::kMIN, Dims4(1, 3, width, height));
+    profile->setDimensions("images", OptProfileSelector::kOPT, Dims4(kopt, 3, width, height));
+    profile->setDimensions("images", OptProfileSelector::kMAX, Dims4(kmax, 3, width, height));
+
+    config->addOptimizationProfile(profile);
+
+    auto parser = nvonnxparser::createParser(*pNetwork, logger.getTRTLogger());
+
+    if (!parser->parseFromFile(onnxMoudlePath, static_cast<int>(logger.getReportableSeverity())))
+    {
+
+        this->logger->error("解析onnx模型失败");
+        return false;
+    }
+
+    int maxBatchSize = kmax;
+
+    config->setMaxWorkspaceSize(2 << 30);
+
+    pBuilder->setMaxBatchSize(maxBatchSize);
+    config->setFlag(BuilderFlag::kFP16);
+    ICudaEngine *engine = pBuilder->buildEngineWithConfig(*pNetwork, *config);
+
+    saveEngine(*engine, trtMoudleSavePath);
+    nvinfer1::Dims dim = engine->getBindingDimensions(0);
+
+    print_dims(dim);
+    return true;
+}
+
 vector<vector<Yolo::Detection>> MyTensorRT_v5::doInference(vector<Mat> *input, int batchSize, float confidence_threshold, float nms_threshold)
 {
-    assert(this->context != nullptr);
     vector<vector<Yolo::Detection>> batch_res(batchSize);
     cudaStream_t stream = nullptr;
     CUDA_CHECK(cudaStreamCreate(&stream));
-    float *buffer_idx = (float *)buffers[inputIndex];
-    for (size_t b = 0; b < input->size(); b++)
+    float *buffer_idx = (float *)buffers[this->inputIndex];
+    for (size_t b = 0; b < input->size(); ++b)
     {
         Mat img = input->at(b);
         if (img.empty())
@@ -396,26 +472,32 @@ vector<vector<Yolo::Detection>> MyTensorRT_v5::doInference(vector<Mat> *input, i
         preprocess_kernel_img(img_device, img.cols, img.rows, buffer_idx, this->input_W, this->input_H, stream);
         buffer_idx += size_image_dst;
     }
-    // CUDA_CHECK(cudaMemcpyAsync(buffers[inputIndex], input,
-    //                       batchSize * 3 * this->input_H * this->input_W * sizeof(float),
-    //                       cudaMemcpyHostToDevice, stream));
-    auto input_dims = this->engine->getBindingDimensions(0);
-    input_dims.d[0] = batchSize;
-    context->setBindingDimensions(0, input_dims);
-    bool success = context->enqueueV2(buffers, stream, nullptr);
+    bool success = this->context->enqueue(batchSize, (void**)this->buffers, stream, nullptr);
     if (!success)
     {
         this->logger->error("DoInference failed");
         CUDA_CHECK(cudaStreamDestroy(stream));
         return {};
     }
-    CUDA_CHECK(cudaMemcpyAsync(this->output, buffers[outputIndex], batchSize * TRT_OUTPUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost, stream));
+    CUDA_CHECK(cudaMemcpyAsync(this->output, buffers[1], batchSize * OUTPUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost, stream));
     CUDA_CHECK(cudaStreamSynchronize(stream));
     CUDA_CHECK(cudaStreamDestroy(stream));
-    for (int b = 0; b < batchSize; ++b)
+    for (int b = 0; b < int(input->size()); ++b)
     {
         auto &res = batch_res[b];
-        nms(res, &this->output[b * TRT_OUTPUT_SIZE], confidence_threshold, nms_threshold);
+        nms(res, &this->output[b * OUTPUT_SIZE], confidence_threshold, nms_threshold);
     }
     return batch_res;
+}
+
+bool MyTensorRT_v5::doInference(IExecutionContext& context, cudaStream_t& stream, void **buffers, float* output, int batchSize) {
+    // infer on the batch asynchronously, and DMA output back to host
+    bool success = context.enqueue(batchSize, buffers, stream, nullptr);
+    if (!success)
+    {
+        return false;
+    }
+    CUDA_CHECK(cudaMemcpyAsync(output, buffers[1], batchSize * OUTPUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost, stream));
+    cudaStreamSynchronize(stream);
+    return true;
 }

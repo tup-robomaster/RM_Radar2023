@@ -25,6 +25,7 @@ include_directories(
   /opt/intel/mkl/include/
   ${CUDA_INCLUDE_DIRS}
   /home/nine-fish/TensorRT/TensorRT-8.5.1.7/include
+  /home/nine-fish/TensorRT/TensorRT-8.5.1.7/samples/common
 )
 
 set(TENSORRT_LIB_PATH "/home/nine-fish/TensorRT/TensorRT-8.5.1.7/lib")
