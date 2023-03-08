@@ -317,11 +317,11 @@ void Radar::MainProcessLoop(Radar *radar)
                     radar->drawArmorsForDebug(pred, frameBag.frame);
                     radar->drawArmorsForDebug(IouArmors, frameBag.frame);
 #endif
-//                 radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
-//                 judge_message myJudge_message;
-//                 myJudge_message.task = 1;
-//                 myJudge_message.loc = radar->mapMapping.getloc();
-//                 radar->send_judge(myJudge_message, radar->myUART);
+                radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
+                judge_message myJudge_message;
+                myJudge_message.task = 1;
+                myJudge_message.loc = radar->mapMapping.getloc();
+                radar->send_judge(myJudge_message, radar->myUART);
                 }
             }
             else

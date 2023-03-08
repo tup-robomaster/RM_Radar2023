@@ -1,4 +1,4 @@
-# 用于转出wts文件，请移至yolov5目录下使用
+# #用于转出wts文件，请移至yolov5目录下使用
 # import sys
 # import argparse
 # import os
