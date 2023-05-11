@@ -164,33 +164,20 @@ void Radar::init(int argc, char **argv)
     cv2eigen(this->E_0_Mat, E_0);
     // TODO: CHECK HERE
     this->depthQueue = DepthQueue(K_0, C_0, E_0);
-    this->movementDetector = MovementDetector();
-    this->armorDetector = ArmorDetector();
-    this->carDetector = CarDetector();
-    this->cameraThread = CameraThread();
-    this->videoRecorder = VideoRecorder();
-    this->myLocation = Location();
-    this->mapMapping = MapMapping();
-    this->myUART = UART();
-    this->mySerial = MySerial();
     if (!this->_init_flag)
     {
         namedWindow("ControlPanel", WindowFlags::WINDOW_NORMAL);
         createTrackbar("Exit Program", "ControlPanel", 0, 1, nullptr);
         setTrackbarPos("Exit Program", "ControlPanel", 0);
-        createTrackbar("Separation mode", "ControlPanel", 0, 1, nullptr);
-        setTrackbarPos("Separation mode", "ControlPanel", 0);
         createTrackbar("Recorder", "ControlPanel", 0, 1, nullptr);
         setTrackbarPos("Recorder", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
-        if (!this->armorDetector.initModel())
+        if (!(this->armorDetector.initModel() && this->carDetector.initModel()))
         {
             this->stop();
+            this->logger->flush();
             return;
         }
-        this->carInferAvailable = this->carDetector.initModel() ? true : false;
-        if (this->carInferAvailable)
-            setTrackbarPos("Separation mode", "ControlPanel", 1);
         this->mySerial.initSerial();
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
         this->cameraThread.start();
@@ -238,41 +225,27 @@ void Radar::SeparationLoop(Radar *radar)
     {
         vector<Rect> tempSepTargets;
         // TODO:Check here
-        if (radar->separation_mode == 0 || !radar->movementDetector._ifHistoryBuild())
+        if (radar->myFrames.size() > 0)
         {
+            Mat frame = radar->myFrames.front().clone();
+            tempSepTargets = radar->carDetector.infer(frame);
             unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
-            if (radar->_if_DepthUpdated > 0)
-            {
-                tempSepTargets = radar->movementDetector.applyMovementDetector(radar->publicDepth);
-                --radar->_if_DepthUpdated;
+            if (tempSepTargets.size() > 0)
                 radar->SeqTargets.swap(tempSepTargets);
-            }
             ulk.unlock();
-        }
-        if (radar->separation_mode == 1)
-        {
-            if (radar->myFrames.size() > 0)
-            {
-                Mat frame = radar->myFrames.front().clone();
-                tempSepTargets = radar->carDetector.infer(frame);
-                unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
-                if(tempSepTargets.size() > 0)
-                    radar->SeqTargets.swap(tempSepTargets);
-                ulk.unlock();
-            }
         }
     }
     radar->logger->critical("SeparationLoop Exit");
 }
 
-void Radar::SerReadLoop(Radar *radar)
+void Radar::SerReadLoop()
 {
-    radar->myUART.read(radar->mySerial);
+    this->myUART.read(this->mySerial);
 }
 
-void Radar::SerWriteLoop(Radar *radar)
+void Radar::SerWriteLoop()
 {
-    radar->myUART.write(radar->mySerial);
+    this->myUART.write(this->mySerial);
 }
 
 void Radar::MainProcessLoop(Radar *radar)
@@ -307,21 +280,17 @@ void Radar::MainProcessLoop(Radar *radar)
                     slk.lock();
                     radar->detectDepth(pred);
                     slk.unlock();
-                    vector<ArmorBoundingBox> IouArmors;
-                    if (radar->separation_mode == 1)
-                    {
-                        IouArmors = radar->mapMapping._IoU_prediction(pred, tempSepTargets);
-                        radar->detectDepth(IouArmors);
-                    }
+                    vector<ArmorBoundingBox> IouArmors = radar->mapMapping._IoU_prediction(pred, tempSepTargets);
+                    radar->detectDepth(IouArmors);
 #ifdef Test
                     radar->drawArmorsForDebug(pred, frameBag.frame);
                     radar->drawArmorsForDebug(IouArmors, frameBag.frame);
 #endif
-                radar->mapMapping.mergeUpdata(pred, IouArmors, radar->separation_mode);
-                judge_message myJudge_message;
-                myJudge_message.task = 1;
-                myJudge_message.loc = radar->mapMapping.getloc();
-                radar->send_judge(myJudge_message, radar->myUART);
+                    radar->mapMapping.mergeUpdata(pred, IouArmors);
+                    judge_message myJudge_message;
+                    myJudge_message.task = 1;
+                    myJudge_message.loc = radar->mapMapping.getloc();
+                    radar->send_judge(myJudge_message, radar->myUART);
                 }
             }
             else
@@ -357,10 +326,6 @@ void Radar::spin(int argc, char **argv)
         return;
     }
     this->_if_record = getTrackbarPos("Recorder", "ControlPanel");
-    if (this->carInferAvailable)
-        separation_mode = getTrackbarPos("Separation mode", "ControlPanel");
-    else
-        separation_mode = 0;
     if (!this->mapMapping._is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
     {
         this->logger->info("Locate pick start ...Process");

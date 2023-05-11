@@ -1,7 +1,7 @@
 #ifndef __CARDETECTOR_H
 #define __CARDETECTOR_H
 
-#include "./tensorRT_v5.h"
+#include "../../TRTInference/TRTInfer/include/Inference.h"
 #include "../../Common/include/general.h"
 
 /**
@@ -11,7 +11,7 @@
 class CarDetector
 {
 private:
-    MyTensorRT_v5 *carTensorRT;
+    TRTInferV1::TRTInfer carTensorRT = TRTInferV1::TRTInfer(0);
     vector<ArmorBoundingBox> results;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 

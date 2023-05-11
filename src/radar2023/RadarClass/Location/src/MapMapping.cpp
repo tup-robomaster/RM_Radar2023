@@ -131,7 +131,7 @@ vector<MapLocation3D> MapMapping::getloc()
     return this->_location3D;
 }
 
-void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, int &sepMode)
+void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox)
 {
     if (!this->_pass_flag)
     {
@@ -154,7 +154,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                 pred[i].armor.flag = false;
         }
     }
-    if (Ioubbox.size() > 0 && sepMode == 1)
+    if (Ioubbox.size() > 0)
     {
         for (size_t i = 0; i < Ioubbox.size(); ++i)
         {

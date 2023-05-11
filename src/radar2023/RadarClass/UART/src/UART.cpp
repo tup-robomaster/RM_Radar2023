@@ -394,28 +394,5 @@ void UART::write(MySerial &ser)
     while (true)
     {
         this->Robot_Data_Transmit_Map(ser);
-        AlarmBag alarmBag = myUARTPasser.pop();
-        if (alarmBag.flag)
-        {
-            // TODO:添加串口发送逻辑
-            for (const auto &it : alarmBag.send_targets)
-            {
-                int t = it;
-                if (!ENEMY)
-                    t += 100;
-                unsigned int dataID = 0x0200 + (alarmBag.code & 0xFF);
-                if (alarmBag.code > 0)
-                {
-                    unsigned char target_code = 0;
-                    for (const auto &jt : alarmBag.alarm_targets)
-                    {
-                        if (jt <= 9)
-                            target_code += 1 << (jt % 5);
-                    }
-                    unsigned char data[4] = {target_code, (unsigned char)((alarmBag.team != ENEMY) & 0xFF), 0, alarmBag.code};
-                    Referee_Transmit_BetweenCar(dataID, t, data, ser);
-                }
-            }
-        }
     }
 }

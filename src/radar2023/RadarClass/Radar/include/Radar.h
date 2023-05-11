@@ -6,7 +6,6 @@
 #include "../../Camera/include/VideoRecorder.h"
 #include "../../Common/include/SharedQueue.h"
 #include "../../Detectors/include/depthProcesser.h"
-#include "../../Detectors/include/MovementDetector.h"
 #include "../../Detectors/include/ArmorDetector.h"
 #include "../../Detectors/include/CarDetector.h"
 #include "../../Location/include/MapMapping.h"
@@ -40,7 +39,6 @@ private:
     bool __VideoRecorderLoop_working = false;
 
     DepthQueue depthQueue;
-    MovementDetector movementDetector;
     ArmorDetector armorDetector;
     CarDetector carDetector;
     CameraThread cameraThread;
@@ -50,7 +48,6 @@ private:
     MySerial mySerial;
     VideoRecorder videoRecorder;
 
-    bool carInferAvailable = false;
     bool _if_record = false;
 
     bool is_alive = true;
@@ -61,7 +58,6 @@ private:
     shared_timed_mutex myMutex_SeqTargets;
     shared_timed_mutex myMutex_cameraThread;
     vector<Rect> SeqTargets;
-    int separation_mode = 0;
     SharedQueue<Mat> myFrames;
 
     Mat K_0_Mat;
@@ -91,8 +87,8 @@ public:
     static void LidarMainLoop(Radar *radar);
     void LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg);
     static void SeparationLoop(Radar *radar);
-    static void SerReadLoop(Radar *radar);
-    static void SerWriteLoop(Radar *radar);
+    void SerReadLoop();
+    void SerWriteLoop();
     static void MainProcessLoop(Radar *radar);
     static void VideoRecorderLoop(Radar *radar);
 
