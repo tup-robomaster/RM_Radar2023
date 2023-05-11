@@ -1,0 +1,4 @@
+[submodule "/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/TRTInference"]
+	path = /home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/TRTInference
+	url = https://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@github.com/tup-robomaster/TRTInferenceForYolo.git
+	branch = yolov5
