@@ -221,12 +221,18 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 
 void Radar::SerReadLoop()
 {
-    this->myUART.read(this->mySerial);
+    while (this->_Ser_working)
+    {
+        this->myUART.read(this->mySerial);
+    }
 }
 
 void Radar::SerWriteLoop()
 {
-    this->myUART.write(this->mySerial);
+    while (this->_Ser_working)
+    {
+        this->myUART.write(this->mySerial);
+    }
 }
 
 void Radar::MainProcessLoop()
@@ -352,9 +358,7 @@ void Radar::spin(int argc, char **argv)
         this->logger->info("SerThread initing ...Process");
         this->_Ser_working = true;
         this->serRead = thread(std::bind(&Radar::SerReadLoop, this));
-        this->serR_t = this->serRead.native_handle();
         this->serWrite = thread(std::bind(&Radar::SerWriteLoop, this));
-        this->serW_t = this->serWrite.native_handle();
         this->logger->info("SerThread initing ...Done");
     }
     if (myFrames.size() > 0)
@@ -379,10 +383,8 @@ void Radar::stop()
         this->__LidarMainLoop_working = false;
         this->__MainProcessLoop_working = false;
         this->__VideoRecorderLoop_working = false;
-        pthread_cancel(this->serR_t);
-        pthread_cancel(this->serW_t);
+        this->_Ser_working = false;
         this->videoRecoderLoop.join();
-        this->seqloop.join();
         this->processLoop.join();
         this->lidarMainloop.join();
     }

@@ -22,11 +22,8 @@ private:
     bool _is_LidarInited = false;
     ros::Subscriber sub;
     thread lidarMainloop;
-    thread seqloop;
     thread serRead;
     thread serWrite;
-    pthread_t serR_t;
-    pthread_t serW_t;
     thread processLoop;
     thread videoRecoderLoop;
     bool _init_flag = false;
