@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9.0)
 SET(CMAKE_BUILD_TYPE "Release")
 project(radar2023 LANGUAGES CXX CUDA)
 find_package(OpenCV REQUIRED)
+find_package(fmt REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
@@ -19,12 +20,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O3  -Wall")
 set(CUDA_GEN_CODE "-gencode=arch=compute_86,code=sm_86")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
+# cuda
+include_directories(/data/cuda/cuda-11.8/cuda/include)
+link_directories(/data/cuda/cuda-11.8/cuda/lib)
+# cudnn
+include_directories(/data/cuda/cuda-11.8/cudnn/v8.0.4/include)
+link_directories(/data/cuda/cuda-11.8/cudnn/v8.0.4/lib64)
+
 include_directories(
   # include
   ${catkin_INCLUDE_DIRS}
   ${CUDA_INCLUDE_DIRS}
 )
-
+include_directories(${EIGEN3_INCLUDE_DIRS})
 link_directories(
   # /opt/intel/mkl/lib/intel64
   # /opt/intel/lib/intel64
@@ -63,7 +71,11 @@ target_link_libraries(radar2023
   MVSDK
   Eigen3::Eigen
   cuda
-  spdlog::spdlog
+  spdlog
+  fmt::fmt
+  cudart
+  nvonnxparser
+  nvinfer
 )
 
 macro(remove_warnings)

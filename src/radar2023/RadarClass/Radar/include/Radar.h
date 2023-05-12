@@ -34,7 +34,6 @@ private:
     bool _Ser_working = false;
 
     bool __LidarMainLoop_working = false;
-    bool __SeparationLoop_working = false;
     bool __MainProcessLoop_working = false;
     bool __VideoRecorderLoop_working = false;
 
@@ -55,9 +54,7 @@ private:
     vector<vector<float>> publicDepth;
     int _if_DepthUpdated = 0;
     shared_timed_mutex myMutex_publicDepth;
-    shared_timed_mutex myMutex_SeqTargets;
     shared_timed_mutex myMutex_cameraThread;
-    vector<Rect> SeqTargets;
     SharedQueue<Mat> myFrames;
 
     Mat K_0_Mat;
@@ -84,13 +81,12 @@ public:
     void init(int argc, char **argv);
 
     void LidarListenerBegin(int argc, char **argv);
-    static void LidarMainLoop(Radar *radar);
+    void LidarMainLoop();
     void LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg);
-    static void SeparationLoop(Radar *radar);
     void SerReadLoop();
     void SerWriteLoop();
-    static void MainProcessLoop(Radar *radar);
-    static void VideoRecorderLoop(Radar *radar);
+    void MainProcessLoop();
+    void VideoRecorderLoop();
 
     void spin(int argc, char **argv);
     void stop();

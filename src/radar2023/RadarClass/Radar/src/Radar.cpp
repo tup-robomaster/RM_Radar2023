@@ -198,14 +198,14 @@ void Radar::LidarListenerBegin(int argc, char **argv)
     this->logger->info("Lidar inited");
 }
 
-void Radar::LidarMainLoop(Radar *radar)
+void Radar::LidarMainLoop()
 {
-    while (radar->__LidarMainLoop_working)
+    while (this->__LidarMainLoop_working)
     {
         if (ros::ok())
             ros::spinOnce();
     }
-    radar->logger->critical("LidarMainLoop Exit");
+    this->logger->critical("LidarMainLoop Exit");
 }
 
 void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
@@ -219,25 +219,6 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     ulk.unlock();
 }
 
-void Radar::SeparationLoop(Radar *radar)
-{
-    while (radar->__SeparationLoop_working)
-    {
-        vector<Rect> tempSepTargets;
-        // TODO:Check here
-        if (radar->myFrames.size() > 0)
-        {
-            Mat frame = radar->myFrames.front().clone();
-            tempSepTargets = radar->carDetector.infer(frame);
-            unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
-            if (tempSepTargets.size() > 0)
-                radar->SeqTargets.swap(tempSepTargets);
-            ulk.unlock();
-        }
-    }
-    radar->logger->critical("SeparationLoop Exit");
-}
-
 void Radar::SerReadLoop()
 {
     this->myUART.read(this->mySerial);
@@ -248,70 +229,60 @@ void Radar::SerWriteLoop()
     this->myUART.write(this->mySerial);
 }
 
-void Radar::MainProcessLoop(Radar *radar)
+void Radar::MainProcessLoop()
 {
-    while (radar->__MainProcessLoop_working)
+    while (this->__MainProcessLoop_working)
     {
-        shared_lock<shared_timed_mutex> slk(radar->myMutex_SeqTargets);
-        int check_count = radar->SeqTargets.size();
-        slk.unlock();
-        FrameBag frameBag = radar->cameraThread.read();
-        if (check_count > 0)
+        FrameBag frameBag = this->cameraThread.read();
+
+        if (!this->cameraThread.is_open())
         {
-            if (!radar->cameraThread.is_open())
-            {
-                radar->cameraThread.open();
-                continue;
-            }
-            vector<bboxAndRect> pred;
-            if (frameBag.flag)
-            {
-                vector<Rect> tempSepTargets;
-                unique_lock<shared_timed_mutex> ulk(radar->myMutex_SeqTargets);
-                tempSepTargets.swap(radar->SeqTargets);
-                ulk.unlock();
-                pred = radar->armorDetector.infer(frameBag.frame, tempSepTargets);
-#ifdef Test
-                radar->drawBbox(tempSepTargets, frameBag.frame);
-#endif
-                if (pred.size() != 0)
-                {
-                    radar->armor_filter(pred);
-                    slk.lock();
-                    radar->detectDepth(pred);
-                    slk.unlock();
-                    vector<ArmorBoundingBox> IouArmors = radar->mapMapping._IoU_prediction(pred, tempSepTargets);
-                    radar->detectDepth(IouArmors);
-#ifdef Test
-                    radar->drawArmorsForDebug(pred, frameBag.frame);
-                    radar->drawArmorsForDebug(IouArmors, frameBag.frame);
-#endif
-                    radar->mapMapping.mergeUpdata(pred, IouArmors);
-                    judge_message myJudge_message;
-                    myJudge_message.task = 1;
-                    myJudge_message.loc = radar->mapMapping.getloc();
-                    radar->send_judge(myJudge_message, radar->myUART);
-                }
-            }
-            else
-                continue;
+            this->cameraThread.open();
+            continue;
         }
+        vector<bboxAndRect> pred;
         if (frameBag.flag)
-            radar->myFrames.push(frameBag.frame);
+        {
+            vector<Rect> sepTargets = this->carDetector.infer(frameBag.frame);
+            pred = this->armorDetector.infer(frameBag.frame, sepTargets);
+#ifdef Test
+            this->drawBbox(sepTargets, frameBag.frame);
+#endif
+            if (pred.size() != 0)
+            {
+                this->armor_filter(pred);
+                this->detectDepth(pred);
+                vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
+                this->detectDepth(IouArmors);
+#ifdef Test
+                this->drawArmorsForDebug(pred, frameBag.frame);
+                this->drawArmorsForDebug(IouArmors, frameBag.frame);
+#endif
+                this->mapMapping.mergeUpdata(pred, IouArmors);
+                judge_message myJudge_message;
+                myJudge_message.task = 1;
+                myJudge_message.loc = this->mapMapping.getloc();
+                this->send_judge(myJudge_message, this->myUART);
+            }
+        }
+        else
+            continue;
+        if (frameBag.flag)
+            this->myFrames.push(frameBag.frame);
     }
-    radar->logger->critical("MainProcessLoop Exit");
+    this->logger->critical("MainProcessLoop Exit");
 }
 
-void Radar::VideoRecorderLoop(Radar *radar)
+void Radar::VideoRecorderLoop()
 {
-    while (radar->__VideoRecorderLoop_working)
+    while (this->__VideoRecorderLoop_working)
     {
-        if (radar->_if_record && radar->myFrames.size() > 0)
+        if (this->_if_record && this->myFrames.size() > 0)
         {
-            radar->videoRecorder.write(radar->myFrames.front().clone());
+            this->videoRecorder.write(this->myFrames.front().clone());
         }
     }
-    radar->logger->critical("VideoRecorderLoop Exit");
+    this->logger->critical("VideoRecorderLoop Exit");
 }
 
 void Radar::spin(int argc, char **argv)
@@ -357,11 +328,6 @@ void Radar::spin(int argc, char **argv)
         {
             this->__LidarMainLoop_working = true;
             this->lidarMainloop = thread(std::bind(&Radar::LidarMainLoop, this));
-        }
-        if (!this->__SeparationLoop_working)
-        {
-            this->__SeparationLoop_working = true;
-            this->seqloop = thread(std::bind(&Radar::SeparationLoop, this));
         }
         if (!this->__MainProcessLoop_working)
         {
@@ -412,7 +378,6 @@ void Radar::stop()
         this->_thread_working = false;
         this->__LidarMainLoop_working = false;
         this->__MainProcessLoop_working = false;
-        this->__SeparationLoop_working = false;
         this->__VideoRecorderLoop_working = false;
         pthread_cancel(this->serR_t);
         pthread_cancel(this->serW_t);
