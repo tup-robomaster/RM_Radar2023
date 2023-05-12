@@ -8,6 +8,7 @@
 #include <memory>
 #include <functional>
 #include <unistd.h>
+#include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <queue>
 #include "opencv2/core/eigen.hpp"
