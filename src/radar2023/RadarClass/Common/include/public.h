@@ -1,8 +1,5 @@
-#define EIGEN_USE_MKL_ALL
-#define EIGEN_VECTORIZE_SSE4_2
-
-#ifndef __PUBLIC_H
-#define __PUBLIC_H
+#ifndef __PUBLIC_R_H
+#define __PUBLIC_R_H
 
 #include <stdio.h>
 #include <iostream>
@@ -11,6 +8,7 @@
 #include <memory>
 #include <functional>
 #include <unistd.h>
+#include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <queue>
 #include "opencv2/core/eigen.hpp"
@@ -88,16 +86,6 @@ struct MapLocation3D
     bool flag = false;
     int id;
     int x = 0, y = 0, z = 0;
-};
-
-/**
- * @brief 预警信息
- */
-struct AlarmBag
-{
-    bool flag = false;
-    unsigned char code, team;
-    vector<unsigned char> send_targets, alarm_targets;
 };
 
 /**

@@ -13,7 +13,7 @@ void SpdLogger::registerLogger(char *logFile, char *loggerName)
     char filename[1024];
     time_t currentTime = time(NULL);
     char chCurrentTime[256];
-    strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d %H%M%S", localtime(&currentTime));
+    strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d_%H%M%S", localtime(&currentTime));
     strcat(chCurrentTime, ".txt");
     strcpy(filename, logFile);
     strcat(filename, chCurrentTime);

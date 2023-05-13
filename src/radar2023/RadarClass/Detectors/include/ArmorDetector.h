@@ -1,7 +1,7 @@
 #ifndef __ARMORDETECTOR_H
 #define __ARMORDETECTOR_H
 
-#include "./tensorRT_v5.h"
+#include "../../TRTInference/TRTInfer/include/Inference.h"
 #include "../../Common/include/general.h"
 
 /**
@@ -11,12 +11,12 @@
 class ArmorDetector
 {
 private:
-    MyTensorRT_v5 *armorTensorRT;
+    TRTInferV1::TRTInfer armorTensorRT = TRTInferV1::TRTInfer(0);
     vector<bboxAndRect> results;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 private:
     vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
-    void reBuildBoxs(vector<vector<Yolo::Detection>> &armors, vector<Rect> &boxs, vector<Mat> &img);
+    void reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors, vector<Rect> &boxs, vector<Mat> &img);
 
 public:
     ArmorDetector();

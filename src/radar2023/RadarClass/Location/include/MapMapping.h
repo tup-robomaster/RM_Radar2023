@@ -37,7 +37,7 @@ public:
     void _plot_region_rect(vector<Point3f> &points, Mat &frame, Mat &K_0, Mat &C_0);
     vector<ArmorBoundingBox> _IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs);
     vector<MapLocation3D> getloc();
-    void mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, int &sepMode);
+    void mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox);
 };
 
 #endif
