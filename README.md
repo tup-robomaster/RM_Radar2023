@@ -2,7 +2,7 @@
 
 沈阳航空航天大学T-UP战队2023赛季雷达程序
 
-## Version: V0.2 Alpha
+## Version: V0.3 Alpha
 
 程序点云接收基于ros-noetic框架
 
@@ -78,8 +78,7 @@
 * 创建以下文件夹：src/radar2023/logs 、src/radar2023/Recorder 、  src/radar2023/RadarClass/Detectors/Moudles  、 src/radar2023/RadarClass/Camera/params
 * 修改config.h中的路径
 * 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0
-* 使用demo_resource文件夹下get_wts导出模型权重
-* 将导出的.wts文件放置在src/radar2023/RadarClass/Detectors/Moudles文件夹中
+* 将yolov5导出的动态尺寸onnx放置于config.h定义位置
 * 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
 * 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
 
@@ -97,6 +96,8 @@
 ```
 
 ### 开发日志
+
+Date:2023.5.13 更换推理模块，删除废弃功能，发布V0.3a测试版本
 
 Date:2022-12-31 经过一轮调试Debug与更新，发布V0.2a测试版本
 
