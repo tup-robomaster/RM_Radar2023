@@ -21,7 +21,6 @@ public:
     int _max_hp[10] = {500};
     bool _set_max_flag = false;
     vector<vector<float>> _robot_location = vector<vector<float>>(5, vector<float>(2, 0.f));
-    queue<AlarmBag> _queue;
     int _BO = 0;
     vector<string> _stage = {"NOT START", "PREPARING", "CHECKING", "5S", "PLAYING", "END"};
     int _Now_stage = 0;
@@ -43,9 +42,6 @@ public:
     void _judge_max_hp(int _HP[16]);
     void push_loc(vector<vector<float>> &location);
     vector<vector<float>> get_position();
-    bool _send_check(unsigned char code, vector<unsigned char> &alarm_target);
-    void push(AlarmBag alarmMessage);
-    AlarmBag pop();
     void get_message();
     void Refree_MapLocationSelf_Message();
     void Referee_Update_GameData(unsigned char *buffer);

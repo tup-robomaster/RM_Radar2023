@@ -2,7 +2,6 @@
 
 CarDetector::CarDetector()
 {
-    this->carTensorRT = new MyTensorRT_v5();
 }
 
 CarDetector::~CarDetector()
@@ -12,19 +11,22 @@ CarDetector::~CarDetector()
 bool CarDetector::initModel()
 {
     this->logger->info("CarDetector init Moudel");
-    bool check = this->carTensorRT->initMyTensorRT_v5(OnnxMoudlePath_c, TensorRTEnginePath_c, Yolov5wtsPath_c, Is_p6_c, G_D_c, G_W_c, TensorRTMaxBatchSize_c, TRT_INPUT_H_c, TRT_INPUT_W_c, TRT_CLS_NUM_c, USE_FP16, TRT_kOPT_c, TRT_kMAX_c);
+    if (access(TensorRTEnginePath_c, F_OK) != 0)
+    {
+        auto engine = this->carTensorRT.createEngine(OnnxMoudlePath_c, 1, 1280, 1280);
+        this->carTensorRT.saveEngineFile(engine, TensorRTEnginePath_c);
+    }
+    bool check = this->carTensorRT.initMoudle(TensorRTEnginePath_c, 1, 1);
     if (check)
         this->logger->info("CarDetector Moudel inited");
-    else
-        this->logger->warn("Block CarDetector Moudel");
     return check;
 }
 
 vector<Rect> CarDetector::infer(Mat &image)
 {
-    vector<vector<Yolo::Detection>> results;
+    vector<vector<TRTInferV1::DetectionObj>> results;
     vector<Mat> srcs = {image};
-    results = this->carTensorRT->doInference(&srcs, 1);
+    results = this->carTensorRT.doInference(srcs, 0.7, 0.8, 0.3);
     vector<Rect> final_results;
     if (results.size() == 0)
         return final_results;
@@ -33,11 +35,10 @@ vector<Rect> CarDetector::infer(Mat &image)
         auto &res = results[i];
         for (size_t j = 0; j < res.size(); j++)
         {
-            cv::Rect r = get_rect(image, res[j].bbox, TRT_INPUT_H_c, TRT_INPUT_W_c);
 #ifdef Test
-            cout << "Car:" << r.x << "|" << r.y << "|" << r.width << "|" << r.height <<"cls:"<< res[j].class_id << "|conf:" << res[j].conf << endl;
+            cout << "Car:" << res[j].x1 << "|" << res[j].y1 << "|" << res[j].x2 << "|" << res[j].y2 << "cls:" << res[j].classId << "|conf:" << res[j].confidence << endl;
 #endif
-            final_results.emplace_back(r);
+            final_results.emplace_back(Rect(res[j].x1, res[j].y1, res[j].x2 - res[j].x1, res[j].y2 - res[j].y1));
         }
     }
     return final_results;

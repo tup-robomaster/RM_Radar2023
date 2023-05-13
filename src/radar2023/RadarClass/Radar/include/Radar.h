@@ -6,7 +6,6 @@
 #include "../../Camera/include/VideoRecorder.h"
 #include "../../Common/include/SharedQueue.h"
 #include "../../Detectors/include/depthProcesser.h"
-#include "../../Detectors/include/MovementDetector.h"
 #include "../../Detectors/include/ArmorDetector.h"
 #include "../../Detectors/include/CarDetector.h"
 #include "../../Location/include/MapMapping.h"
@@ -23,11 +22,8 @@ private:
     bool _is_LidarInited = false;
     ros::Subscriber sub;
     thread lidarMainloop;
-    thread seqloop;
     thread serRead;
     thread serWrite;
-    pthread_t serR_t;
-    pthread_t serW_t;
     thread processLoop;
     thread videoRecoderLoop;
     bool _init_flag = false;
@@ -35,12 +31,10 @@ private:
     bool _Ser_working = false;
 
     bool __LidarMainLoop_working = false;
-    bool __SeparationLoop_working = false;
     bool __MainProcessLoop_working = false;
     bool __VideoRecorderLoop_working = false;
 
     DepthQueue depthQueue;
-    MovementDetector movementDetector;
     ArmorDetector armorDetector;
     CarDetector carDetector;
     CameraThread cameraThread;
@@ -50,7 +44,6 @@ private:
     MySerial mySerial;
     VideoRecorder videoRecorder;
 
-    bool carInferAvailable = false;
     bool _if_record = false;
 
     bool is_alive = true;
@@ -58,10 +51,7 @@ private:
     vector<vector<float>> publicDepth;
     int _if_DepthUpdated = 0;
     shared_timed_mutex myMutex_publicDepth;
-    shared_timed_mutex myMutex_SeqTargets;
     shared_timed_mutex myMutex_cameraThread;
-    vector<Rect> SeqTargets;
-    int separation_mode = 0;
     SharedQueue<Mat> myFrames;
 
     Mat K_0_Mat;
@@ -88,13 +78,12 @@ public:
     void init(int argc, char **argv);
 
     void LidarListenerBegin(int argc, char **argv);
-    static void LidarMainLoop(Radar *radar);
+    void LidarMainLoop();
     void LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg);
-    static void SeparationLoop(Radar *radar);
-    static void SerReadLoop(Radar *radar);
-    static void SerWriteLoop(Radar *radar);
-    static void MainProcessLoop(Radar *radar);
-    static void VideoRecorderLoop(Radar *radar);
+    void SerReadLoop();
+    void SerWriteLoop();
+    void MainProcessLoop();
+    void VideoRecorderLoop();
 
     void spin(int argc, char **argv);
     void stop();

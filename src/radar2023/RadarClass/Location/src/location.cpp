@@ -47,9 +47,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     this->frame = FrameBag();
     this->flag = false;
     vector<Point2f>().swap(this->pick_points);
-    Mat K_0;
-    Mat C_0;
-    Mat E_0;
+    Mat K_0, C_0, E_0;
     if (!read_param(K_0, C_0, E_0))
         return false;
     Point3f red_base = location_targets.find("red_base")->second;
@@ -91,27 +89,27 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     cv::setMouseCallback("PickPoints", __callback__click, reinterpret_cast<void *>(this));
     while (true)
     {
-        putText(frame.frame, tips[(int)(enemy)][pick_points.size()], Point(tip_w, tip_h), HersheyFonts::FONT_HERSHEY_SIMPLEX, 3, Scalar(0, 255, 0), 2);
+        putText(frame.frame, tips[(int)(enemy)][pick_points.size()], Point(tip_w, tip_h), HersheyFonts::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0), 2);
         for (const auto &it : pick_points)
             circle(frame.frame, it, 1, Scalar(0, 255, 0), 2);
         for (size_t i = 1; i < pick_points.size(); ++i)
-            line(frame.frame, pick_points[i - 1], pick_points[i], Scalar(0, 255, 0), 2);
+            line(frame.frame, pick_points[i - 1], pick_points[i], cv::Scalar(0, 255, 0), 2);
         imshow("PickPoints", frame.frame);
         if (flag)
         {
             if (pick_points.size() == 4)
             {
-                line(frame.frame, pick_points[3], pick_points[0], Scalar(0, 255, 0), 2);
+                line(frame.frame, pick_points[3], pick_points[0], cv::Scalar(0, 255, 0), 2);
                 imshow("PickPoints", frame.frame);
             }
             int key = waitKey(0);
             if (key == 90 || key == 122)
             {
                 if (pick_points.size() == 4)
-                    line(frame.frame, pick_points[3], pick_points[0], Scalar(0, 0, 255), 2);
+                    line(frame.frame, pick_points[3], pick_points[0], cv::Scalar(0, 0, 255), 2);
                 else if (pick_points.size() > 1)
-                    line(frame.frame, pick_points[pick_points.size() - 1], pick_points[pick_points.size() - 2], Scalar(0, 0, 255), 2);
-                circle(frame.frame, pick_points[pick_points.size() - 1], 1, Scalar(0, 0, 255), 2);
+                    line(frame.frame, pick_points[pick_points.size() - 1], pick_points[pick_points.size() - 2], cv::Scalar(0, 0, 255), 2);
+                circle(frame.frame, pick_points[pick_points.size() - 1], 1, cv::Scalar(0, 0, 255), 2);
                 pick_points.pop_back();
                 imshow("PickPoints", frame.frame);
             }
