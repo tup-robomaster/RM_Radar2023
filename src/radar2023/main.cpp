@@ -2,7 +2,6 @@
 
 int main(int argc, char **argv)
 {
-    cudaSetDevice(0);
     SpdLogger myLogger;
     myLogger.registerLogger(LOGPATH, (char *)"RadarLogger");
     Radar myRadar;

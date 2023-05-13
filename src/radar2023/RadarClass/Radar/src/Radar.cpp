@@ -387,6 +387,8 @@ void Radar::stop()
         this->videoRecoderLoop.join();
         this->processLoop.join();
         this->lidarMainloop.join();
+        this->serRead.join();
+        this->serWrite.join();
     }
     if (this->cameraThread.is_open())
         this->cameraThread.stop();

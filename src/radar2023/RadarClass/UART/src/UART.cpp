@@ -159,6 +159,8 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
 void UART::ControlLoop_red()
 {
     if (this->Id_red == 5)
+        this->Id_red = 7;
+    else if (this->Id_red == 7)
         this->Id_red = 1;
     else
         ++this->Id_red;
@@ -167,6 +169,8 @@ void UART::ControlLoop_red()
 void UART::ControlLoop_blue()
 {
     if (this->Id_blue == 5)
+        this->Id_blue = 7;
+    else if (this->Id_blue == 7)
         this->Id_blue = 1;
     else
         ++this->Id_blue;
