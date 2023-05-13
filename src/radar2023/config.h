@@ -18,9 +18,9 @@
 #define CAMERA_PARAM_PATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/camera0.yaml" // 相机参数文件
 #define VideoRecoderRath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/Recorder/"                              // 录制保存文件
 
-#define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/armor.onnx"
-#define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/armor.onnx"
-#define TensorRTEnginePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/best.engine"     // Engine
+#define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/43best.onnx"
+#define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/best.onnx"
+#define TensorRTEnginePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/43best.engine"     // Engine
 #define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/best.engine" // Engine
 
 #define MAXBO 3
@@ -35,4 +35,4 @@
 #define Real_Size_H 28. // 真实高度（长）
 #define IoU_THRE 0.8f
 
-#define LOGPATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/logs" // log日志存储文件夹
+#define LOGPATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/logs/" // log日志存储文件夹

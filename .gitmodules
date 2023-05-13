@@ -1,4 +1,4 @@
 [submodule "src/radar2023/RadarClass/TRTInference"]
 	path = src/radar2023/RadarClass/TRTInference
-	url = https://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@github.com/tup-robomaster/TRTInferenceForYolo.git
+	url = https://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@github.com/tup-robomaster/TRTInferenceForYolo.git
 	branch = yolov5

@@ -11,7 +11,12 @@ ArmorDetector::~ArmorDetector()
 bool ArmorDetector::initModel()
 {
     this->logger->info("ArmorDetector init Moudel");
-    bool check = this->armorTensorRT.initMoudle(TensorRTEnginePath, 32, 16);
+    if (access(TensorRTEnginePath, F_OK) != 0)
+    {
+        auto engine = this->armorTensorRT.createEngine(OnnxMoudlePath, 64, 640, 640);
+        this->armorTensorRT.saveEngineFile(engine, TensorRTEnginePath);
+    }
+    bool check = this->armorTensorRT.initMoudle(TensorRTEnginePath, 32, 36);
     this->logger->info("ArmorDetector Moudel inited");
     return check;
 }
