@@ -15,7 +15,7 @@ private:
     vector<bboxAndRect> results;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 private:
-    vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
+    vector<Mat> preProcess(Mat image, vector<Rect> &movingTargets);
     void reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors, vector<Rect> &boxs, vector<Mat> &img);
 
 public:

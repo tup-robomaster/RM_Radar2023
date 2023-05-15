@@ -2,7 +2,7 @@
 
 MapMapping::MapMapping()
 {
-    vector<MapLocation3D> temp_1(10, MapLocation3D());
+    vector<MapLocation3D> temp_1(12, MapLocation3D());
     this->_location3D.swap(temp_1);
     vector<vector<MapLocation3D>> temp_2(2, vector<MapLocation3D>(10, MapLocation3D()));
     this->_location_cache.swap(temp_2);
@@ -138,7 +138,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
         this->logger->error("Can't get _T !");
         return;
     }
-    vector<MapLocation3D> temp(10, MapLocation3D());
+    vector<MapLocation3D> temp(12, MapLocation3D());
     this->_location3D.swap(temp);
     vector<ArmorBoundingBox> locations;
     if (pred.size() > 0)

@@ -32,13 +32,18 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
     return this->results;
 }
 
-vector<Mat> ArmorDetector::preProcess(Mat &image, vector<Rect> &movingTargets)
+vector<Mat> ArmorDetector::preProcess(Mat image, vector<Rect> &movingTargets)
 {
     vector<Mat> output;
-    for (auto &it : movingTargets)
+    for (auto it : movingTargets)
     {
         makeRectSafe(it, image);
-        output.emplace_back(image(it));
+        if (it.width == 0 || it.height == 0)
+        {
+            continue;
+        }
+        Mat src = image(it);
+        output.emplace_back(src);
     }
     return output;
 }

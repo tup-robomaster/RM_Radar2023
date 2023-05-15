@@ -8,11 +8,16 @@ MySerial::~MySerial()
 {
 }
 
-void MySerial::initSerial()
+void MySerial::initSerial(std::string sername, std::string password)
 {
     if (this->fd != -1)
         return;
-    this->fd = open(SerialPortNAME, O_RDWR | O_NONBLOCK | O_NOCTTY | O_NDELAY);
+    if (system(("echo " + password + " | sudo -S chmod a+rw " + sername).c_str()) != 0)
+    {
+        this->logger->error("Serial :Failed to get permission!");
+        return;
+    }
+    this->fd = open(sername.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY | O_NDELAY);
     if (this->fd == -1)
     {
         this->logger->error("Serial init failed");

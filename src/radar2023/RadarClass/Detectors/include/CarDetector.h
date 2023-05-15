@@ -12,7 +12,6 @@ class CarDetector
 {
 private:
     TRTInferV1::TRTInfer carTensorRT = TRTInferV1::TRTInfer(0);
-    vector<ArmorBoundingBox> results;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:

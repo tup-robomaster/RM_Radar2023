@@ -178,7 +178,7 @@ void Radar::init(int argc, char **argv)
             this->logger->flush();
             return;
         }
-        this->mySerial.initSerial();
+        this->mySerial.initSerial(SerialPortNAME, PASSWORD);
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
         this->cameraThread.start();
         this->_init_flag = true;
@@ -225,6 +225,7 @@ void Radar::SerReadLoop()
     {
         this->myUART.read(this->mySerial);
     }
+    this->logger->critical("SerReadLoop Exit");
 }
 
 void Radar::SerWriteLoop()
@@ -233,6 +234,7 @@ void Radar::SerWriteLoop()
     {
         this->myUART.write(this->mySerial);
     }
+    this->logger->critical("SerWriteLoop Exit");
 }
 
 void Radar::MainProcessLoop()
@@ -246,11 +248,10 @@ void Radar::MainProcessLoop()
             this->cameraThread.open();
             continue;
         }
-        vector<bboxAndRect> pred;
         if (frameBag.flag)
         {
             vector<Rect> sepTargets = this->carDetector.infer(frameBag.frame);
-            pred = this->armorDetector.infer(frameBag.frame, sepTargets);
+            vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
 #ifdef Test
             this->drawBbox(sepTargets, frameBag.frame);
 #endif
@@ -347,13 +348,13 @@ void Radar::spin(int argc, char **argv)
         }
         this->logger->info("Thread starting ...Done");
     }
-    if (!this->mySerial._is_open())
+    if (!this->mySerial._is_open() && this->is_alive)
     {
         this->logger->info("Serial initing ...Process");
-        this->mySerial.initSerial();
+        this->mySerial.initSerial(SerialPortNAME, PASSWORD);
         this->logger->info("Serial initing ...Done");
     }
-    if (!this->_Ser_working && this->mySerial._is_open())
+    if (!this->_Ser_working && this->mySerial._is_open() && this->is_alive)
     {
         this->logger->info("SerThread initing ...Process");
         this->_Ser_working = true;
@@ -361,7 +362,7 @@ void Radar::spin(int argc, char **argv)
         this->serWrite = thread(std::bind(&Radar::SerWriteLoop, this));
         this->logger->info("SerThread initing ...Done");
     }
-    if (myFrames.size() > 0)
+    if (myFrames.size() > 0 && this->is_alive)
     {
         Mat frame = myFrames.front().clone();
         this->mapMapping._plot_region_rect(this->location_show, frame, this->K_0_Mat, this->C_0_Mat);

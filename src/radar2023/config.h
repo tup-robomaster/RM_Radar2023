@@ -3,6 +3,8 @@
 #define Test                                                //测试标志
 // #define UsingVideo                                          //是否使用视频
 
+#define PASSWORD (char *)"momoko11"
+
 #define SerialPortNAME (char *)"/dev/ttyUSB0"
 #define lidarTopicName (char *)"/livox/lidar"
 
@@ -20,8 +22,8 @@
 
 #define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/43best.onnx"
 #define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/best.onnx"
-#define TensorRTEnginePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/43best.engine"     // Engine
-#define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/best.engine" // Engine
+#define TensorRTEnginePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/model_trt.engine"     // Engine
+#define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/model_trt_c.engine" // Engine
 
 #define MAXBO 3
 #define ENEMY 1

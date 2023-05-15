@@ -13,7 +13,7 @@ bool CarDetector::initModel()
     this->logger->info("CarDetector init Moudel");
     if (access(TensorRTEnginePath_c, F_OK) != 0)
     {
-        auto engine = this->carTensorRT.createEngine(OnnxMoudlePath_c, 1, 1280, 1280);
+        auto engine = this->carTensorRT.createEngine(OnnxMoudlePath_c, 4, 1280, 1280);
         this->carTensorRT.saveEngineFile(engine, TensorRTEnginePath_c);
     }
     bool check = this->carTensorRT.initMoudle(TensorRTEnginePath_c, 1, 1);
@@ -25,21 +25,18 @@ bool CarDetector::initModel()
 vector<Rect> CarDetector::infer(Mat &image)
 {
     vector<vector<TRTInferV1::DetectionObj>> results;
-    vector<Mat> srcs = {image};
-    results = this->carTensorRT.doInference(srcs, 0.7, 0.8, 0.3);
+    vector<Mat> srcs;
+    srcs.emplace_back(image);
+    results = this->carTensorRT.doInference(srcs, 0.6, 0.1, 0.3);
     vector<Rect> final_results;
     if (results.size() == 0)
         return final_results;
-    for (size_t i = 0; i < srcs.size(); ++i)
+    for (size_t j = 0; j < results[0].size(); j++)
     {
-        auto &res = results[i];
-        for (size_t j = 0; j < res.size(); j++)
-        {
 #ifdef Test
-            cout << "Car:" << res[j].x1 << "|" << res[j].y1 << "|" << res[j].x2 << "|" << res[j].y2 << "cls:" << res[j].classId << "|conf:" << res[j].confidence << endl;
+        cout << "Car:" << results[0][j].x1 << "|" << results[0][j].y1 << "|" << results[0][j].x2 << "|" << results[0][j].y2 << "cls:" << results[0][j].classId << "|conf:" << results[0][j].confidence << endl;
 #endif
-            final_results.emplace_back(Rect(res[j].x1, res[j].y1, res[j].x2 - res[j].x1, res[j].y2 - res[j].y1));
-        }
+        final_results.emplace_back(Rect(results[0][j].x1, results[0][j].y1, results[0][j].x2 - results[0][j].x1, results[0][j].y2 - results[0][j].y1));
     }
     return final_results;
 }

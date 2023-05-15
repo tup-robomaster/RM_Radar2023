@@ -22,7 +22,7 @@ public:
     MySerial();
     ~MySerial();
 
-    void initSerial();
+    void initSerial(std::string sername, std::string password);
     bool _is_open();
 
     void msread(unsigned char buffer[], size_t size);

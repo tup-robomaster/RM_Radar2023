@@ -390,6 +390,5 @@ void UART::read(MySerial &ser)
 
 void UART::write(MySerial &ser)
 {
-
     this->Robot_Data_Transmit_Map(ser);
 }
