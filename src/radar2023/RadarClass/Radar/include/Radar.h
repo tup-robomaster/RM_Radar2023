@@ -29,7 +29,7 @@ private:
     bool _init_flag = false;
     bool _thread_working = false;
     bool _Ser_working = false;
-
+    bool _CameraThread_working = false;
     bool __LidarMainLoop_working = false;
     bool __MainProcessLoop_working = false;
     bool __VideoRecorderLoop_working = false;

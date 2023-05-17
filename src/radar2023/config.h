@@ -18,7 +18,7 @@
 #define LidarQueueSize 1   // 雷达消息队列
 
 #define CAMERA_PARAM_PATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/camera0.yaml" // 相机参数文件
-#define VideoRecoderRath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/Recorder/"                              // 录制保存文件
+#define VideoRecoderRath (char *)"/home/ninefish/nine-fish/RM_Radar2023/Record/"                              // 录制保存文件
 
 #define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/43best.onnx"
 #define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/best.onnx"

@@ -17,17 +17,17 @@ void MySerial::initSerial(std::string sername, std::string password)
         this->logger->error("Serial :Failed to get permission!");
         return;
     }
-    this->fd = open(sername.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY | O_NDELAY);
+    this->fd = open(sername.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY);
     if (this->fd == -1)
     {
         this->logger->error("Serial init failed");
         return;
     }
 
-    if (fcntl(this->fd, F_SETFL, 0) < 0) // 改为阻塞模式
+    if (fcntl(this->fd, F_SETFL, FNDELAY) < 0)
         this->logger->error("fcntl failed");
     else
-        this->logger->info("fcntl={}", fcntl(this->fd, F_SETFL, 0));
+        this->logger->info("fcntl={}", fcntl(this->fd, F_SETFL, FNDELAY));
 
     tcgetattr(this->fd, &this->options);
 

@@ -27,7 +27,7 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
     if (targets.size() == 0)
         return {};
     vector<Mat> preProcessedImage = this->preProcess(image, targets);
-    results_pre = this->armorTensorRT.doInference(preProcessedImage, 0.6, 0.6, 0.3);
+    results_pre = this->armorTensorRT.doInference(preProcessedImage, 0.1, 0.1, 0.3);
     this->reBuildBoxs(results_pre, targets, preProcessedImage);
     return this->results;
 }
@@ -45,7 +45,6 @@ vector<Mat> ArmorDetector::preProcess(Mat &image, vector<Rect> &movingTargets)
         {
             makeRectSafe(*it, image);
             output.emplace_back(image(*it));
-            imshow("Test",image(*it));
             ++it;
         }
     }
@@ -62,9 +61,7 @@ void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors
     {
         for (auto &it : armors[i])
         {
-#ifdef Test
-            cout << "Arrmor:" << it.x1 << "|" << it.y1 << "|" << it.x2 << "|" << it.y2 << "cls:" << it.classId << "|conf:" << it.confidence << endl;
-#endif
+            this->logger->info("Arrmor: [x1] " + to_string(it.x1) + " [y1] " + to_string(it.y1) + " [x2] " + to_string(it.x2) + " [y2] " + to_string(it.y2) + " [cls] " + to_string(it.classId) + " [conf] " + to_string(it.confidence));
             this->results.emplace_back(bboxAndRect{ArmorBoundingBox{true, (float)it.x1 + boxs[i].x, (float)it.y1 + boxs[i].y, (float)(it.x2 - it.x1), (float)(it.y2 - it.y1), (float)it.classId, it.confidence}, boxs[i]});
         }
     }

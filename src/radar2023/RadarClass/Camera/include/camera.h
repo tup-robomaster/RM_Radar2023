@@ -49,6 +49,7 @@ class CameraThread
 {
 private:
     bool _open = false;
+    bool _alive = true;
 #ifdef UsingVideo
     VideoCapture _cap;
 #else

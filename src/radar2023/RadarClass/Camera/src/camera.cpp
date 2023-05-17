@@ -161,6 +161,7 @@ void CameraThread::stop()
 {
     this->_is_init = false;
     this->_open = false;
+    this->_alive = false;
     this->release();
 }
 
@@ -243,7 +244,7 @@ void CameraThread::open()
             this->_is_init = true;
     }
 #else
-    if (!this->_open)
+    if (!this->_open && this->_alive)
     {
         this->openCamera(this->_is_init);
         this->_open = this->_cap._openflag;

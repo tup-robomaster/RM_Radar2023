@@ -9,7 +9,7 @@ VideoRecorder::~VideoRecorder()
     this->close();
 }
 
-void VideoRecorder::init(char *videoPath, int coder, Size size)
+bool VideoRecorder::init(char *videoPath, int coder, Size size)
 {
     if (!this->vw.isOpened())
     {
@@ -24,8 +24,10 @@ void VideoRecorder::init(char *videoPath, int coder, Size size)
         if (!this->vw.open(filename, coder, 60.0, size, true))
         {
             this->logger->warn("Block Video Recoder");
+            return false;
         }
     }
+    return true;
 }
 
 void VideoRecorder::write(Mat src)

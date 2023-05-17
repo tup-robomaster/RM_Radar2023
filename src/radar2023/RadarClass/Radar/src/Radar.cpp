@@ -179,7 +179,7 @@ void Radar::init(int argc, char **argv)
             return;
         }
         this->mySerial.initSerial(SerialPortNAME, PASSWORD);
-        this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
+        this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH)) ? setTrackbarPos("Recorder", "ControlPanel", 1) : setTrackbarPos("Recorder", "ControlPanel", 0);
         this->cameraThread.start();
         this->_init_flag = true;
         this->logger->info("Init Done");
@@ -258,6 +258,8 @@ void Radar::MainProcessLoop()
             if (pred.size() != 0)
             {
                 this->armor_filter(pred);
+                if (this->_if_DepthUpdated == 0)
+                    return;
                 this->detectDepth(pred);
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                 this->detectDepth(IouArmors);
@@ -292,6 +294,10 @@ void Radar::VideoRecorderLoop()
         if (this->_if_record && this->myFrames.size() > 0)
         {
             this->videoRecorder.write(this->myFrames.front().clone());
+        }
+        else if (!this->_if_record)
+        {
+            this->videoRecorder.close();
         }
     }
     this->logger->critical("VideoRecorderLoop Exit");
@@ -382,12 +388,14 @@ void Radar::stop()
     this->is_alive = false;
     this->logger->warn("Start Shutdown Process...");
     this->logger->flush();
+    this->cameraThread.stop();
     cv::destroyAllWindows();
     if (this->_thread_working)
     {
         this->_thread_working = false;
         this->__LidarMainLoop_working = false;
         this->__MainProcessLoop_working = false;
+        this->_if_record = false;
         this->__VideoRecorderLoop_working = false;
         this->_Ser_working = false;
         this->videoRecoderLoop.join();

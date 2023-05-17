@@ -17,7 +17,7 @@ public:
     VideoRecorder();
     ~VideoRecorder();
 
-    void init(char *videoPath, int coder, Size size);
+    bool init(char *videoPath, int coder, Size size);
     void write(Mat src);
     void close();
 };
