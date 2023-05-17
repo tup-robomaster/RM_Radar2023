@@ -241,8 +241,8 @@ void Radar::MainProcessLoop()
 {
     while (this->__MainProcessLoop_working)
     {
+        auto start_t = std::chrono::system_clock::now().time_since_epoch();
         FrameBag frameBag = this->cameraThread.read();
-
         if (!this->cameraThread.is_open())
         {
             this->cameraThread.open();
@@ -274,6 +274,11 @@ void Radar::MainProcessLoop()
         }
         else
             continue;
+        auto end_t = std::chrono::system_clock::now().time_since_epoch();
+        char ch[255];
+        sprintf(ch, "FPS %d", int(std::chrono::nanoseconds(1000000000).count() / (end_t - start_t).count()));
+        std::string fps_str = ch;
+        cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0});
         if (frameBag.flag)
             this->myFrames.push(frameBag.frame);
     }

@@ -27,24 +27,29 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
     if (targets.size() == 0)
         return {};
     vector<Mat> preProcessedImage = this->preProcess(image, targets);
-    results_pre = this->armorTensorRT.doInference(preProcessedImage, 0.7, 0.6, 0.3);
+    results_pre = this->armorTensorRT.doInference(preProcessedImage, 0.6, 0.6, 0.3);
     this->reBuildBoxs(results_pre, targets, preProcessedImage);
     return this->results;
 }
 
-vector<Mat> ArmorDetector::preProcess(Mat image, vector<Rect> &movingTargets)
+vector<Mat> ArmorDetector::preProcess(Mat &image, vector<Rect> &movingTargets)
 {
     vector<Mat> output;
-    for (auto it : movingTargets)
+    for (vector<Rect>::iterator it = movingTargets.begin(); it != movingTargets.end();)
     {
-        makeRectSafe(it, image);
-        if (it.width == 0 || it.height == 0)
+        if (it->width == 0 || it->height == 0)
         {
-            continue;
+            it = movingTargets.erase(it);
         }
-        Mat src = image(it);
-        output.emplace_back(src);
+        else
+        {
+            makeRectSafe(*it, image);
+            output.emplace_back(image(*it));
+            imshow("Test",image(*it));
+            ++it;
+        }
     }
+
     return output;
 }
 
