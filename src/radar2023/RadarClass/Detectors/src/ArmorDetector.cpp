@@ -16,7 +16,7 @@ bool ArmorDetector::initModel()
         auto engine = this->armorTensorRT.createEngine(OnnxMoudlePath, 64, 640, 640);
         this->armorTensorRT.saveEngineFile(engine, TensorRTEnginePath);
     }
-    bool check = this->armorTensorRT.initMoudle(TensorRTEnginePath, 32, 36);
+    bool check = this->armorTensorRT.initModule(TensorRTEnginePath, 32, 36);
     this->logger->info("ArmorDetector Moudel inited");
     return check;
 }
@@ -69,5 +69,5 @@ void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors
 
 void ArmorDetector::unInit()
 {
-    this->armorTensorRT.unInitMoudle();
+    this->armorTensorRT.unInitModule();
 }

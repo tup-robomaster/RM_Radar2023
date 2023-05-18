@@ -16,7 +16,7 @@ bool CarDetector::initModel()
         auto engine = this->carTensorRT.createEngine(OnnxMoudlePath_c, 4, 1280, 1280);
         this->carTensorRT.saveEngineFile(engine, TensorRTEnginePath_c);
     }
-    bool check = this->carTensorRT.initMoudle(TensorRTEnginePath_c, 1, 1);
+    bool check = this->carTensorRT.initModule(TensorRTEnginePath_c, 1, 1);
     if (check)
         this->logger->info("CarDetector Moudel inited");
     return check;
@@ -41,5 +41,5 @@ vector<Rect> CarDetector::infer(Mat &image)
 
 void CarDetector::unInit()
 {
-    this->carTensorRT.unInitMoudle();
+    this->carTensorRT.unInitModule();
 }
