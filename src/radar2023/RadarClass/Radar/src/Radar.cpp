@@ -261,7 +261,7 @@ void Radar::MainProcessLoop()
                 if (this->_if_DepthUpdated == 0)
                 {
                     this->logger->info("No Lidar Msg , Return");
-                    return;
+                    continue;
                 }
                 this->detectDepth(pred);
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
