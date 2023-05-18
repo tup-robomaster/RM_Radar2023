@@ -259,7 +259,10 @@ void Radar::MainProcessLoop()
             {
                 this->armor_filter(pred);
                 if (this->_if_DepthUpdated == 0)
+                {
+                    this->logger->info("No Lidar Msg , Return");
                     return;
+                }
                 this->detectDepth(pred);
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                 this->detectDepth(IouArmors);
@@ -277,10 +280,12 @@ void Radar::MainProcessLoop()
         else
             continue;
         auto end_t = std::chrono::system_clock::now().time_since_epoch();
+#ifdef Test
         char ch[255];
         sprintf(ch, "FPS %d", int(std::chrono::nanoseconds(1000000000).count() / (end_t - start_t).count()));
         std::string fps_str = ch;
         cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0});
+#endif
         if (frameBag.flag)
             this->myFrames.push(frameBag.frame);
     }
@@ -388,14 +393,16 @@ void Radar::stop()
     this->is_alive = false;
     this->logger->warn("Start Shutdown Process...");
     this->logger->flush();
-    this->cameraThread.stop();
+    if (this->cameraThread.is_open())
+        this->cameraThread.stop();
+    this->videoRecorder.close();
+    this->_if_record = false;
     cv::destroyAllWindows();
     if (this->_thread_working)
     {
         this->_thread_working = false;
         this->__LidarMainLoop_working = false;
         this->__MainProcessLoop_working = false;
-        this->_if_record = false;
         this->__VideoRecorderLoop_working = false;
         this->_Ser_working = false;
         this->videoRecoderLoop.join();
@@ -404,9 +411,8 @@ void Radar::stop()
         this->serRead.join();
         this->serWrite.join();
     }
-    if (this->cameraThread.is_open())
-        this->cameraThread.stop();
-    this->videoRecorder.close();
+    this->armorDetector.unInit();
+    this->carDetector.unInit();
     this->logger->warn("Program Shutdown");
 }
 

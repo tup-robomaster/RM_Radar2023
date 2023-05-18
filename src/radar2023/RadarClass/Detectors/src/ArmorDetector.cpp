@@ -66,3 +66,8 @@ void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors
         }
     }
 }
+
+void ArmorDetector::unInit()
+{
+    this->armorTensorRT.unInitMoudle();
+}

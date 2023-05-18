@@ -38,3 +38,8 @@ vector<Rect> CarDetector::infer(Mat &image)
     }
     return final_results;
 }
+
+void CarDetector::unInit()
+{
+    this->carTensorRT.unInitMoudle();
+}

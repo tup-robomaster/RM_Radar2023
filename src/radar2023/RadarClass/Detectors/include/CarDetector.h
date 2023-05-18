@@ -20,6 +20,7 @@ public:
 
     bool initModel();
     vector<Rect> infer(Mat &image);
+    void unInit();
 };
 
 #endif

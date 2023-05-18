@@ -25,6 +25,7 @@ public:
 
     bool initModel();
     vector<bboxAndRect> infer(Mat &image, vector<Rect> &targets);
+    void unInit();
 };
 
 #endif
