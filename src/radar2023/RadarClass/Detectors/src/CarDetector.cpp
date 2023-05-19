@@ -27,7 +27,7 @@ vector<Rect> CarDetector::infer(Mat &image)
     vector<vector<TRTInferV1::DetectionObj>> results;
     vector<Mat> srcs;
     srcs.emplace_back(image);
-    results = this->carTensorRT.doInference(srcs, 0.6, 0.1, 0.3);
+    results = this->carTensorRT.doInference(srcs, 0.1, 0.45, 0.3);
     vector<Rect> final_results;
     if (results.size() == 0)
         return final_results;

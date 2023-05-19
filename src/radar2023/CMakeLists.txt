@@ -17,7 +17,7 @@ include_directories()
 add_compile_options(-std=c++17)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=16000000")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O3  -Wall")
-set(CUDA_GEN_CODE "-gencode=arch=compute_86,code=sm_86")
+set(CUDA_GEN_CODE "-gencode=arch=compute_89,code=sm_89")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
 catkin_package(CATKIN_DEPENDS

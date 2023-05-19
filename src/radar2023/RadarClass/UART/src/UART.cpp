@@ -381,7 +381,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 36 && this->cmdID == 0x020B)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
+        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 36))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -391,7 +391,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 4 && this->cmdID == 0x0104)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
+        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 4))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)

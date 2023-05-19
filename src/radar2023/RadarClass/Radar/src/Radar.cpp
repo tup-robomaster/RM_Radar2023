@@ -3,8 +3,8 @@
 void Radar::armor_filter(vector<bboxAndRect> &pred)
 {
     vector<bboxAndRect> results;
-    int ids[10] = {1, 2, 3, 4, 5, 8, 9, 10, 11, 12};
-    for (int i = 0; i < 10; ++i)
+    int ids[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    for (int i = 0; i < 12; ++i)
     {
         int max_id = 0;
         float max_conf = 0.f;
@@ -122,10 +122,7 @@ void Radar::drawArmorsForDebug(vector<bboxAndRect> &armors, Mat &img)
     for (auto &it : armors)
     {
         Rect temp = Rect(it.armor.x0, it.armor.y0, it.armor.w, it.armor.h);
-        cv::rectangle(img, temp, Scalar(255, 255, 0), 2);
-        stringstream ss;
-        ss << it.armor.cls << "[Depth]" << it.armor.depth << "[Conf]" << it.armor.conf;
-        cv::putText(img, ss.str(), Point2i(int(it.armor.x0 + it.armor.w / 2), int(it.armor.y0 + it.armor.h / 2)), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 255));
+        cv::rectangle(img, temp, Scalar(0, 255, 0), 2);
     }
 }
 
@@ -252,6 +249,7 @@ void Radar::MainProcessLoop()
             vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
 #ifdef Test
             this->drawBbox(sepTargets, frameBag.frame);
+            // this->drawArmorsForDebug(pred, frameBag.frame);
 #endif
             if (pred.size() != 0)
             {
@@ -265,10 +263,9 @@ void Radar::MainProcessLoop()
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                 this->detectDepth(IouArmors);
 #ifdef Test
-                this->drawArmorsForDebug(pred, frameBag.frame);
-                this->drawArmorsForDebug(IouArmors, frameBag.frame);
+                // this->drawArmorsForDebug(IouArmors, frameBag.frame);
 #endif
-                //TODO:FIX HERE
+                // TODO:FIX HERE
                 this->mapMapping.mergeUpdata(pred, IouArmors);
                 judge_message myJudge_message;
                 myJudge_message.task = 1;
