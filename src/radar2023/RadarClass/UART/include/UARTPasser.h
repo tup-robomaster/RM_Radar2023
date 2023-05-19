@@ -20,7 +20,7 @@ public:
     int _HP[16] = {500};
     int _max_hp[10] = {500};
     bool _set_max_flag = false;
-    vector<vector<float>> _robot_location = vector<vector<float>>(5, vector<float>(2, 0.f));
+    vector<vector<float>> _robot_location = vector<vector<float>>(6, vector<float>(2, 0.f));
     int _BO = 0;
     vector<string> _stage = {"NOT START", "PREPARING", "CHECKING", "5S", "PLAYING", "END"};
     int _Now_stage = 0;
@@ -39,7 +39,6 @@ public:
     int bytes2Int(unsigned char a, unsigned char b);
     float bytesToFloat(unsigned char bytes[]);
 
-    void _judge_max_hp(int _HP[16]);
     void push_loc(vector<vector<float>> &location);
     vector<vector<float>> get_position();
     void get_message();

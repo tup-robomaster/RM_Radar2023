@@ -18,46 +18,6 @@ float UARTPasser::bytesToFloat(unsigned char bytes[])
     return *((float *)bytes);
 }
 
-void UARTPasser::_judge_max_hp(int _HP[16])
-{
-    int temp[10];
-    int count = 0;
-    for (int i = 0; i < 16; ++i)
-    {
-        if (i == 0 || i == 1 || i == 2 || i == 3 || i == 4 || i == 8 || i == 9 || i == 10 || i == 11 || i == 12)
-        {
-            temp[count] = _HP[i];
-            count++;
-        }
-    }
-    for (int i = 0; i < 10; ++i)
-    {
-        if (i == 1 || i == 9)
-            continue;
-        if (temp[i] - this->_last_hp[i] > 30 && temp[i] - this->_last_hp[i] <= 80 && this->_last_hp > 0)
-            this->_max_hp[i] += 50;
-        if (temp[i] - this->_last_hp[i] <= 80 && this->_last_hp > 0)
-            this->_max_hp[i] += 100;
-        if (temp[i] > this->_max_hp[i])
-        {
-            for (int j = 0; j < 9; ++j)
-            {
-                if (temp[i] < this->_hp_up[i])
-                    this->_max_hp[i] = this->_hp_up[i];
-            }
-        }
-    }
-    count = 0;
-    for (int i = 0; i < 16; ++i)
-    {
-        if (i == 0 || i == 1 || i == 2 || i == 3 || i == 4 || i == 8 || i == 9 || i == 10 || i == 11 || i == 12)
-        {
-            _HP[i] = temp[count];
-            count++;
-        }
-    }
-}
-
 void UARTPasser::push_loc(vector<vector<float>> &location)
 {
     this->_robot_location.swap(location);
@@ -104,7 +64,7 @@ void UARTPasser::Referee_Robot_HP(unsigned char *buffer)
 {
     for (int i = 0; i < 16; ++i)
     {
-        this->_HP[0] = this->bytes2Int(buffer[(i + 4) * 2 - 1], buffer[(i + 4) * 2]);
+        this->_HP[i] = this->bytes2Int(buffer[(i + 4) * 2 - 1], buffer[(i + 4) * 2]);
     }
 }
 

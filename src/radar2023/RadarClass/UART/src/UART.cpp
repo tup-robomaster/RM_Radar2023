@@ -10,11 +10,6 @@ UART::~UART()
 {
 }
 
-void UART::Refree_Arial_Message()
-{
-    int key = this->buffer[17];
-    // TODO:对云台手操作进行响应
-}
 
 void UART::Judge_Refresh_Result()
 {
@@ -135,25 +130,25 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
         flag = true;
     if (!ENEMY && flag)
     {
-        this->Referee_Transmit_Map(0x0305, 14, Id_red, location[0], location[1], ser);
+        this->Referee_Transmit_Map(0x0305, 14, this->Id_red, location[0], location[1], ser);
         sleep(0.1);
         this->ControlLoop_red();
     }
     else if (flag)
     {
-        this->Referee_Transmit_Map(0x0305, 14, Id_blue, location[0], location[1], ser);
+        this->Referee_Transmit_Map(0x0305, 14, this->Id_blue, location[0], location[1], ser);
         sleep(0.1);
         this->ControlLoop_blue();
     }
     if (flag)
         ++this->myUARTPasser.loop_send;
-    if (this->ind == 4)
+    if (this->ind == 5)
     {
         if (this->myUARTPasser.loop_send == 0)
             sleep(0.1);
         this->myUARTPasser.loop_send = 0;
     }
-    this->ind = (this->ind + 1) % 5;
+    this->ind = (this->ind + 1) % 6;
 }
 
 void UART::ControlLoop_red()
@@ -168,10 +163,10 @@ void UART::ControlLoop_red()
 
 void UART::ControlLoop_blue()
 {
-    if (this->Id_blue == 5)
-        this->Id_blue = 7;
-    else if (this->Id_blue == 7)
-        this->Id_blue = 1;
+    if (this->Id_blue == 105)
+        this->Id_blue = 107;
+    else if (this->Id_blue == 107)
+        this->Id_blue = 101;
     else
         ++this->Id_blue;
 }
@@ -378,7 +373,26 @@ void UART::read(MySerial &ser)
     {
         if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
         {
-            this->Refree_Arial_Message();
+            this->buffercnt = 0;
+            if (this->buffer[this->buffercnt] == 0xa5)
+                this->buffercnt = 1;
+            return;
+        }
+    }
+    if (this->buffercnt == 36 && this->cmdID == 0x020B)
+    {
+        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
+        {
+            this->buffercnt = 0;
+            if (this->buffer[this->buffercnt] == 0xa5)
+                this->buffercnt = 1;
+            return;
+        }
+    }
+    if (this->buffercnt == 4 && this->cmdID == 0x0104)
+    {
+        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
+        {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
                 this->buffercnt = 1;

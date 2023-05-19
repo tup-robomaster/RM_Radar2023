@@ -2,9 +2,9 @@
 
 MapMapping::MapMapping()
 {
-    vector<MapLocation3D> temp_1(12, MapLocation3D());
+    vector<MapLocation3D> temp_1(this->_ids.size(), MapLocation3D());
     this->_location3D.swap(temp_1);
-    vector<vector<MapLocation3D>> temp_2(2, vector<MapLocation3D>(10, MapLocation3D()));
+    vector<vector<MapLocation3D>> temp_2(2, vector<MapLocation3D>(this->_ids.size(), MapLocation3D()));
     this->_location_cache.swap(temp_2);
 }
 
@@ -45,11 +45,11 @@ void MapMapping::_plot_region_rect(vector<Point3f> &points, Mat &frame, Mat &K_0
     vector<Point2i> ips_dst;
     vector<Point3f> points_4 = {Point3f(points[0].x, points[0].y, points[0].z), Point3f(points[0].x, points[0].y + Real_Size_H, points[0].z), Point3f(points[1].x, points[1].y, points[1].z), Point3f(points[1].x, points[1].y - Real_Size_H, points[1].z)};
     cv::projectPoints(points_4, this->rvec, this->tvec, K_0, C_0, ips_pre);
-    cv::Mat(ips_pre).convertTo(ips_dst,CV_32SC1);
-    line(frame,ips_dst[0],ips_dst[1], Scalar(0, 255, 0));
-    line(frame,ips_dst[1],ips_dst[2], Scalar(0, 255, 0));
-    line(frame,ips_dst[2],ips_dst[3], Scalar(0, 255, 0));
-    line(frame,ips_dst[3],ips_dst[0], Scalar(0, 255, 0));
+    cv::Mat(ips_pre).convertTo(ips_dst, CV_32SC1);
+    line(frame, ips_dst[0], ips_dst[1], Scalar(0, 255, 0));
+    line(frame, ips_dst[1], ips_dst[2], Scalar(0, 255, 0));
+    line(frame, ips_dst[2], ips_dst[3], Scalar(0, 255, 0));
+    line(frame, ips_dst[3], ips_dst[0], Scalar(0, 255, 0));
 }
 
 vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
@@ -98,7 +98,7 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
                     pred_bbox.emplace_back(ArmorBoundingBox{true, (float)current_rect.x, (float)current_rect.y, (float)current_rect.width, (float)current_rect.height, pred[max_index].armor.cls});
                 }
             }
-            iter ++;
+            iter++;
         }
     }
     if (pred.size() > 0)
@@ -139,7 +139,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
         this->logger->error("Can't get _T !");
         return;
     }
-    vector<MapLocation3D> temp(12, MapLocation3D());
+    vector<MapLocation3D> temp(this->_ids.size(), MapLocation3D());
     this->_location3D.swap(temp);
     vector<ArmorBoundingBox> locations;
     if (pred.size() > 0)

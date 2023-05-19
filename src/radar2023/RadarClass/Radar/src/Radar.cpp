@@ -82,11 +82,11 @@ void Radar::send_judge(judge_message &message, UART &myUART)
     switch (message.task)
     {
     case 1:
-        for (int i = 1; i < 6; ++i)
+        for (int i = 0; i < int(message.loc.size() / 2); ++i)
         {
             vector<float> temp_location;
-            temp_location.emplace_back(message.loc[i + ENEMY * 5].x);
-            temp_location.emplace_back(message.loc[i + ENEMY * 5].y);
+            temp_location.emplace_back(message.loc[i + ENEMY * 6].x);
+            temp_location.emplace_back(message.loc[i + ENEMY * 6].y);
             loc.emplace_back(temp_location);
         }
         myUART.myUARTPasser.push_loc(loc);
@@ -261,25 +261,19 @@ void Radar::MainProcessLoop()
                     this->logger->info("No Lidar Msg , Return");
                     continue;
                 }
-                cout << 1 << endl;
                 this->detectDepth(pred);
-                cout << 1 << endl;
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
-                cout << 1 << endl;
                 this->detectDepth(IouArmors);
-                cout << 1 << endl;
 #ifdef Test
                 this->drawArmorsForDebug(pred, frameBag.frame);
                 this->drawArmorsForDebug(IouArmors, frameBag.frame);
 #endif
+                //TODO:FIX HERE
                 this->mapMapping.mergeUpdata(pred, IouArmors);
-                cout << 1 << endl;
                 judge_message myJudge_message;
                 myJudge_message.task = 1;
                 myJudge_message.loc = this->mapMapping.getloc();
-                cout << 1 << endl;
                 this->send_judge(myJudge_message, this->myUART);
-                cout << 1 << endl;
             }
         }
         else
@@ -400,8 +394,6 @@ void Radar::stop()
     this->logger->flush();
     if (this->cameraThread.is_open())
         this->cameraThread.stop();
-    this->videoRecorder.close();
-    this->_if_record = false;
     cv::destroyAllWindows();
     if (this->_thread_working)
     {
@@ -416,6 +408,8 @@ void Radar::stop()
         this->serRead.join();
         this->serWrite.join();
     }
+    this->videoRecorder.close();
+    this->_if_record = false;
     this->armorDetector.unInit();
     this->carDetector.unInit();
     this->logger->warn("Program Shutdown");

@@ -50,7 +50,6 @@ private:
         }
     }
 
-    void Refree_Arial_Message();
     void Judge_Refresh_Result();
     void Referee_Game_Result();
     void Referee_dart_status();
