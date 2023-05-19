@@ -10,6 +10,10 @@ SpdLogger::~SpdLogger()
 
 void SpdLogger::registerLogger(char *logFile, char *loggerName)
 {
+    if (access(logFile, 0) == -1)
+    {
+        std::cout << "[ERR] LogFile, non-existent" << std::endl;
+    }
     char filename[1024];
     time_t currentTime = time(NULL);
     char chCurrentTime[256];
@@ -26,4 +30,3 @@ void SpdLogger::registerLogger(char *logFile, char *loggerName)
     logger->flush_on(spdlog::level::err);
     spdlog::register_logger(logger);
 }
-

@@ -262,7 +262,7 @@ bool CameraThread::is_open()
 FrameBag CameraThread::read()
 {
     FrameBag framebag;
-    if (this->_open)
+    if (this->_open && this->_alive)
     {
 #ifdef UsingVideo
         this->_cap.read(framebag.frame);
@@ -271,11 +271,11 @@ FrameBag CameraThread::read()
         framebag = this->_cap.read();
 #endif
     }
-    else
+    else if(this->_alive)
     {
         this->logger->warn("Camera closed !");
     }
-    if (!framebag.flag)
+    if (!framebag.flag && this->_alive)
     {
         this->logger->error("Failed to get frame!");
     }

@@ -11,6 +11,10 @@ VideoRecorder::~VideoRecorder()
 
 bool VideoRecorder::init(char *videoPath, int coder, Size size)
 {
+    if (access(videoPath, 0) == -1)
+    {
+        std::cout << "[ERR] VideoPath, non-existent" << std::endl;
+    }
     if (!this->vw.isOpened())
     {
         char filename[1024];

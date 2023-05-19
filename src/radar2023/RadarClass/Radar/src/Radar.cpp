@@ -28,7 +28,6 @@ void Radar::detectDepth(vector<bboxAndRect> &pred)
         return;
     for (size_t i = 0; i < pred.size(); ++i)
     {
-        float count = 0;
         vector<float> tempBox;
         float center[2] = {pred[i].armor.x0 + pred[i].armor.w / 2, pred[i].armor.y0 + pred[i].armor.h / 2};
         for (int j = int(max<float>(center[1] - pred[i].armor.h, 0.)); j < int(min<float>(center[1] + pred[i].armor.h, ImageH)); ++j)
@@ -38,15 +37,14 @@ void Radar::detectDepth(vector<bboxAndRect> &pred)
                 if (this->publicDepth[i][j] == 0)
                     continue;
                 tempBox.emplace_back(this->publicDepth[i][j]);
-                ++count;
             }
         }
-        float tempNum = 0;
+        float tempDepth = 0;
         for (const auto &jt : tempBox)
         {
-            tempNum += jt;
+            tempDepth += jt;
         }
-        pred[i].armor.depth = tempNum / count;
+        pred[i].armor.depth = tempDepth / tempBox.size();
     }
 }
 
@@ -263,18 +261,25 @@ void Radar::MainProcessLoop()
                     this->logger->info("No Lidar Msg , Return");
                     continue;
                 }
+                cout << 1 << endl;
                 this->detectDepth(pred);
+                cout << 1 << endl;
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
+                cout << 1 << endl;
                 this->detectDepth(IouArmors);
+                cout << 1 << endl;
 #ifdef Test
                 this->drawArmorsForDebug(pred, frameBag.frame);
                 this->drawArmorsForDebug(IouArmors, frameBag.frame);
 #endif
                 this->mapMapping.mergeUpdata(pred, IouArmors);
+                cout << 1 << endl;
                 judge_message myJudge_message;
                 myJudge_message.task = 1;
                 myJudge_message.loc = this->mapMapping.getloc();
+                cout << 1 << endl;
                 this->send_judge(myJudge_message, this->myUART);
+                cout << 1 << endl;
             }
         }
         else
