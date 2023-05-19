@@ -20,6 +20,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O3  -Wall")
 set(CUDA_GEN_CODE "-gencode=arch=compute_86,code=sm_86")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
+catkin_package(CATKIN_DEPENDS
+	roscpp
+	sensor_msgs
+	)
 # cuda
 include_directories(/data/cuda/cuda-11.8/cuda/include)
 link_directories(/data/cuda/cuda-11.8/cuda/lib)
@@ -56,9 +60,33 @@ cuda_add_executable(radar2023
   RadarClass/UART/src/UARTPasser.cpp
   RadarClass/Logger/src/Logger.cpp
 )
+target_sources(radar2023
+  PRIVATE
+  main.cpp
+  RadarClass/TRTInference/TRTInfer/CUDA/preprocess.cu
+  RadarClass/TRTInference/TRTInfer/src/Inference.cpp
+  RadarClass/Camera/src/camera.cpp
+  RadarClass/Camera/src/VideoRecorder.cpp
+  RadarClass/Common/src/general.cpp
+  RadarClass/Detectors/src/ArmorDetector.cpp
+  RadarClass/Detectors/src/CarDetector.cpp
+  RadarClass/Detectors/src/depthProcesser.cpp
+  RadarClass/Location/src/location.cpp
+  RadarClass/Location/src/MapMapping.cpp
+  RadarClass/Radar/src/Radar.cpp
+  RadarClass/UART/src/offical_judge_Handler.cpp
+  RadarClass/UART/src/serial.cpp
+  RadarClass/UART/src/UART.cpp
+  RadarClass/UART/src/UARTPasser.cpp
+  RadarClass/Logger/src/Logger.cpp
+)
 set_target_properties(radar2023 PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON)
 add_dependencies(radar2023 ${catkin_EXPORTED_TARGETS})
+target_include_directories(radar2023
+  PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  logs)
 target_link_libraries(radar2023
   ${catkin_LIBRARIES}
   ${LIBS} ${CUDA_LIBRARIES}
@@ -77,6 +105,17 @@ target_link_libraries(radar2023
   nvonnxparser
   nvinfer
 )
+
+install(TARGETS radar2023 
+	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+	)
+
+install(DIRECTORY
+  launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  # config
+	)
 
 macro(remove_warnings)
   add_definitions(-Wno-deprecated-declarations
