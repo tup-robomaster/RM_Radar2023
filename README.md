@@ -29,7 +29,9 @@
 > [Location](src/radar2023/RadarClass/Location/README.md)
 > [Radar](src/radar2023/RadarClass/Radar/README.md)
 
-## 2.环境配置 (recommend)
+## 2.环境配置
+
+1[recommend]
 
 * Ubuntu 20.04 LTS
 * GCC 9.3.0
@@ -50,6 +52,28 @@
 * AMD R7 5800H CPU
 * 32G RAM
 * GeForce RTX 3070 Laptop GPU
+
+2[best]
+
+* Ubuntu 20.04 LTS
+* GCC 9.4.0
+* CUDA 11.8
+* cudnn 8.9.0
+* Tensorrt 8.5.2.2
+* ros-noetic
+* OpenCV4.6.0
+* PCL
+* spdlog
+* Eigen3
+* MKL
+* Livox雷达驱动
+* 迈德威视相机驱动
+
+运算平台 (best)：
+
+* I9 13900KF
+* 32G RAM
+* GeForce RTX 4090 GPU
 
 ## 3.文件结构
 
@@ -77,7 +101,9 @@
 * 环境配置完成后，需根据运算平台及环境修改src下CMakeLists.txt
 * 创建以下文件夹：src/radar2023/logs 、src/radar2023/Recorder 、  src/radar2023/RadarClass/Detectors/Moudles  、 src/radar2023/RadarClass/Camera/params
 * 修改config.h中的路径
-* 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0
+* 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0，注意导出动态Onnx
+* 车辆分类[CAR]
+* 装甲板分类[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7]
 * 将yolov5导出的动态尺寸onnx放置于config.h定义位置
 * 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
 * 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
