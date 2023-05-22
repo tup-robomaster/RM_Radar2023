@@ -29,14 +29,14 @@ void Radar::detectDepth(vector<bboxAndRect> &pred)
     for (size_t i = 0; i < pred.size(); ++i)
     {
         vector<float> tempBox;
-        float center[2] = {pred[i].armor.x0 + pred[i].armor.w / 2, pred[i].armor.y0 + pred[i].armor.h / 2};
-        for (int j = int(max<float>(center[1] - pred[i].armor.h, 0.)); j < int(min<float>(center[1] + pred[i].armor.h, ImageH)); ++j)
+        float center[2] = {pred[i].armor.x0 + pred[i].armor.w / 2.f, pred[i].armor.y0 + pred[i].armor.h / 2.f};
+        for (int j = int(max<float>(center[1] - pred[i].armor.h / 2.f, 0.)); j < int(min<float>(center[1] + pred[i].armor.h / 2.f, ImageH)); ++j)
         {
-            for (int k = int(max<float>(center[0] - pred[i].armor.w, 0.)); k < int(min<float>(center[0] + pred[i].armor.w, ImageW)); ++k)
+            for (int k = int(max<float>(center[0] - pred[i].armor.w / 2.f, 0.)); k < int(min<float>(center[0] + pred[i].armor.w / 2.f, ImageW)); ++k)
             {
-                if (this->publicDepth[i][j] == 0)
+                if (this->publicDepth[j][k] == 0)
                     continue;
-                tempBox.emplace_back(this->publicDepth[i][j]);
+                tempBox.emplace_back(this->publicDepth[j][k]);
             }
         }
         float tempDepth = 0;
@@ -45,6 +45,7 @@ void Radar::detectDepth(vector<bboxAndRect> &pred)
             tempDepth += jt;
         }
         pred[i].armor.depth = tempDepth / tempBox.size();
+        this->logger->info("Depth: [CLS] " + to_string(pred[i].armor.cls) + " [Depth] " + to_string(pred[i].armor.depth));
     }
 }
 
@@ -56,14 +57,14 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
     {
         float count = 0;
         vector<float> tempBox;
-        float center[2] = {armors.at(i).x0 + armors[i].w / 2, armors[i].y0 + armors[i].h / 2};
-        for (int j = int(max<float>(center[1] - armors[i].h, 0.)); j < int(min<float>(center[1] + armors[i].h, ImageH)); ++j)
+        float center[2] = {armors.at(i).x0 + armors[i].w / 2.f, armors[i].y0 + armors[i].h / 2.f};
+        for (int j = int(max<float>(center[1] - armors[i].h / 2.f, 0.)); j < int(min<float>(center[1] + armors[i].h / 2.f, ImageH)); ++j)
         {
-            for (int k = int(max<float>(center[0] - armors[i].w, 0.)); k < int(min<float>(center[0] + armors[i].w, ImageW)); ++k)
+            for (int k = int(max<float>(center[0] - armors[i].w / 2.f, 0.)); k < int(min<float>(center[0] + armors[i].w  / 2.f, ImageW)); ++k)
             {
-                if (this->publicDepth[i][j] == 0)
+                if (this->publicDepth[j][k] == 0)
                     continue;
-                tempBox.emplace_back(this->publicDepth[i][j]);
+                tempBox.emplace_back(this->publicDepth[j][k]);
                 ++count;
             }
         }
@@ -73,6 +74,7 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
             tempNum += jt;
         }
         armors[i].depth = tempNum / count;
+        this->logger->info("Depth: [CLS] " + to_string(armors[i].cls) + " [Depth] " + to_string(armors[i].depth));
     }
 }
 
@@ -262,15 +264,12 @@ void Radar::MainProcessLoop()
                 this->detectDepth(pred);
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                 this->detectDepth(IouArmors);
-#ifdef Test
-                // this->drawArmorsForDebug(IouArmors, frameBag.frame);
-#endif
                 // TODO:FIX HERE
-                this->mapMapping.mergeUpdata(pred, IouArmors);
-                judge_message myJudge_message;
-                myJudge_message.task = 1;
-                myJudge_message.loc = this->mapMapping.getloc();
-                this->send_judge(myJudge_message, this->myUART);
+                // this->mapMapping.mergeUpdata(pred, IouArmors);
+                // judge_message myJudge_message;
+                // myJudge_message.task = 1;
+                // myJudge_message.loc = this->mapMapping.getloc();
+                // this->send_judge(myJudge_message, this->myUART);
             }
         }
         else
@@ -280,7 +279,7 @@ void Radar::MainProcessLoop()
         char ch[255];
         sprintf(ch, "FPS %d", int(std::chrono::nanoseconds(1000000000).count() / (end_t - start_t).count()));
         std::string fps_str = ch;
-        cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0});
+        cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0}, 3);
 #endif
         if (frameBag.flag)
             this->myFrames.push(frameBag.frame);
