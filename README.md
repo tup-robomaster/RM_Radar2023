@@ -115,10 +115,9 @@
 
 ### 使用
 
-现版本无需install，在确保设备连接正常、启动激光雷达驱动后运行 build/radar2023/radar2023
-
 ```
-./build/radar2023/radar2023
+source devel/setup.bash
+roslaunch radar2023 radar2023.launch
 ```
 
 ### 开发日志
