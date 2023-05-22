@@ -71,7 +71,7 @@
 
 运算平台 (best)：
 
-* I9 13900KF
+* i9 13900KF
 * 32G RAM
 * GeForce RTX 4090 GPU
 

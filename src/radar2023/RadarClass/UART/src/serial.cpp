@@ -12,6 +12,11 @@ void MySerial::initSerial(std::string sername, std::string password)
 {
     if (this->fd != -1)
         return;
+    if (access(sername.c_str(), 0) == -1)
+    {
+        this->logger->warn("Serial :Serial Port Not Found !");
+        return;
+    }
     if (system(("echo " + password + " | sudo -S chmod a+rw " + sername).c_str()) != 0)
     {
         this->logger->error("Serial :Failed to get permission!");
