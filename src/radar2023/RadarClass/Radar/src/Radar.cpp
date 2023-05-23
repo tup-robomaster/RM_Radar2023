@@ -3,7 +3,7 @@
 void Radar::armor_filter(vector<bboxAndRect> &pred)
 {
     vector<bboxAndRect> results;
-    int ids[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    int ids[12] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     for (int i = 0; i < 12; ++i)
     {
         int max_id = 0;
@@ -60,7 +60,7 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
         float center[2] = {armors.at(i).x0 + armors[i].w / 2.f, armors[i].y0 + armors[i].h / 2.f};
         for (int j = int(max<float>(center[1] - armors[i].h / 2.f, 0.)); j < int(min<float>(center[1] + armors[i].h / 2.f, ImageH)); ++j)
         {
-            for (int k = int(max<float>(center[0] - armors[i].w / 2.f, 0.)); k < int(min<float>(center[0] + armors[i].w  / 2.f, ImageW)); ++k)
+            for (int k = int(max<float>(center[0] - armors[i].w / 2.f, 0.)); k < int(min<float>(center[0] + armors[i].w / 2.f, ImageW)); ++k)
             {
                 if (this->publicDepth[j][k] == 0)
                     continue;
@@ -212,8 +212,9 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     std::vector<std::vector<float>> tempDepth = this->depthQueue.pushback(*pc);
     unique_lock<shared_timed_mutex> ulk(this->myMutex_publicDepth);
     this->publicDepth.swap(tempDepth);
-    ++this->_if_DepthUpdated;
     ulk.unlock();
+    if (!this->_if_DepthUpdated)
+        this->_if_DepthUpdated = true;
 }
 
 void Radar::SerReadLoop()
@@ -256,7 +257,7 @@ void Radar::MainProcessLoop()
             if (pred.size() != 0)
             {
                 this->armor_filter(pred);
-                if (this->_if_DepthUpdated == 0)
+                if (!this->_if_DepthUpdated)
                 {
                     this->logger->info("No Lidar Msg , Return");
                     continue;
@@ -264,8 +265,9 @@ void Radar::MainProcessLoop()
                 this->detectDepth(pred);
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                 this->detectDepth(IouArmors);
-                // TODO:FIX HERE
-                // this->mapMapping.mergeUpdata(pred, IouArmors);
+                // TODO: FIX HERE
+                this->mapMapping.mergeUpdata(pred, IouArmors);
+                // TODO: FIX HERE
                 // judge_message myJudge_message;
                 // myJudge_message.task = 1;
                 // myJudge_message.loc = this->mapMapping.getloc();

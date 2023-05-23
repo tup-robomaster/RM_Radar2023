@@ -49,7 +49,7 @@ private:
     bool is_alive = true;
 
     vector<vector<float>> publicDepth;
-    int _if_DepthUpdated = 0;
+    bool _if_DepthUpdated = false;
     shared_timed_mutex myMutex_publicDepth;
     shared_timed_mutex myMutex_cameraThread;
     SharedQueue<Mat> myFrames;

@@ -2,9 +2,10 @@
 
 MapMapping::MapMapping()
 {
-    vector<MapLocation3D> temp_1(this->_ids.size(), MapLocation3D());
+    MapLocation3D temp;
+    vector<MapLocation3D> temp_1(this->_ids.size(), temp);
     this->_location3D.swap(temp_1);
-    vector<vector<MapLocation3D>> temp_2(2, vector<MapLocation3D>(this->_ids.size(), MapLocation3D()));
+    vector<vector<MapLocation3D>> temp_2(2, vector<MapLocation3D>(this->_ids.size(), temp));
     this->_location_cache.swap(temp_2);
 }
 
@@ -21,12 +22,12 @@ void MapMapping::_location_prediction()
 {
     for (size_t i = 0; i < this->_location3D.size(); ++i)
     {
-        bool do_pre = this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && (this->_location_cache[0][i].x != 0 || this->_location_cache[0][i].y != 0) && (this->_location_cache[i][1].x != 0 || this->_location_cache[1][i].y != 0) && this->_location_pred_time[i] != 1;
+        bool do_pre = this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_cache[0][i].x != 0 && this->_location_cache[0][i].y != 0 && this->_location_cache[i][1].x != 0 && this->_location_cache[1][i].y != 0 && this->_location_pred_time[i] != 1;
         if (do_pre)
         {
             float m_v[2] = {Pre_radio * (this->_location_cache[1][i].x - this->_location_cache[0][i].x), Pre_radio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};
             this->_location3D[i].x = m_v[0] + this->_location_cache[1][i].x;
-            this->_location3D[i].y = m_v[0] + this->_location_cache[1][i].y;
+            this->_location3D[i].y = m_v[1] + this->_location_cache[1][i].y;
         }
         if (this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_pred_time[i] == 1)
             this->_location_pred_time[i] = 0;
@@ -139,14 +140,14 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
         this->logger->error("Can't get _T !");
         return;
     }
-    vector<MapLocation3D> temp(this->_ids.size(), MapLocation3D());
+    vector<MapLocation3D> temp(this->_ids.size());
     this->_location3D.swap(temp);
     vector<ArmorBoundingBox> locations;
     if (pred.size() > 0)
     {
         for (size_t i = 0; i < pred.size(); ++i)
         {
-            if (pred[i].armor.depth != 0)
+            if (pred[i].armor.depth != 0 && !isnan(pred[i].armor.depth))
             {
                 pred[i].armor.flag = true;
                 locations.emplace_back(pred[i].armor);
@@ -159,7 +160,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
     {
         for (size_t i = 0; i < Ioubbox.size(); ++i)
         {
-            if (Ioubbox[i].depth != 0)
+            if (Ioubbox[i].depth != 0 && !isnan(Ioubbox[i].depth))
             {
                 Ioubbox[i].flag = true;
                 locations.emplace_back(Ioubbox[i]);
@@ -184,7 +185,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                 if ((int)it.cls == key)
                 {
                     Matrix<float, 4, 1> xyzu;
-                    xyzu << (it.x0 + it.w / 2) * it.depth, (it.y0 + it.h / 2) * it.depth, it.depth, 1.f;
+                    xyzu << (it.x0 + it.w / 2.f) * it.depth, (it.y0 + it.h / 2.f) * it.depth, it.depth, 1.f;
                     Matrix<float, 4, 1> dst_xyzu;
                     dst_xyzu << this->_T * xyzu;
                     al.id = it.cls;
@@ -195,6 +196,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                     TRTtype = true;
                     if (Z_A)
                         this->adjust_z_one(al);
+                    this->logger->info("LOC: [CLS] " + to_string(al.id) + " [x] " + to_string(al.x) + " [y] " + to_string(al.y) + " [z] " + to_string(al.z));
                     break;
                 }
                 // TODO:添加IOU预测
@@ -228,6 +230,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
             this->_location3D[this->_ids[(int)pred_loc[i].id]] = pred_loc[i];
         }
         if (L_P)
+            // TODO: FIX HERE
             this->_location_prediction();
     }
 }
