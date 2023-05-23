@@ -44,9 +44,12 @@ void MapMapping::_plot_region_rect(vector<Point3f> &points, Mat &frame, Mat &K_0
 {
     vector<Point2f> ips_pre;
     vector<Point2i> ips_dst;
-    vector<Point3f> points_4 = {Point3f(points[0].x, points[0].y, points[0].z), Point3f(points[0].x, points[0].y + Real_Size_H, points[0].z), Point3f(points[1].x, points[1].y, points[1].z), Point3f(points[1].x, points[1].y - Real_Size_H, points[1].z)};
-    cv::projectPoints(points_4, this->rvec, this->tvec, K_0, C_0, ips_pre);
+    cv::projectPoints(points, this->rvec, this->tvec, K_0, C_0, ips_pre);
     cv::Mat(ips_pre).convertTo(ips_dst, CV_32SC1);
+    circle(frame, ips_dst[0], 5, Scalar(0, 255, 0), 2);
+    circle(frame, ips_dst[1], 5, Scalar(0, 255, 255), 2);
+    circle(frame, ips_dst[2], 5, Scalar(255, 255, 0), 2);
+    circle(frame, ips_dst[3], 5, Scalar(255, 0, 0), 2);
     line(frame, ips_dst[0], ips_dst[1], Scalar(0, 255, 0), 3);
     line(frame, ips_dst[1], ips_dst[2], Scalar(0, 255, 0), 3);
     line(frame, ips_dst[2], ips_dst[3], Scalar(0, 255, 0), 3);
@@ -113,6 +116,15 @@ void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
 {
     rvec_input.copyTo(this->rvec);
     tvec_input.copyTo(this->tvec);
+    stringstream ss_rvec, ss_tvec;
+    ss_rvec << endl
+            << " " << rvec_input << endl
+            << endl;
+    ss_tvec << "tvec= " << endl
+            << " " << tvec_input << endl
+            << endl;
+    this->logger->info(ss_rvec.str());
+    this->logger->info(ss_tvec.str());
     Mat rvec_Matrix;
     Rodrigues(this->rvec, rvec_Matrix);
     Mat T_Matrix = Mat::zeros(Size(4, 4), CV_16F);
@@ -196,7 +208,6 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                     TRTtype = true;
                     if (Z_A)
                         this->adjust_z_one(al);
-                    this->logger->info("LOC: [CLS] " + to_string(al.id) + " [x] " + to_string(al.x) + " [y] " + to_string(al.y) + " [z] " + to_string(al.z));
                     break;
                 }
                 // TODO:添加IOU预测
@@ -228,6 +239,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
         {
             pred_loc[i].z += Real_Size_W;
             this->_location3D[this->_ids[(int)pred_loc[i].id]] = pred_loc[i];
+            this->logger->info("LOC: [CLS] " + to_string(pred_loc[i].id) + " [x] " + to_string(pred_loc[i].x) + " [y] " + to_string(pred_loc[i].y) + " [z] " + to_string(pred_loc[i].z));
         }
         if (L_P)
             // TODO: FIX HERE

@@ -49,7 +49,6 @@ private:
     bool is_alive = true;
 
     vector<vector<float>> publicDepth;
-    bool _if_DepthUpdated = false;
     shared_timed_mutex myMutex_publicDepth;
     shared_timed_mutex myMutex_cameraThread;
     SharedQueue<Mat> myFrames;
@@ -57,7 +56,6 @@ private:
     Mat K_0_Mat;
     Mat C_0_Mat;
     Mat E_0_Mat;
-    vector<Point3f> location_show = vector<Point3f>{Point3f(0., 0., 0.5), Point3f(Real_Size_W, Real_Size_H, 0.5)};
 
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 

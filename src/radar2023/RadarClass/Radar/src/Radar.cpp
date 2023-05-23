@@ -213,8 +213,6 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     unique_lock<shared_timed_mutex> ulk(this->myMutex_publicDepth);
     this->publicDepth.swap(tempDepth);
     ulk.unlock();
-    if (!this->_if_DepthUpdated)
-        this->_if_DepthUpdated = true;
 }
 
 void Radar::SerReadLoop()
@@ -257,7 +255,8 @@ void Radar::MainProcessLoop()
             if (pred.size() != 0)
             {
                 this->armor_filter(pred);
-                if (!this->_if_DepthUpdated)
+                shared_lock<shared_timed_mutex> slk(this->myMutex_publicDepth);
+                if (this->publicDepth.size() == 0)
                 {
                     this->logger->info("No Lidar Msg , Return");
                     continue;
@@ -265,6 +264,7 @@ void Radar::MainProcessLoop()
                 this->detectDepth(pred);
                 vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                 this->detectDepth(IouArmors);
+                slk.unlock();
                 // TODO: FIX HERE
                 this->mapMapping.mergeUpdata(pred, IouArmors);
                 // TODO: FIX HERE
@@ -378,7 +378,12 @@ void Radar::spin(int argc, char **argv)
     if (myFrames.size() > 0 && this->is_alive)
     {
         Mat frame = myFrames.front().clone();
-        this->mapMapping._plot_region_rect(this->location_show, frame, this->K_0_Mat, this->C_0_Mat);
+#if (ENEMY == 1)
+        vector<Point3f> test = vector<Point3f>{location_targets.find("blue_base")->second, location_targets.find("red_outpost")->second, location_targets.find("r_rt")->second, location_targets.find("blue_outpost")->second};
+#else
+        vector<Point3f> test = vector<Point3f>{location_targets.find("red_base")->second, location_targets.find("blue_outpost")->second, location_targets.find("b_rt")->second, location_targets.find("red_outpost")->second};
+#endif
+        this->mapMapping._plot_region_rect(test, frame, this->K_0_Mat, this->C_0_Mat);
         imshow("ControlPanel", frame);
         resizeWindow("ControlPanel", 1920, 1080);
         myFrames.pop();
