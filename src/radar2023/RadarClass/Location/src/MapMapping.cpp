@@ -113,25 +113,28 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
 }
 
 void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
-{
+{ 
     rvec_input.copyTo(this->rvec);
     tvec_input.copyTo(this->tvec);
+   
     stringstream ss_rvec, ss_tvec;
-    ss_rvec << endl
+    ss_rvec << "rvec= " << endl
             << " " << rvec_input << endl
             << endl;
     ss_tvec << "tvec= " << endl
             << " " << tvec_input << endl
             << endl;
+
     this->logger->info(ss_rvec.str());
     this->logger->info(ss_tvec.str());
     Mat rvec_Matrix;
     Rodrigues(this->rvec, rvec_Matrix);
-    Mat T_Matrix = Mat::zeros(Size(4, 4), CV_16F);
+    Mat T_Matrix = Mat::zeros(Size(4, 4), CV_32F);
     rvec_Matrix.copyTo(T_Matrix(Rect(0, 0, 3, 3)));
-    T_Matrix.at<float>(Point2i(3, 0)) = this->tvec.at<float>(Point2i(0, 0));
-    T_Matrix.at<float>(Point2i(3, 1)) = this->tvec.at<float>(Point2i(1, 0));
-    T_Matrix.at<float>(Point2i(3, 2)) = this->tvec.at<float>(Point2i(2, 0));
+    T_Matrix.at<_Float32>(Point2i(3, 0)) = this->tvec.at<_Float32>(Point2i(0, 0));
+    T_Matrix.at<_Float32>(Point2i(3, 1)) = this->tvec.at<_Float32>(Point2i(1, 0));
+    T_Matrix.at<_Float32>(Point2i(3, 2)) = this->tvec.at<_Float32>(Point2i(2, 0));
+    T_Matrix.at<_Float32>(Point2i(3, 3)) = 1.f;
     cv2eigen(T_Matrix, this->_T);
     this->_T << this->_T.inverse();
     Matrix<float, 4, 1> m1;
@@ -200,6 +203,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                     xyzu << (it.x0 + it.w / 2.f) * it.depth, (it.y0 + it.h / 2.f) * it.depth, it.depth, 1.f;
                     Matrix<float, 4, 1> dst_xyzu;
                     dst_xyzu << this->_T * xyzu;
+                    cout << dst_xyzu << endl;
                     al.id = it.cls;
                     al.x = dst_xyzu(0, 0);
                     al.y = dst_xyzu(1, 0);

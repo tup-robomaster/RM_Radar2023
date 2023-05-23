@@ -202,6 +202,7 @@ void Radar::LidarMainLoop()
         if (ros::ok())
             ros::spinOnce();
     }
+    ros::shutdown();
     this->logger->critical("LidarMainLoop Exit");
 }
 
@@ -384,6 +385,10 @@ void Radar::spin(int argc, char **argv)
         vector<Point3f> test = vector<Point3f>{location_targets.find("red_base")->second, location_targets.find("blue_outpost")->second, location_targets.find("b_rt")->second, location_targets.find("red_outpost")->second};
 #endif
         this->mapMapping._plot_region_rect(test, frame, this->K_0_Mat, this->C_0_Mat);
+        cv::Mat map1, map2;
+        cv::Size imageSize = frame.size();
+        cv::initUndistortRectifyMap(this->K_0_Mat, this->C_0_Mat, cv::Mat(), cv::getOptimalNewCameraMatrix(this->K_0_Mat, this->C_0_Mat, imageSize, 1, imageSize, 0), imageSize, CV_16SC2, map1, map2);
+        cv::remap(frame, frame, map1, map2, cv::INTER_LINEAR);
         imshow("ControlPanel", frame);
         resizeWindow("ControlPanel", 1920, 1080);
         myFrames.pop();
