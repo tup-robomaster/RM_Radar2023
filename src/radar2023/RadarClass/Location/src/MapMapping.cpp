@@ -203,7 +203,6 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                     xyzu << (it.x0 + it.w / 2.f) * it.depth, (it.y0 + it.h / 2.f) * it.depth, it.depth, 1.f;
                     Matrix<float, 4, 1> dst_xyzu;
                     dst_xyzu << this->_T * xyzu;
-                    cout << dst_xyzu << endl;
                     al.id = it.cls;
                     al.x = dst_xyzu(0, 0);
                     al.y = dst_xyzu(1, 0);

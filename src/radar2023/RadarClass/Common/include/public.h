@@ -46,7 +46,7 @@ using namespace ros;
 struct ArmorBoundingBox
 {
     bool flag = false;
-    float x0 = 0.f, y0 = 0.f, w = 0.f, h = 0.f, cls = 0.f, conf = 0.f, depth = 0.f;
+    _Float32 x0 = 0.f, y0 = 0.f, w = 0.f, h = 0.f, cls = 0.f, conf = 0.f, depth = 0.f;
 };
 
 /**
