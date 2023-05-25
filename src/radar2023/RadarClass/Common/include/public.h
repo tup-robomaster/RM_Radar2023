@@ -74,7 +74,7 @@ struct MapLocation2D
 {
     bool flag = false;
     float depth;
-    int id;
+    int id = -1;
     int x = 0, y = 0;
 };
 
@@ -84,7 +84,7 @@ struct MapLocation2D
 struct MapLocation3D
 {
     bool flag = false;
-    int id;
+    int id = -1;
     int x = 0, y = 0, z = 0;
 };
 
