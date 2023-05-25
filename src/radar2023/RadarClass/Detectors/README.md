@@ -1,35 +1,35 @@
 # Copyright(C),2022-2023,沈阳航空航天大学T-UP战队 All Rights Reserved
 
-# Detectors: 装甲板检测模块 | 车辆检测模块 | 点云深度图处理模块 | 点云深度图背景分割模块
+# Detectors: 装甲板检测模块[已替换] | 车辆检测模块[已替换] | 点云深度图处理模块 | 点云深度图背景分割模块[已废弃]
 
 ## 文件结构
 
-├── CUDA
-│   ├── gpu_decode.cu       	//gpu后处理cu文件
-│   ├── preprocess.cu       	//gpu预处理cu文件
-│   └── yololayer.cu        		//yolo相关CUDA核函数
+├── CUDA [deleted]
+│   ├── gpu_decode.cu [deleted]      	//gpu后处理cu文件
+│   ├── preprocess.cu [deleted]      	//gpu预处理cu文件
+│   └── yololayer.cu  [deleted]      		//yolo相关CUDA核函数
 ├── include
 │   ├── ArmorDetector.h		//装甲板检测器头文件
-│   ├── calibrator.h			//TRT相关头文件
+│   ├── calibrator.h [deleted]			//TRT相关头文件
 │   ├── CarDetector.h		//车辆检测器头文件
-│   ├── common.h			//TRT相关头文件
-│   ├── cuda_utils.h			//TRT相关头文件
+│   ├── common.h [deleted]			//TRT相关头文件
+│   ├── cuda_utils.h [deleted]			//TRT相关头文件
 │   ├── depthProcesser.h		//点云深度图映射头文件
-│   ├── macros.h			//TRT相关头文件
-│   ├── MovementDetector.h	//点云背景分割头文件
-│   ├── preprocess.h		//TRT相关头文件
-│   ├── tensorRT_v5.h		//TRT主要头文件
-│   ├── utils.h				//TRT相关头文件
-│   └── yololayer.h			//TRT相关头文件
+│   ├── macros.h [deleted]			//TRT相关头文件
+│   ├── MovementDetector.h [deleted]	//点云背景分割头文件
+│   ├── preprocess.h [deleted]		//TRT相关头文件
+│   ├── tensorRT_v5.h [deleted]		//TRT主要头文件
+│   ├── utils.h [deleted]				//TRT相关头文件
+│   └── yololayer.h [deleted]			//TRT相关头文件
 ├── Moudles
 └── src
      ├── ArmorDetector.cpp	//装甲板检测器cpp文件
-     ├── calibrator.cpp		//TRT相关cpp文件
+     ├── calibrator.cpp [deleted]		//TRT相关cpp文件
      ├── CarDetector.cpp		//车辆检测器cpp文件
-     ├── common.cpp		//TRT相关cpp文件
+     ├── common.cpp [deleted]		//TRT相关cpp文件
      ├── depthProcesser.cpp	//点云深度图映射cpp文件
-     ├── MovementDetector.cpp	//点云背景分割cpp文件
-     └── tensorRT_v5.cpp		//TRT主要cpp文件
+     ├── MovementDetector.cpp [deleted]	//点云背景分割cpp文件
+     └── tensorRT_v5.cpp	[deleted]	//TRT主要cpp文件
 
 ## 装甲板检测模块
 
@@ -79,7 +79,7 @@ DepthQueue
 
 ### 2.函数功能
 
-MovementDetector
+MovementDetector [deleted]
 
 * applyMovementDetector() 应用背景分割，前期积分，后期分割
 * buildBackground() 建立背景
@@ -89,7 +89,7 @@ MovementDetector
 
 ## 技术细节
 
-### 1.点云深度图分割+单层神经网络预测
+### 1.点云深度图分割+单层神经网络预测 [已废弃]
 
 此方案下，由于分流了GPU运算压力，将图像分割转为CPU负载，充分利用了运算平台的富余算力，带来了进一步的性能提升。缺点是点云积分慢，分割框更新较慢且一般大于车辆实际大小，由于精度较低，所以不能使用IoU预测的方式对装甲板检测框进行消抖。
 
