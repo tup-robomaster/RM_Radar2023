@@ -175,6 +175,11 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
     {
         for (size_t i = 0; i < Ioubbox.size(); ++i)
         {
+            int item_cls = int(Ioubbox[i].cls);
+            bool check = std::find_if(locations.begin(), locations.end(), [item_cls](ArmorBoundingBox item)
+                                      { return int(item.cls) == item_cls; }) == locations.end();
+            if (!check)
+                continue;
             if (Ioubbox[i].depth != 0 && !isnan(Ioubbox[i].depth))
             {
                 Ioubbox[i].flag = true;
