@@ -267,7 +267,7 @@ void Radar::MainProcessLoop()
                 this->detectDepth(IouArmors);
                 slk.unlock();
                 // TODO: FIX HERE
-                this->mapMapping.mergeUpdata(pred, IouArmors);
+                this->mapMapping.mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
                 // TODO: FIX HERE
                 // judge_message myJudge_message;
                 // myJudge_message.task = 1;

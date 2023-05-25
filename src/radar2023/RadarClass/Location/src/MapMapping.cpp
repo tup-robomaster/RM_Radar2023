@@ -113,10 +113,10 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
 }
 
 void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
-{ 
+{
     rvec_input.copyTo(this->rvec);
     tvec_input.copyTo(this->tvec);
-   
+
     stringstream ss_rvec, ss_tvec;
     ss_rvec << "rvec= " << endl
             << " " << rvec_input << endl
@@ -148,7 +148,7 @@ vector<MapLocation3D> MapMapping::getloc()
     return this->_location3D;
 }
 
-void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox)
+void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, Mat &K_0, Mat &C_0)
 {
     if (!this->_pass_flag)
     {
@@ -200,7 +200,9 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                 if ((int)it.cls == key)
                 {
                     Matrix<float, 4, 1> xyzu;
-                    xyzu << (it.x0 + it.w / 2.f) * it.depth, (it.y0 + it.h / 2.f) * it.depth, it.depth, 1.f;
+                    vector<Point2f> center = {Point2f((it.x0 + it.w / 2.f), (it.y0 + it.h / 2.f))};
+                    cv::undistortPoints(center, center, K_0, C_0);
+                    xyzu << center[0].x * it.depth, center[0].y * it.depth, it.depth, 1.f;
                     Matrix<float, 4, 1> dst_xyzu;
                     dst_xyzu << this->_T * xyzu;
                     al.id = it.cls;
