@@ -222,7 +222,8 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                 if (al.flag)
                     cache_pred.emplace_back(al);
             }
-            pred_loc.emplace_back(al);
+            if(al.flag)
+                pred_loc.emplace_back(al);
             ++iter;
         }
         if (Z_A)

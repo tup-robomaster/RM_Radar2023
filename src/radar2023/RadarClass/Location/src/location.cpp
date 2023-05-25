@@ -50,29 +50,21 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     Mat K_0, C_0, E_0;
     if (!read_param(K_0, C_0, E_0))
         return false;
-    Point3f red_base = location_targets.find("red_base")->second;
-    Point3f blue_outpost = location_targets.find("blue_outpost")->second;
-    Point3f red_outpost = location_targets.find("red_outpost")->second;
-    Point3f blue_base = location_targets.find("blue_base")->second;
-    Point3f r_rt = location_targets.find("r_rt")->second;
-    Point3f r_lt = location_targets.find("r_lt")->second;
-    Point3f b_rt = location_targets.find("b_rt")->second;
-    Point3f b_lt = location_targets.find("b_lt")->second;
     map<int, vector<string>> tips{{0, {"red_base", "blue_outpost", "b_right_top", "red_outpost"}}, {1, {"blue_base", "red_outpost", "r_right_top", "blue_outpost"}}};
     vector<Point3f> ops;
     if (enemy == 0)
     {
-        ops.emplace_back(red_base);
-        ops.emplace_back(blue_outpost);
-        ops.emplace_back(b_rt);
-        ops.emplace_back(red_outpost);
+        ops.emplace_back(location_targets.find("red_base")->second);
+        ops.emplace_back(location_targets.find("blue_outpost")->second);
+        ops.emplace_back(location_targets.find("b_rt")->second);
+        ops.emplace_back(location_targets.find("red_outpost")->second);
     }
     else
     {
-        ops.emplace_back(blue_base);
-        ops.emplace_back(red_outpost);
-        ops.emplace_back(r_rt);
-        ops.emplace_back(blue_outpost);
+        ops.emplace_back(location_targets.find("blue_base")->second);
+        ops.emplace_back(location_targets.find("red_outpost")->second);
+        ops.emplace_back(location_targets.find("r_rt")->second);
+        ops.emplace_back(location_targets.find("blue_outpost")->second);
     }
     frame = cap.read();
     if (!cap.is_open() || !frame.flag)

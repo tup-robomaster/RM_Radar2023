@@ -85,7 +85,7 @@ struct MapLocation3D
 {
     bool flag = false;
     int id = -1;
-    int x = 0, y = 0, z = 0;
+    float x = 0., y = 0., z = 0.;
 };
 
 /**
