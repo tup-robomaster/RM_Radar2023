@@ -199,7 +199,6 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
         {
             int key = iter->first;
             MapLocation3D al;
-            bool TRTtype = false; // 神经网络预测标志位
             for (const auto &it : locations)
             {
                 if ((int)it.cls == key)
@@ -215,27 +214,17 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                     al.y = dst_xyzu(1, 0);
                     al.z = dst_xyzu(2, 0);
                     al.flag = true;
-                    TRTtype = true;
                     if (Z_A)
                         this->adjust_z_one(al);
                     break;
                 }
-                // TODO:添加IOU预测
             }
             if (Z_A)
             {
                 if (al.flag)
                     cache_pred.emplace_back(al);
             }
-            if (!TRTtype)
-            {
-                // TODO:添加IOU预测
-            }
-            else
-            {
-                // TODO:进阶预测控制
-                pred_loc.emplace_back(al);
-            }
+            pred_loc.emplace_back(al);
             ++iter;
         }
         if (Z_A)
