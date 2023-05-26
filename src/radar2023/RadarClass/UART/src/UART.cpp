@@ -8,7 +8,6 @@ UART::~UART()
 {
 }
 
-
 void UART::Judge_Refresh_Result()
 {
     this->logger->debug("Judge_Refresh_Result");
@@ -53,7 +52,7 @@ void UART::Refree_dart_remaining_time()
     this->Game_dart_remaining_time.time = this->buffer[8];
 }
 
-void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char ReceiverId, unsigned char data[4], MySerial &ser)
+void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char ReceiverId, unsigned char data[48], MySerial &ser)
 {
     unsigned char local_buffer[200];
     local_buffer[0] = 0xA5;
@@ -76,11 +75,55 @@ void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char Receiv
     local_buffer[14] = data[1];
     local_buffer[15] = data[2];
     local_buffer[16] = data[3];
-    myHandler.Append_CRC16_Check_Sum(local_buffer, 10 + 9);
-    unsigned char buffer_tmp_array[10 + 9];
-    for (int i = 0; i < 10 + 9; ++i)
+    local_buffer[17] = data[4];
+    local_buffer[18] = data[5];
+    local_buffer[19] = data[6];
+    local_buffer[20] = data[7];
+    local_buffer[21] = data[8];
+    local_buffer[22] = data[9];
+    local_buffer[23] = data[10];
+    local_buffer[24] = data[11];
+    local_buffer[25] = data[12];
+    local_buffer[26] = data[13];
+    local_buffer[27] = data[14];
+    local_buffer[28] = data[15];
+    local_buffer[29] = data[16];
+    local_buffer[30] = data[17];
+    local_buffer[31] = data[18];
+    local_buffer[32] = data[19];
+    local_buffer[33] = data[20];
+    local_buffer[34] = data[21];
+    local_buffer[35] = data[22];
+    local_buffer[36] = data[23];
+    local_buffer[37] = data[24];
+    local_buffer[38] = data[25];
+    local_buffer[39] = data[26];
+    local_buffer[40] = data[27];
+    local_buffer[41] = data[28];
+    local_buffer[42] = data[29];
+    local_buffer[43] = data[30];
+    local_buffer[44] = data[31];
+    local_buffer[45] = data[32];
+    local_buffer[46] = data[33];
+    local_buffer[47] = data[34];
+    local_buffer[48] = data[35];
+    local_buffer[49] = data[36];
+    local_buffer[50] = data[37];
+    local_buffer[51] = data[38];
+    local_buffer[52] = data[39];
+    local_buffer[53] = data[40];
+    local_buffer[54] = data[41];
+    local_buffer[55] = data[42];
+    local_buffer[56] = data[43];
+    local_buffer[57] = data[44];
+    local_buffer[58] = data[45];
+    local_buffer[59] = data[46];
+    local_buffer[60] = data[47];
+    myHandler.Append_CRC16_Check_Sum(local_buffer, 54 + 9);
+    unsigned char buffer_tmp_array[54 + 9];
+    for (int i = 0; i < 54 + 9; ++i)
         buffer_tmp_array[i] = local_buffer[i];
-    ser.mswrite(buffer_tmp_array, 10 + 9);
+    ser.mswrite(buffer_tmp_array, 54 + 9);
 }
 
 void UART::Referee_Transmit_Map(unsigned int cmdID, int datalength, int targetId, float x, float y, MySerial &ser)
@@ -141,7 +184,7 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
     if (this->ind == 5)
     {
         if (this->myUARTPasser.loop_send == 0)
-        this->myUARTPasser.loop_send = 0;
+            this->myUARTPasser.loop_send = 0;
     }
     this->ind = (this->ind + 1) % 6;
 }
@@ -400,5 +443,29 @@ void UART::read(MySerial &ser)
 void UART::write(MySerial &ser)
 {
     this->Robot_Data_Transmit_Map(ser);
+    unsigned int dataID = 0x0200 + (1 & 0xFF);
+    unsigned char receiverId;
+    if (ENEMY)
+        receiverId = 7;
+    else
+        receiverId = 107;
+    unsigned char data[48];
+    vector<vector<float>> positions = myUARTPasser.get_position();
+    for (int i = 0; i < 6; ++i)
+    {
+        unsigned char t_x[4], t_y[4];
+        this->FloatToBytes(t_x, positions[i][0]);
+        this->FloatToBytes(t_y, positions[i][1]);
+        int data_p = i * 8;
+        data[data_p + 0] = t_x[0];
+        data[data_p + 1] = t_x[1];
+        data[data_p + 2] = t_x[2];
+        data[data_p + 3] = t_x[3];
+        data[data_p + 4] = t_y[0];
+        data[data_p + 5] = t_y[1];
+        data[data_p + 6] = t_y[2];
+        data[data_p + 7] = t_y[3];
+    }
+    Referee_Transmit_BetweenCar(dataID, receiverId, data, ser);
     usleep(100000);
 }
