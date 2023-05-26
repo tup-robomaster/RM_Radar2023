@@ -51,7 +51,7 @@ void UARTPasser::Referee_Update_GameData(unsigned char *buffer)
     {
         this->_Game_End_Flag = true;
         this->logger->critical("GAME END !");
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 12; ++i)
         {
             this->_max_hp[i] = this->_init_hp[i];
         }
@@ -95,5 +95,5 @@ bool UARTPasser::One_compete_start()
 void UARTPasser::Receive_Robot_Data(unsigned char *buffer)
 {
     if ((0x0000 | buffer[7]) | ((buffer[8] << 8) == 0x0200))
-        this->logger->info("received");
+        this->logger->debug("Receive_Robot_Data");
 }

@@ -8,63 +8,70 @@ Offical_Judge_Handler::~Offical_Judge_Handler()
 {
 }
 
-unsigned char Offical_Judge_Handler::myGet_CRC8_Check_Sum(unsigned char *pchMessage, int dwLength, unsigned char ucCRC8)
+unsigned char Offical_Judge_Handler::Get_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength, unsigned char ucCRC8)
 {
-    int tmp = 0;
-    while (dwLength > 0)
+    unsigned char ucIndex;
+    while (dwLength--)
     {
-        --dwLength;
-        unsigned char ucIndex = ucCRC8 ^ pchMessage[tmp];
-        tmp++;
-        ucCRC8 = this->myCRC8_TAB[ucIndex];
+        ucIndex = ucCRC8 ^ (*pchMessage++);
+        ucCRC8 = CRC8_TAB[ucIndex];
     }
-    return ucCRC8;
+    return (ucCRC8);
 }
 
-bool Offical_Judge_Handler::myVerify_CRC8_Check_Sum(unsigned char *pchMessage, int dwLength)
+bool Offical_Judge_Handler::Verify_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength)
 {
-    if (*pchMessage == 0U || dwLength <= 2)
-        return false;
-    unsigned char ucExpected = myGet_CRC8_Check_Sum(pchMessage, dwLength - 1, this->myCRC8_INIT);
-    return ucExpected == pchMessage[dwLength - 1];
+    unsigned char ucExpected = 0;
+    if ((pchMessage == 0) || (dwLength <= 2))
+        return 0;
+    ucExpected = Get_CRC8_Check_Sum(pchMessage, dwLength - 1, CRC8_INIT);
+    return (ucExpected == pchMessage[dwLength - 1]);
 }
 
-void Offical_Judge_Handler::Append_CRC8_Check_Sum(unsigned char *pchMessage, int dwLength)
+void Offical_Judge_Handler::Append_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength)
 {
-    if (*pchMessage == 0U || dwLength <= 2)
+    unsigned char ucCRC = 0;
+    if ((pchMessage == 0) || (dwLength <= 2))
         return;
-    unsigned char ucCRC = myGet_CRC8_Check_Sum(pchMessage, dwLength - 1, myCRC8_INIT);
+    ucCRC = Get_CRC8_Check_Sum((unsigned char *)pchMessage, dwLength - 1, CRC8_INIT);
     pchMessage[dwLength - 1] = ucCRC;
 }
 
-unsigned int Offical_Judge_Handler::myGet_CRC16_Check_Sum(unsigned char *pchMessage, int dwLength, unsigned int wCRC)
+uint16_t Offical_Judge_Handler::Get_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength, uint16_t wCRC)
 {
-    if (*pchMessage == 0U)
-        return 0xFFFF;
-    int tmp = 0;
-    while (dwLength)
+    uint8_t chData;
+    if (pchMessage == NULL)
     {
-        --dwLength;
-        unsigned char chData = pchMessage[tmp];
-        ++tmp;
-        wCRC = (wCRC >> 8) ^ mywCRC_Table[(wCRC ^ chData) & 0x00ff];
+        return 0xFFFF;
+    }
+    while (dwLength--)
+    {
+        chData = *pchMessage++;
+        (wCRC) = ((uint16_t)(wCRC) >> 8) ^ wCRC_Table[((uint16_t)(wCRC) ^ (uint16_t)(chData)) & 0x00ff];
     }
     return wCRC;
 }
 
-bool Offical_Judge_Handler::myVerify_CRC16_Check_Sum(unsigned char *pchMessage, int dwLength)
+uint32_t Offical_Judge_Handler::Verify_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength)
 {
-    if (*pchMessage == 0U || dwLength <= 2)
+    uint16_t wExpected = 0;
+    if ((pchMessage == NULL) || (dwLength <= 2))
+    {
         return false;
-    unsigned char wExpected = myGet_CRC16_Check_Sum(pchMessage, dwLength - 2, myCRC16_INIT);
-    return ((wExpected & 0xff) == pchMessage[dwLength - 2] && ((wExpected >> 8) & 0xff) == pchMessage[dwLength - 1]);
+    }
+    wExpected = Get_CRC16_Check_Sum(pchMessage, dwLength - 2, CRC16_INIT);
+    return ((wExpected & 0xff) == pchMessage[dwLength - 2] && ((wExpected >> 8) & 0xff) ==
+                                                                  pchMessage[dwLength - 1]);
 }
 
-void Offical_Judge_Handler::Append_CRC16_Check_Sum(unsigned char *pchMessage, int dwLength)
+void Offical_Judge_Handler::Append_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength)
 {
-    if (*pchMessage == 0 || dwLength <= 2)
+    uint16_t wCRC = 0;
+    if ((pchMessage == NULL) || (dwLength <= 2))
+    {
         return;
-    unsigned char wCRC = myGet_CRC16_Check_Sum(pchMessage, dwLength - 2, myCRC16_INIT);
-    pchMessage[dwLength - 2] = (wCRC & 0x00ff);
-    pchMessage[dwLength - 1] = ((wCRC >> 8) & 0x00ff);
+    }
+    wCRC = Get_CRC16_Check_Sum((uint8_t *)pchMessage, dwLength - 2, CRC16_INIT);
+    pchMessage[dwLength - 2] = (uint8_t)(wCRC & 0x00ff);
+    pchMessage[dwLength - 1] = (uint8_t)((wCRC >> 8) & 0x00ff);
 }

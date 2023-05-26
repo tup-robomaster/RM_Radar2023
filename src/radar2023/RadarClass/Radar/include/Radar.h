@@ -63,7 +63,7 @@ private:
     void armor_filter(vector<bboxAndRect> &pred);
     void detectDepth(vector<bboxAndRect> &pred);
     void detectDepth(vector<ArmorBoundingBox> &armors);
-    void send_judge(judge_message &message, UART &myUART);
+    void send_judge(judge_message &message);
 
     void drawBbox(vector<Rect> &bboxs, Mat &img);
     void drawArmorsForDebug(vector<ArmorBoundingBox> &armors, Mat &img);

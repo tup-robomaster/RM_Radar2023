@@ -2,8 +2,6 @@
 
 UART::UART()
 {
-    this->myUARTPasser = UARTPasser();
-    this->myHandler = Offical_Judge_Handler();
 }
 
 UART::~UART()
@@ -13,7 +11,7 @@ UART::~UART()
 
 void UART::Judge_Refresh_Result()
 {
-    this->logger->info("Judge_Refresh_Result");
+    this->logger->debug("Judge_Refresh_Result");
 }
 
 void UART::Referee_Game_Result()
@@ -62,7 +60,7 @@ void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char Receiv
     local_buffer[1] = 10; // 数据帧中 data 的长度,占两个字节
     local_buffer[2] = 0;
     local_buffer[3] = 0;
-    local_buffer[4] = this->myHandler.myGet_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);
+    local_buffer[4] = this->myHandler.Get_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);
     local_buffer[5] = 0x01;
     local_buffer[6] = 0x03;
     local_buffer[7] = dataID & 0x00ff;
@@ -95,7 +93,7 @@ void UART::Referee_Transmit_Map(unsigned int cmdID, int datalength, int targetId
     local_buffer[1] = (datalength)&0x00ff; // 数据帧中 data 的长度,占两个字节
     local_buffer[2] = ((datalength)&0xff00) >> 8;
     local_buffer[3] = 0;
-    local_buffer[4] = this->myHandler.myGet_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);
+    local_buffer[4] = this->myHandler.Get_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);
     local_buffer[5] = cmdID & 0x00ff;
     local_buffer[6] = (cmdID & 0xff00) >> 8;
 
@@ -130,14 +128,12 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
         flag = true;
     if (!ENEMY && flag)
     {
-        this->Referee_Transmit_Map(0x0305, 14, this->Id_red, location[0], location[1], ser);
-        sleep(0.1);
+        this->Referee_Transmit_Map(0x0305, 14, this->Id_red, _Float32(location[0]), _Float32(location[1]), ser);
         this->ControlLoop_red();
     }
     else if (flag)
     {
-        this->Referee_Transmit_Map(0x0305, 14, this->Id_blue, location[0], location[1], ser);
-        sleep(0.1);
+        this->Referee_Transmit_Map(0x0305, 14, this->Id_blue, _Float32(location[0]), _Float32(location[1]), ser);
         this->ControlLoop_blue();
     }
     if (flag)
@@ -145,7 +141,6 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
     if (this->ind == 5)
     {
         if (this->myUARTPasser.loop_send == 0)
-            sleep(0.1);
         this->myUARTPasser.loop_send = 0;
     }
     this->ind = (this->ind + 1) % 6;
@@ -189,7 +184,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 5)
     {
-        if (myHandler.myVerify_CRC8_Check_Sum(this->buffer, 5) == 0)
+        if (myHandler.Verify_CRC8_Check_Sum(this->buffer, 5) == 0)
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -201,7 +196,7 @@ void UART::read(MySerial &ser)
         this->cmdID = (0x0000 | buffer[5]) | (buffer[6] << 8);
     if (this->buffercnt == 25 && this->cmdID == 0x0203)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 25))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 25))
         {
             this->myUARTPasser.Refree_MapLocationSelf_Message();
             this->buffercnt = 0;
@@ -212,7 +207,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 10 && this->cmdID == 0x0002)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 10))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 10))
         {
             this->Referee_Game_Result();
             this->buffercnt = 0;
@@ -223,7 +218,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 20 && this->cmdID == 0x0001)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 20))
         {
             this->myUARTPasser.Referee_Update_GameData(this->buffer);
             this->buffercnt = 0;
@@ -234,7 +229,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 41 && this->cmdID == 0x0003)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 41))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 41))
         {
             this->myUARTPasser.Referee_Robot_HP(this->buffer);
             this->buffercnt = 0;
@@ -245,7 +240,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 12 && this->cmdID == 0x0004)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 12))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 12))
         {
             this->Referee_dart_status();
             this->buffercnt = 0;
@@ -256,7 +251,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 13 && this->cmdID == 0x0101)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 13))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 13))
         {
             this->Referee_event_data();
             this->buffercnt = 0;
@@ -267,7 +262,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 13 && this->cmdID == 0x0102)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 13))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 13))
         {
             this->Refree_supply_projectile_action();
             this->buffercnt = 0;
@@ -278,7 +273,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 11 && this->cmdID == 0x0104)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 11))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 11))
         {
             this->Refree_Warning();
             this->buffercnt = 0;
@@ -289,7 +284,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 10 && this->cmdID == 0x0105)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 10))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 10))
         {
             this->Refree_dart_remaining_time();
             this->buffercnt = 0;
@@ -300,7 +295,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 17 && this->cmdID == 0x301)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 17))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 17))
         {
             this->myUARTPasser.Receive_Robot_Data(this->buffer);
             this->buffercnt = 0;
@@ -311,7 +306,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 25 && this->cmdID == 0x202)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 25))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 25))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -321,7 +316,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 25 && this->cmdID == 0x203)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 25))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 25))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -331,7 +326,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 27 && this->cmdID == 0x201)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 27))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 27))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -341,7 +336,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 10 && this->cmdID == 0x204)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 10))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 10))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -351,7 +346,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 10 && this->cmdID == 0x206)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 10))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 10))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -361,7 +356,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 13 && this->cmdID == 0x209)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 13))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 13))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -371,7 +366,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 20 && this->cmdID == 0x0301)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 20))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 20))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -381,7 +376,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 36 && this->cmdID == 0x020B)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 36))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 36))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -391,7 +386,7 @@ void UART::read(MySerial &ser)
     }
     if (this->buffercnt == 4 && this->cmdID == 0x0104)
     {
-        if (myHandler.myVerify_CRC16_Check_Sum(this->buffer, 4))
+        if (myHandler.Verify_CRC16_Check_Sum(this->buffer, 4))
         {
             this->buffercnt = 0;
             if (this->buffer[this->buffercnt] == 0xa5)
@@ -405,4 +400,5 @@ void UART::read(MySerial &ser)
 void UART::write(MySerial &ser)
 {
     this->Robot_Data_Transmit_Map(ser);
+    usleep(100000);
 }

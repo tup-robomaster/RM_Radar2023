@@ -48,12 +48,17 @@ void MySerial::initSerial(std::string sername, std::string password)
     // 串口设置
     this->options.c_cflag |= (CLOCAL | CREAD);
     this->options.c_cflag &= ~PARENB; // 设置无奇偶校验位，N
+    this->options.c_iflag &= ~INPCK; 
     this->options.c_cflag &= ~CSTOPB; // 设置停止位1
     this->options.c_cflag &= ~CSIZE;
     this->options.c_cflag |= CS8;  // 设置数据位
-    this->options.c_cc[VTIME] = 0; // 阻塞模式的设置
-    this->options.c_cc[VMIN] = 1;
-
+    this->options.c_cc[VTIME] = 150; // 阻塞模式的设置
+    this->options.c_cc[VMIN] = 0;
+    this->options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    this->options.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+    this->options.c_iflag &= ~(ICRNL | IGNCR);
+    this->options.c_oflag &= ~OPOST;
+    tcflush(this->fd, TCIOFLUSH);
     // 激活新配置
     tcsetattr(this->fd, TCSANOW, &this->options);
 }

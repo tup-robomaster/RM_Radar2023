@@ -78,7 +78,7 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
     }
 }
 
-void Radar::send_judge(judge_message &message, UART &myUART)
+void Radar::send_judge(judge_message &message)
 {
     vector<vector<float>> loc;
     switch (message.task)
@@ -91,7 +91,7 @@ void Radar::send_judge(judge_message &message, UART &myUART)
             temp_location.emplace_back(message.loc[i + ENEMY * 6].y);
             loc.emplace_back(temp_location);
         }
-        myUART.myUARTPasser.push_loc(loc);
+        this->myUART.myUARTPasser.push_loc(loc);
         break;
 
     default:
@@ -269,10 +269,10 @@ void Radar::MainProcessLoop()
                 // TODO: FIX HERE
                 this->mapMapping.mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
                 // TODO: FIX HERE
-                // judge_message myJudge_message;
-                // myJudge_message.task = 1;
-                // myJudge_message.loc = this->mapMapping.getloc();
-                // this->send_judge(myJudge_message, this->myUART);
+                judge_message myJudge_message;
+                myJudge_message.task = 1;
+                myJudge_message.loc = this->mapMapping.getloc();
+                this->send_judge(myJudge_message);
             }
         }
         else

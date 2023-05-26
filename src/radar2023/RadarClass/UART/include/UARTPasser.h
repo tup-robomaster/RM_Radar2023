@@ -15,10 +15,10 @@ private:
 
 public:
     int _hp_up[9] = {100, 150, 200, 250, 300, 350, 400, 450, 500};
-    int _init_hp[10] = {500};
-    int _last_hp[10] = {500};
+    int _init_hp[12] = {500};
+    int _last_hp[12] = {500};
     int _HP[16] = {500};
-    int _max_hp[10] = {500};
+    int _max_hp[12] = {500};
     bool _set_max_flag = false;
     vector<vector<float>> _robot_location = vector<vector<float>>(6, vector<float>(2, 0.f));
     int _BO = 0;
