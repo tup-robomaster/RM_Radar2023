@@ -22,7 +22,7 @@ void MapMapping::_location_prediction()
 {
     for (size_t i = 0; i < this->_location3D.size(); ++i)
     {
-        bool do_pre = this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_cache[0][i].x != 0 && this->_location_cache[0][i].y != 0 && this->_location_cache[i][1].x != 0 && this->_location_cache[1][i].y != 0 && this->_location_pred_time[i] != 1;
+        bool do_pre = this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_cache[0][i].x != 0 && this->_location_cache[0][i].y != 0 && this->_location_cache[1][i].x != 0 && this->_location_cache[1][i].y != 0 && this->_location_pred_time[i] != 1;
         if (do_pre)
         {
             float m_v[2] = {Pre_radio * (this->_location_cache[1][i].x - this->_location_cache[0][i].x), Pre_radio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};

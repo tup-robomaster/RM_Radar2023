@@ -239,12 +239,12 @@ void Radar::MainProcessLoop()
     while (this->__MainProcessLoop_working)
     {
         auto start_t = std::chrono::system_clock::now().time_since_epoch();
-        FrameBag frameBag = this->cameraThread.read();
         if (!this->cameraThread.is_open())
         {
             this->cameraThread.open();
             continue;
         }
+        FrameBag frameBag = this->cameraThread.read();
         if (frameBag.flag)
         {
             vector<Rect> sepTargets = this->carDetector.infer(frameBag.frame);
@@ -274,18 +274,17 @@ void Radar::MainProcessLoop()
                 myJudge_message.loc = this->mapMapping.getloc();
                 this->send_judge(myJudge_message);
             }
+            auto end_t = std::chrono::system_clock::now().time_since_epoch();
+#ifdef Test
+            char ch[255];
+            sprintf(ch, "FPS %d", int(std::chrono::nanoseconds(1000000000).count() / (end_t - start_t).count()));
+            std::string fps_str = ch;
+            cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0}, 3);
+#endif
+            this->myFrames.push(frameBag.frame);
         }
         else
             continue;
-        auto end_t = std::chrono::system_clock::now().time_since_epoch();
-#ifdef Test
-        char ch[255];
-        sprintf(ch, "FPS %d", int(std::chrono::nanoseconds(1000000000).count() / (end_t - start_t).count()));
-        std::string fps_str = ch;
-        cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0}, 3);
-#endif
-        if (frameBag.flag)
-            this->myFrames.push(frameBag.frame);
     }
     this->logger->critical("MainProcessLoop Exit");
 }

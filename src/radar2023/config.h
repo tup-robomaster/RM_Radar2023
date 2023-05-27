@@ -26,10 +26,10 @@
 #define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/model_trt_c.engine" // Engine
 
 #define MAXBO 3
-#define ENEMY 1
+#define ENEMY 0
 
 #define Z_A true        // Z轴突变调整
-#define L_P false        // 位置预测
+#define L_P true        // 位置预测
 #define Z_THRE 0.2      // Z轴突变阈值
 #define Pre_Time 10     // 预测次数
 #define Pre_radio 0.2f  // 预测速度比例
