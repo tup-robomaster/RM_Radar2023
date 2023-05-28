@@ -267,11 +267,17 @@ FrameBag CameraThread::read()
 #ifdef UsingVideo
         this->_cap.read(framebag.frame);
         framebag.flag = true;
+        this->frame_counter += 1;
+        if (frame_counter == int(cap.get(cv::CAP_PROP_FRAME_COUNT)))
+        {
+            this->frame_counter = 0;
+            _cap.set(cv::CAP_PROP_POS_FRAMES, 0);
+        }
 #else
         framebag = this->_cap.read();
 #endif
     }
-    else if(this->_alive)
+    else if (this->_alive)
     {
         this->logger->warn("Camera closed !");
     }

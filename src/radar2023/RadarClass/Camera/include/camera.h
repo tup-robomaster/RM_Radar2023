@@ -52,6 +52,7 @@ private:
     bool _alive = true;
 #ifdef UsingVideo
     VideoCapture _cap;
+    int frame_counter = 0;
 #else
     MV_Camera _cap;
 #endif

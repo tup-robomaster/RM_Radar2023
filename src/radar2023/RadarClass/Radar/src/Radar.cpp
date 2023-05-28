@@ -249,9 +249,8 @@ void Radar::MainProcessLoop()
         {
             vector<Rect> sepTargets = this->carDetector.infer(frameBag.frame);
             vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
-#ifdef Test
+#if defined Test && defined TestWithVis
             this->drawBbox(sepTargets, frameBag.frame);
-            // this->drawArmorsForDebug(pred, frameBag.frame);
 #endif
             if (pred.size() != 0)
             {
@@ -273,6 +272,9 @@ void Radar::MainProcessLoop()
                 myJudge_message.task = 1;
                 myJudge_message.loc = this->mapMapping.getloc();
                 this->send_judge(myJudge_message);
+#if defined Test && defined TestWithVis
+                this->drawArmorsForDebug(pred, frameBag.frame);
+#endif
             }
             auto end_t = std::chrono::system_clock::now().time_since_epoch();
 #ifdef Test
