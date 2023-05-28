@@ -54,6 +54,14 @@ void MapMapping::_plot_region_rect(vector<Point3f> &points, Mat &frame, Mat &K_0
     line(frame, ips_dst[1], ips_dst[2], Scalar(0, 255, 0), 3);
     line(frame, ips_dst[2], ips_dst[3], Scalar(0, 255, 0), 3);
     line(frame, ips_dst[3], ips_dst[0], Scalar(0, 255, 0), 3);
+    circle(frame, ips_dst[4], 5, Scalar(0, 255, 0), 2);
+    circle(frame, ips_dst[5], 5, Scalar(0, 255, 255), 2);
+    circle(frame, ips_dst[6], 5, Scalar(255, 255, 0), 2);
+    circle(frame, ips_dst[7], 5, Scalar(255, 0, 0), 2);
+    line(frame, ips_dst[4], ips_dst[5], Scalar(0, 255, 0), 3);
+    line(frame, ips_dst[5], ips_dst[6], Scalar(0, 255, 0), 3);
+    line(frame, ips_dst[6], ips_dst[7], Scalar(0, 255, 0), 3);
+    line(frame, ips_dst[7], ips_dst[4], Scalar(0, 255, 0), 3);
 }
 
 vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
@@ -222,7 +230,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                 if (al.flag)
                     cache_pred.emplace_back(al);
             }
-            if(al.flag)
+            if (al.flag)
                 pred_loc.emplace_back(al);
             ++iter;
         }
@@ -230,19 +238,23 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
         {
             if (pred_loc.size() > 0)
             {
-                this->cached_location3D.swap(pred_loc);
+                this->cached_location3D.clear();
+                for (auto it : pred_loc)
+                {
+                    this->cached_location3D.emplace_back(it);
+                }
             }
         }
         for (size_t i = 0; i < pred_loc.size(); ++i)
         {
-            pred_loc[i].z += Real_Size_W;
+            pred_loc[i].y += Real_Size_W;
             this->_location3D[this->_ids[(int)pred_loc[i].id]] = pred_loc[i];
             this->logger->info("LOC: [CLS] " + to_string(pred_loc[i].id) + " [x] " + to_string(pred_loc[i].x) + " [y] " + to_string(pred_loc[i].y) + " [z] " + to_string(pred_loc[i].z));
         }
-        if (L_P)
-            // TODO: FIX HERE
-            this->_location_prediction();
     }
+    if (L_P)
+        // TODO: FIX HERE
+        this->_location_prediction();
 }
 // TODO: 待验证
 void MapMapping::adjust_z_one(MapLocation3D &loc)

@@ -251,6 +251,7 @@ void Radar::MainProcessLoop()
             vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
 #if defined Test && defined TestWithVis
             this->drawBbox(sepTargets, frameBag.frame);
+            this->drawArmorsForDebug(pred, frameBag.frame);
 #endif
             if (pred.size() != 0)
             {
@@ -259,22 +260,21 @@ void Radar::MainProcessLoop()
                 if (this->publicDepth.size() == 0)
                 {
                     this->logger->info("No Lidar Msg , Return");
-                    continue;
                 }
-                this->detectDepth(pred);
-                vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
-                this->detectDepth(IouArmors);
-                slk.unlock();
-                // TODO: FIX HERE
-                this->mapMapping.mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
-                // TODO: FIX HERE
-                judge_message myJudge_message;
-                myJudge_message.task = 1;
-                myJudge_message.loc = this->mapMapping.getloc();
-                this->send_judge(myJudge_message);
-#if defined Test && defined TestWithVis
-                this->drawArmorsForDebug(pred, frameBag.frame);
-#endif
+                else
+                {
+                    this->detectDepth(pred);
+                    vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
+                    this->detectDepth(IouArmors);
+                    slk.unlock();
+                    // TODO: FIX HERE
+                    this->mapMapping.mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
+                    // TODO: FIX HERE
+                    judge_message myJudge_message;
+                    myJudge_message.task = 1;
+                    myJudge_message.loc = this->mapMapping.getloc();
+                    this->send_judge(myJudge_message);
+                }
             }
             auto end_t = std::chrono::system_clock::now().time_since_epoch();
 #ifdef Test
@@ -284,6 +284,7 @@ void Radar::MainProcessLoop()
             cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0}, 3);
 #endif
             this->myFrames.push(frameBag.frame);
+            this->logger->flush();
         }
         else
             continue;
@@ -380,11 +381,8 @@ void Radar::spin(int argc, char **argv)
     if (myFrames.size() > 0 && this->is_alive)
     {
         Mat frame = myFrames.front().clone();
-#if (ENEMY == 1)
-        vector<Point3f> test = vector<Point3f>{location_targets.find("blue_base")->second, location_targets.find("red_outpost")->second, location_targets.find("r_rt")->second, location_targets.find("blue_outpost")->second};
-#else
-        vector<Point3f> test = vector<Point3f>{location_targets.find("red_base")->second, location_targets.find("blue_outpost")->second, location_targets.find("b_rt")->second, location_targets.find("red_outpost")->second};
-#endif
+        vector<Point3f> test = vector<Point3f>{Point3f(15.682, 14.844 - 15.f, 0.3f), Point3f(23.464, 14.844 - 15.f, 0.3f), Point3f(23.464, 13.984 - 15.f, 0.3f), Point3f(15.682, 13.984 - 15.f, 0.3f),
+                                               Point3f(4.536, 1.016 - 15.f, 0.3f), Point3f(12.318, 1.016 - 15.f, 0.3f), Point3f(12.318, 0.156 - 15.f, 0.3f), Point3f(4.536, 0.156 - 15.f, 0.3f)};
         this->mapMapping._plot_region_rect(test, frame, this->K_0_Mat, this->C_0_Mat);
         cv::Mat map1, map2;
         cv::Size imageSize = frame.size();

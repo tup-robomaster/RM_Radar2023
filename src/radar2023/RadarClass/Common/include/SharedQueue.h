@@ -1,11 +1,11 @@
 #ifndef __SHAREDQUEUE_H
 #define __SHAREDQUEUE_H
- 
+
 #include <queue>
 #include <mutex>
 #include <condition_variable>
- 
- /**
+
+/**
  * @brief 线程安全的共享队列
  */
 template <typename T>
@@ -14,34 +14,34 @@ class SharedQueue
 public:
     SharedQueue();
     ~SharedQueue();
- 
+
     T &front();
     void pop();
- 
+
     void push(const T &item);
     void push(T &&item);
- 
+
     size_t size();
     bool empty();
- 
+
 private:
     std::deque<T> queue_;
     std::mutex mutex_;
     std::condition_variable cond_;
 };
- 
+
 template <typename T>
 SharedQueue<T>::SharedQueue(){};
- 
+
 template <typename T>
 SharedQueue<T>::~SharedQueue() {}
- 
+
 template <typename T>
 bool SharedQueue<T>::empty()
 {
     return size() ? false : true;
 }
- 
+
 template <typename T>
 T &SharedQueue<T>::front()
 {
@@ -52,7 +52,7 @@ T &SharedQueue<T>::front()
     }
     return queue_.front();
 }
- 
+
 template <typename T>
 void SharedQueue<T>::pop()
 {
@@ -63,25 +63,33 @@ void SharedQueue<T>::pop()
     }
     queue_.pop_front();
 }
- 
+
 template <typename T>
 void SharedQueue<T>::push(const T &item)
 {
     std::unique_lock<std::mutex> mlock(mutex_);
     queue_.push_back(item);
+    if (queue_.size() > 1000)
+    {
+        queue_.pop_front();
+    }
     mlock.unlock();     // unlock before notificiation to minimize mutex con
     cond_.notify_one(); // notify one waiting thread
 }
- 
+
 template <typename T>
 void SharedQueue<T>::push(T &&item)
 {
     std::unique_lock<std::mutex> mlock(mutex_);
     queue_.push_back(std::move(item));
+    if (queue_.size() > 1000)
+    {
+        queue_.pop_front();
+    }
     mlock.unlock();     // unlock before notificiation to minimize mutex con
     cond_.notify_one(); // notify one waiting thread
 }
- 
+
 template <typename T>
 size_t SharedQueue<T>::size()
 {

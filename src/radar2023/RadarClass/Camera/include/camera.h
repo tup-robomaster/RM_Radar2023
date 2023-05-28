@@ -4,6 +4,7 @@
 #include "../../Common/include/public.h"
 #include "CameraApi.h"
 
+#ifndef UsingVideo
 /**
  * @brief 相机驱动类
  * 迈德威视驱动程序，提供格式化的OpenCV Mat图像
@@ -40,6 +41,7 @@ public:
     int getExposureTime();
     int getAnalogGain();
 };
+#endif
 
 /**
  * @brief 相机线程内部类
@@ -60,8 +62,10 @@ private:
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:
+#ifndef UsingVideo
     void openCamera(bool is_init);
     void adjustExposure();
+#endif
     CameraThread();
     ~CameraThread();
     void open();

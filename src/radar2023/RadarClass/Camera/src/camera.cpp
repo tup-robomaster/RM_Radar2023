@@ -1,6 +1,8 @@
 #include "../include/camera.h"
 
+#ifndef UsingVideo
 // unsigned char camera_match_index = (char)0;                  //相机索引号
+
 MV_Camera::MV_Camera()
 {
 }
@@ -140,6 +142,7 @@ int MV_Camera::getAnalogGain()
     CameraGetAnalogGain(this->hCamera, &gain);
     return gain;
 }
+#endif
 
 CameraThread::CameraThread()
 {
@@ -165,6 +168,7 @@ void CameraThread::stop()
     this->release();
 }
 
+#ifndef UsingVideo
 void CameraThread::openCamera(bool is_init)
 {
     bool initFlag = false;
@@ -232,6 +236,7 @@ void CameraThread::adjustExposure()
     this->logger->info("Setting analog gain {}", gain);
     destroyWindow("EXPOSURE Press Q to Exit");
 }
+#endif
 
 void CameraThread::open()
 {
@@ -265,14 +270,14 @@ FrameBag CameraThread::read()
     if (this->_open && this->_alive)
     {
 #ifdef UsingVideo
-        this->_cap.read(framebag.frame);
-        framebag.flag = true;
         this->frame_counter += 1;
-        if (frame_counter == int(cap.get(cv::CAP_PROP_FRAME_COUNT)))
+        if (this->frame_counter == int(_cap.get(cv::CAP_PROP_FRAME_COUNT)))
         {
             this->frame_counter = 0;
             _cap.set(cv::CAP_PROP_POS_FRAMES, 0);
         }
+        this->_cap.read(framebag.frame);
+        framebag.flag = !framebag.frame.empty();
 #else
         framebag = this->_cap.read();
 #endif
@@ -290,6 +295,8 @@ FrameBag CameraThread::read()
 
 void CameraThread::release()
 {
+#ifndef UsingVideo
     this->_cap.uninit();
+#endif
     this->_open = false;
 }
