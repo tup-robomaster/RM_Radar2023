@@ -405,15 +405,27 @@ void Radar::stop()
     if (this->_thread_working)
     {
         this->_thread_working = false;
-        this->__LidarMainLoop_working = false;
-        this->__MainProcessLoop_working = false;
-        this->__VideoRecorderLoop_working = false;
-        this->_Ser_working = false;
-        this->videoRecoderLoop.join();
-        this->processLoop.join();
-        this->lidarMainloop.join();
-        this->serRead.join();
-        this->serWrite.join();
+        if (this->__LidarMainLoop_working)
+        {
+            this->__LidarMainLoop_working = false;
+            this->lidarMainloop.join();
+        }
+        if (this->__MainProcessLoop_working)
+        {
+            this->__MainProcessLoop_working = false;
+            this->processLoop.join();
+        }
+        if (this->__VideoRecorderLoop_working)
+        {
+            this->__VideoRecorderLoop_working = false;
+            this->videoRecoderLoop.join();
+        }
+        if (this->_Ser_working)
+        {
+            this->_Ser_working = false;
+            this->serRead.join();
+            this->serWrite.join();
+        }
     }
     this->videoRecorder.close();
     this->_if_record = false;

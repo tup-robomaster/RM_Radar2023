@@ -8,7 +8,7 @@
 #define lidarTopicName (char *)"/livox/lidar"
 
 #define CameraConfigPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/Config_0.Config" // 相机配置文件名称
-#define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resource/1.mp4"                    // DEMO视频路径
+#define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resource/2.mp4"                    // DEMO视频路径
 
 #define MaxPointsNum 10000 // 最大点云数量
 #define ImageH 2064        // 图像高度

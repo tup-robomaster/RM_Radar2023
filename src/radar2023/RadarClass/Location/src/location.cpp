@@ -69,7 +69,7 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     frame = cap.read();
     if (!cap.is_open() || !frame.flag)
         return false;
-    int tip_w = floor(frame.frame.cols / 2);
+    int tip_w = floor(frame.frame.cols / 2.);
     int tip_h = frame.frame.rows - 200;
     cv::namedWindow("PickPoints", WindowFlags::WINDOW_GUI_NORMAL);
     cv::resizeWindow("PickPoints", Size(1280, 780));
