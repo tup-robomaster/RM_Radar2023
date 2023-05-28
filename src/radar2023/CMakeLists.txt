@@ -25,11 +25,15 @@ catkin_package(CATKIN_DEPENDS
 	sensor_msgs
 	)
 # cuda
-include_directories(/data/cuda/cuda-11.8/cuda/include)
-link_directories(/data/cuda/cuda-11.8/cuda/lib)
+include_directories(/user/local/cuda/cuda-11.8/cuda/include)
+link_directories(/user/local/cuda/cuda-11.8/cuda/lib)
 # cudnn
-include_directories(/data/cuda/cuda-11.8/cudnn/v8.0.4/include)
-link_directories(/data/cuda/cuda-11.8/cudnn/v8.0.4/lib64)
+include_directories(/user/local/cuda/cuda-11.8/cudnn/v8.0.4/include)
+link_directories(/user/local/cuda/cuda-11.8/cudnn/v8.0.4/lib64)
+# mkl
+include_directories(/opt/intel/oneapi/mkl/latest/include)
+link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64)
+
 
 include_directories(
   # include
@@ -93,6 +97,7 @@ target_link_libraries(radar2023
   ${CUDA_cudadevrt_LIBRARY}
   ${OpenCV_LIBS}
   ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${PCL_LIBRARIES}
+  libmkl_rt.so 
   pthread
   libm.so
   libdl.so
@@ -117,10 +122,10 @@ install(DIRECTORY
   # config
 	)
 
-macro(remove_warnings)
-  add_definitions(-Wno-deprecated-declarations
-    -Wno-unused-but-set-variable
-    -Wno-unused-variable)
-endmacro()
+# macro(remove_warnings)
+#   add_definitions(-Wno-deprecated-declarations
+#     -Wno-unused-but-set-variable
+#     -Wno-unused-variable)
+# endmacro()
 
-remove_warnings()
+# remove_warnings()

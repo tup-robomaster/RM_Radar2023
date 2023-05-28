@@ -1,5 +1,7 @@
 #ifndef __PUBLIC_R_H
 #define __PUBLIC_R_H
+#define EIGEN_USE_MKL_ALL
+#define EIGEN_VECTORIZE_SSE4_2
 
 #include <stdio.h>
 #include <iostream>
