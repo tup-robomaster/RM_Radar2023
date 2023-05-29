@@ -7,6 +7,8 @@
 #define SerialPortNAME (char *)"/dev/ttyUSB0"
 #define lidarTopicName (char *)"/livox/lidar"
 
+#define FRAME_DEPTH 500                                     //图像队列深度
+
 #define CameraConfigPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/Config_0.Config" // 相机配置文件名称
 #define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resource/2.mp4"                    // DEMO视频路径
 
@@ -25,7 +27,7 @@
 #define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/model_trt_c.engine" // Engine
 
 #define MAXBO 3
-#define ENEMY 0
+#define ENEMY 1         // 0 RED 1 BLUE
 
 #define Z_A true        // Z轴突变调整
 #define L_P true        // 位置预测
@@ -34,6 +36,6 @@
 #define Pre_radio 0.2f  // 预测速度比例
 #define Real_Size_W 15. // 真实宽度
 #define Real_Size_H 28. // 真实高度（长）
-#define IoU_THRE 0.8f
+#define IoU_THRE 0.8f   // IoU预测阈值
 
 #define LOGPATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/logs/" // log日志存储文件夹

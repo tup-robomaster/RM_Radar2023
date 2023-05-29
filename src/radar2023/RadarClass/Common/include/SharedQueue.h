@@ -15,6 +15,8 @@ public:
     SharedQueue();
     ~SharedQueue();
 
+    void setDepth(size_t depth);
+
     T &front();
     void pop();
 
@@ -28,13 +30,24 @@ private:
     std::deque<T> queue_;
     std::mutex mutex_;
     std::condition_variable cond_;
+    size_t depth = 0;
 };
 
 template <typename T>
-SharedQueue<T>::SharedQueue(){};
+SharedQueue<T>::SharedQueue()
+{
+    this->depth = queue_.max_size();
+};
 
 template <typename T>
 SharedQueue<T>::~SharedQueue() {}
+
+
+template <typename T>
+void SharedQueue<T>::setDepth(size_t depth)
+{
+    this->depth = depth;
+}
 
 template <typename T>
 bool SharedQueue<T>::empty()
@@ -69,7 +82,7 @@ void SharedQueue<T>::push(const T &item)
 {
     std::unique_lock<std::mutex> mlock(mutex_);
     queue_.push_back(item);
-    if (queue_.size() > 1000)
+    if (queue_.size() > this->depth)
     {
         queue_.pop_front();
     }

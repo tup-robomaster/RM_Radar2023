@@ -40,28 +40,22 @@ void MapMapping::_location_prediction()
     }
 }
 
-void MapMapping::_plot_region_rect(vector<Point3f> &points, Mat &frame, Mat &K_0, Mat &C_0)
+void MapMapping::_plot_region_rect(vector<vector<Point3f>> &points, Mat &frame, Mat &K_0, Mat &C_0)
 {
-    vector<Point2f> ips_pre;
-    vector<Point2i> ips_dst;
-    cv::projectPoints(points, this->rvec, this->tvec, K_0, C_0, ips_pre);
-    cv::Mat(ips_pre).convertTo(ips_dst, CV_32SC1);
-    circle(frame, ips_dst[0], 5, Scalar(0, 255, 0), 2);
-    circle(frame, ips_dst[1], 5, Scalar(0, 255, 255), 2);
-    circle(frame, ips_dst[2], 5, Scalar(255, 255, 0), 2);
-    circle(frame, ips_dst[3], 5, Scalar(255, 0, 0), 2);
-    line(frame, ips_dst[0], ips_dst[1], Scalar(0, 255, 0), 3);
-    line(frame, ips_dst[1], ips_dst[2], Scalar(0, 255, 0), 3);
-    line(frame, ips_dst[2], ips_dst[3], Scalar(0, 255, 0), 3);
-    line(frame, ips_dst[3], ips_dst[0], Scalar(0, 255, 0), 3);
-    circle(frame, ips_dst[4], 5, Scalar(0, 255, 0), 2);
-    circle(frame, ips_dst[5], 5, Scalar(0, 255, 255), 2);
-    circle(frame, ips_dst[6], 5, Scalar(255, 255, 0), 2);
-    circle(frame, ips_dst[7], 5, Scalar(255, 0, 0), 2);
-    line(frame, ips_dst[4], ips_dst[5], Scalar(0, 255, 0), 3);
-    line(frame, ips_dst[5], ips_dst[6], Scalar(0, 255, 0), 3);
-    line(frame, ips_dst[6], ips_dst[7], Scalar(0, 255, 0), 3);
-    line(frame, ips_dst[7], ips_dst[4], Scalar(0, 255, 0), 3);
+    for (auto &it : points)
+    {
+        vector<Point2f> ips_pre;
+        vector<Point2i> ips_dst;
+        cv::projectPoints(it, this->rvec, this->tvec, K_0, C_0, ips_pre);
+        circle(frame, ips_pre[0], 5, Scalar(0, 255, 0), 2);
+        circle(frame, ips_pre[1], 5, Scalar(0, 255, 255), 2);
+        circle(frame, ips_pre[2], 5, Scalar(255, 255, 0), 2);
+        circle(frame, ips_pre[3], 5, Scalar(255, 0, 0), 2);
+        line(frame, ips_pre[0], ips_pre[1], Scalar(0, 255, 0), 3);
+        line(frame, ips_pre[1], ips_pre[2], Scalar(0, 255, 0), 3);
+        line(frame, ips_pre[2], ips_pre[3], Scalar(0, 255, 0), 3);
+        line(frame, ips_pre[3], ips_pre[0], Scalar(0, 255, 0), 3);
+    }
 }
 
 vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
