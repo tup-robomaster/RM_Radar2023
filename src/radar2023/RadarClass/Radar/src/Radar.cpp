@@ -382,9 +382,7 @@ void Radar::spin(int argc, char **argv)
     if (myFrames.size() > 0 && this->is_alive)
     {
         Mat frame = myFrames.front().clone();
-        vector<vector<Point3f>> test = vector<vector<Point3f>>{{Point3f(15.682, 14.844 - 15.f, 0.3f), Point3f(23.464, 14.844 - 15.f, 0.3f), Point3f(23.464, 13.984 - 15.f, 0.3f), Point3f(15.682, 13.984 - 15.f, 0.3f)},
-                                                               {Point3f(4.536, 1.016 - 15.f, 0.3f), Point3f(12.318, 1.016 - 15.f, 0.3f), Point3f(12.318, 0.156 - 15.f, 0.3f), Point3f(4.536, 0.156 - 15.f, 0.3f)}};
-        this->mapMapping._plot_region_rect(test, frame, this->K_0_Mat, this->C_0_Mat);
+        this->mapMapping._plot_region_rect(this->show_region, frame, this->K_0_Mat, this->C_0_Mat);
         cv::Mat map1, map2;
         cv::Size imageSize = frame.size();
         cv::initUndistortRectifyMap(this->K_0_Mat, this->C_0_Mat, cv::Mat(), cv::getOptimalNewCameraMatrix(this->K_0_Mat, this->C_0_Mat, imageSize, 1, imageSize, 0), imageSize, CV_16SC2, map1, map2);

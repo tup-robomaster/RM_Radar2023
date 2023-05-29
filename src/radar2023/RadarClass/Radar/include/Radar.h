@@ -59,6 +59,9 @@ private:
 
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
+    vector<vector<Point3f>> show_region = vector<vector<Point3f>>{{Point3f(15.682, 14.844 - 15.f, 0.3f), Point3f(23.464, 14.844 - 15.f, 0.3f), Point3f(23.464, 13.984 - 15.f, 0.3f), Point3f(15.682, 13.984 - 15.f, 0.3f)},
+                                                                  {Point3f(4.536, 1.016 - 15.f, 0.3f), Point3f(12.318, 1.016 - 15.f, 0.3f), Point3f(12.318, 0.156 - 15.f, 0.3f), Point3f(4.536, 0.156 - 15.f, 0.3f)}};
+
 private:
     void armor_filter(vector<bboxAndRect> &pred);
     void detectDepth(vector<bboxAndRect> &pred);

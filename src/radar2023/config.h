@@ -21,10 +21,10 @@
 #define CAMERA_PARAM_PATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/camera0.yaml" // 相机参数文件
 #define VideoRecoderRath (char *)"/home/ninefish/nine-fish/RM_Radar2023/Record/"                              // 录制保存文件
 
-#define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/43best.onnx"
-#define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/best.onnx"
-#define TensorRTEnginePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/model_trt.engine"     // Engine
-#define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/Moudles/model_trt_c.engine" // Engine
+#define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/43best.onnx"
+#define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/best.onnx"
+#define TensorRTEnginePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/model_trt.engine"     // Engine
+#define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/model_trt_c.engine" // Engine
 
 #define MAXBO 3
 #define ENEMY 1         // 0 RED 1 BLUE
