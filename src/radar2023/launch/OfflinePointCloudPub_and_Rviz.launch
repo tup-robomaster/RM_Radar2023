@@ -1,0 +1,6 @@
+<launch>
+    <param name="pcd_path" type="string" value="/home/ninefish/nine-fish/RM_Radar2023/resources/pcds.txt"/>  
+    <node pkg="rviz" type="rviz" name="rviz" args="-d ${find point_cloud_pkg}/rviz/point_cloud.rviz"></node>
+    <node pkg="radar2023" type="offline_point_cloud_publisher" name="point_cloud_node" output="screen" params=></node>
+
+</launch>

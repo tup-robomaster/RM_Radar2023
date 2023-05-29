@@ -95,7 +95,7 @@ void SharedQueue<T>::push(T &&item)
 {
     std::unique_lock<std::mutex> mlock(mutex_);
     queue_.push_back(std::move(item));
-    if (queue_.size() > 1000)
+    if (queue_.size() > this->depth)
     {
         queue_.pop_front();
     }

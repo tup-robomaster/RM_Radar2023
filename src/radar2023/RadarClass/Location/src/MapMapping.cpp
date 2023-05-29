@@ -60,7 +60,7 @@ void MapMapping::_plot_region_rect(vector<vector<Point3f>> &points, Mat &frame, 
 
 vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
 {
-    vector<ArmorBoundingBox> pred_bbox;
+    vector<ArmorBoundingBox> pred_bbox = {};
     map<int, int>::iterator iter;
     iter = this->_ids.begin();
     if (this->_IoU_pred_cache.size() > 0)
@@ -93,15 +93,18 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
                     float area = cached_pred.armor.w * cached_pred.armor.h;
                     iou.emplace_back(overlap / area);
                 }
-                int max_index = max_element(iou.begin(), iou.end()) - iou.begin();
-                if (iou[max_index] > IoU_THRE)
+                if (iou.size() > 0)
                 {
-                    Rect current_rect = sepboxs[max_index];
-                    current_rect.width = floor(current_rect.width / 3);
-                    current_rect.height = floor(current_rect.height / 5);
-                    current_rect.x += current_rect.width;
-                    current_rect.y += current_rect.height * 3;
-                    pred_bbox.emplace_back(ArmorBoundingBox{true, (float)current_rect.x, (float)current_rect.y, (float)current_rect.width, (float)current_rect.height, pred[max_index].armor.cls});
+                    int max_index = std::distance(iou.begin(), max_element(iou.begin(), iou.end()));
+                    if (iou[max_index] > IoU_THRE)
+                    {
+                        Rect current_rect = sepboxs[max_index];
+                        current_rect.width = floor(current_rect.width / 3.);
+                        current_rect.height = floor(current_rect.height / 5.);
+                        current_rect.x += current_rect.width;
+                        current_rect.y += current_rect.height * 3;
+                        pred_bbox.emplace_back(ArmorBoundingBox{true, (float)current_rect.x, (float)current_rect.y, (float)current_rect.width, (float)current_rect.height, pred[max_index].armor.cls});
+                    }
                 }
             }
             iter++;

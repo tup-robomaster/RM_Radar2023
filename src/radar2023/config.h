@@ -2,7 +2,7 @@
 #define TestWithVis                                         //显示可视化检测结果
 #define UsingVideo                                          //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
 
-#define PASSWORD (char *)"momoko11"
+#define PASSWORD (char *)"momoko11"                         //用户密码，用于串口权限
 
 #define SerialPortNAME (char *)"/dev/ttyUSB0"
 #define lidarTopicName (char *)"/livox/lidar"
@@ -10,7 +10,7 @@
 #define FRAME_DEPTH 500                                     //图像队列深度
 
 #define CameraConfigPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/Config_0.Config" // 相机配置文件名称
-#define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resource/2.mp4"                    // DEMO视频路径
+#define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resources/3.mp4"                    // DEMO视频路径
 
 #define MaxPointsNum 10000 // 最大点云数量
 #define ImageH 2064        // 图像高度
@@ -27,7 +27,7 @@
 #define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/model_trt_c.engine" // Engine
 
 #define MAXBO 3
-#define ENEMY 1         // 0 RED 1 BLUE
+#define ENEMY 0         // 0 RED 1 BLUE
 
 #define Z_A true        // Z轴突变调整
 #define L_P true        // 位置预测

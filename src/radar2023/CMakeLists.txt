@@ -45,6 +45,8 @@ link_directories(
   # /opt/intel/mkl/lib/intel64
   # /opt/intel/lib/intel64
   ${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 cuda_add_executable(radar2023
   main.cpp
   RadarClass/TRTInference/TRTInfer/CUDA/preprocess.cu
@@ -64,6 +66,10 @@ cuda_add_executable(radar2023
   RadarClass/UART/src/UARTPasser.cpp
   RadarClass/Logger/src/Logger.cpp
 )
+
+add_executable(offline_point_cloud_publisher tools/offline_point_cloud_pub.cpp)
+target_link_libraries(offline_point_cloud_publisher ${PCL_LIBRARIES}  ${catkin_LIBRARIES} )
+
 target_sources(radar2023
   PRIVATE
   main.cpp

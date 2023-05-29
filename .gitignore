@@ -9,6 +9,8 @@ src/radar2023/logs/
 log/
 Camera/
 Record/
-resource/
+resources/1.mp4
+resources/2.mp4
 src/radar2023/RadarClass/Detectors/models/model_trt_c.engine
 src/radar2023/RadarClass/Detectors/models/model_trt.engine
+resources/3.mp4

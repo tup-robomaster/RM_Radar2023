@@ -2,13 +2,15 @@
 
 沈阳航空航天大学T-UP战队2023赛季雷达程序
 
-## Version: V1.0 Gamma
+## Version: V1.1 Gamma
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
 ## 0.前言
 
 本赛季出于对后续扩展性考虑，原有雷达程序性能已无法满足继续开发的需求，故进行重构。程序整体的设计目的在于尽可能的压榨算力的条件下保留充足的可扩展性，各模块充分解耦、即插即用，做到程序二次开发简便、扩展性高。
+
+特别感谢上海交通大学[SJTU]提供的开源程序及测试资源对本项目的帮助。
 
 ## 1.简介
 
@@ -77,7 +79,7 @@
 * 32G RAM
 * GeForce RTX 4090 GPU
 
-## 3.文件结构
+## 3.文件结构-SRC
 
 * radar2023
   * demo_resource 存放常用资源和工具
@@ -128,13 +130,26 @@ roslaunch radar2023 radar2023.launch
 
 2.初始化完成后，程序会尝试启动相机并展示一张预览图，若对相机曝光、增益不满意，在预览图上按“t”进入调节界面，在调节界面中有相应的退出滑条。
 
-3.相机预览结束后，进入四点标注界面，根据提示完成标注点选取，每确定一点，在标定窗口按“z”撤回，按其他任意键确定。
+3.相机预览结束后，进入四点标注界面，根据提示完成标注点选取，每确定一点，在标定窗口按“z”撤回，按其他任意键确定。Tips: 在src/RadarClass/Location/src/location.cpp -> locate_pick函数中更改使用的3D点；在src/radar2023/RadarClass/Common/include/public.h -> location_targets中更改3D点坐标。
 
 4.标定结束后，进入控制窗口，可控制程序退出和视频录制，在图像中显示空间点反投影效果和识别车辆，对标定结果不满意可退出程序重新标定。
 
 5.【不稳定功能未在此列出】
 
+### 其他Launch文件说明-使用离线点云
+
+使用下列launch前需修改其中pcd_path参数
+
+预置pcds.txt由上交开源程序提供，需搭配上交开源视频[非上交视频仅用于正常运行]
+
+* OfflinePointCloudPub_and_Rviz.launch //启动离线点云发布及Rviz
+* OfflinePointCloudPub.launch //启动离线点云发布
+* radar2023_with_OfflinePointCloudPub_and_Rviz.launch //启动离线点云发布、Rviz及雷达主程序
+* radar2023_with_OfflinePointCloudPub.launch //启动离线点云发布及雷达主程序
+
 ### 开发日志
+
+Date:2023.5.30 V1.1:添加离线点云调试工具
 
 Date:2023.5.29 雷达已完善，发布V1.0g测试版本
 
