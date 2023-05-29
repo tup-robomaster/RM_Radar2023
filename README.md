@@ -2,7 +2,7 @@
 
 沈阳航空航天大学T-UP战队2023赛季雷达程序
 
-## Version: V0.9 Beta
+## Version: V0.9 Gamma
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
@@ -22,6 +22,7 @@
 * 相机到激光雷达的外参 推荐使用 [Livox相机-激光雷达 联合标定](https://github.com/Livox-SDK/livox_camera_lidar_calibration "Github链接")
 * 网络对应的TensorRT相关参数[废弃]
 * 车辆及装甲板识别模型
+* 测试视频[可选]
 
 对每个模块更加具体的说明可以参考文件夹下的README.md文件:
 
@@ -134,6 +135,8 @@ roslaunch radar2023 radar2023.launch
 5.【不稳定功能未在此列出】
 
 ### 开发日志
+
+Date:2023.5.29 雷达已完善，发布V1.0g测试版本
 
 Date:2023.5.27 主要功能测试通过，发布V0.9b测试版本
 

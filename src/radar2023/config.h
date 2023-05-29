@@ -1,6 +1,6 @@
 #define Test                                                //测试标志
 #define TestWithVis                                         //显示可视化检测结果
-#define UsingVideo                                          //是否使用视频(！！！可能造成内存泄露)
+#define UsingVideo                                          //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
 
 #define PASSWORD (char *)"momoko11"
 
@@ -15,7 +15,7 @@
 #define MaxPointsNum 10000 // 最大点云数量
 #define ImageH 2064        // 图像高度
 #define ImageW 3088        // 图像宽度
-#define maxQueueSize 100    // 点云最大帧队列长度
+#define maxQueueSize 100   // 点云最大帧队列长度
 #define LidarQueueSize 1   // 雷达消息队列
 
 #define CAMERA_PARAM_PATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/camera0.yaml" // 相机参数文件
