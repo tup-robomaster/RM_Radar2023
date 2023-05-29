@@ -3,12 +3,12 @@ build/
 install/
 .vscode/
 .catkin_workspace
-src/radar2023/RadarClass/Detectors/Moudles/
 src/radar2023/RadarClass/Camera/params/Config_0.Config
 src/radar2023/Recorder/
 src/radar2023/logs/
-017.jpg
 log/
 Camera/
 Record/
 resource/
+src/radar2023/RadarClass/Detectors/Moudles/model_trt_c.engine
+src/radar2023/RadarClass/Detectors/Moudles/model_trt.engine
