@@ -2,7 +2,7 @@
 
 沈阳航空航天大学T-UP战队2023赛季雷达程序
 
-## Version: V0.9 Gamma
+## Version: V1.0 Gamma
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
