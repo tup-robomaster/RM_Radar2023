@@ -44,7 +44,7 @@
 * Tensorrt 8.5.1.7
 * ros-noetic
 * OpenCV4.6.0
-* PCL
+* PCL 1.10.0
 * spdlog
 * Eigen3
 * MKL[可选]
@@ -66,7 +66,7 @@
 * Tensorrt 8.5.2.2
 * ros-noetic
 * OpenCV4.6.0
-* PCL
+* PCL 1.10.0
 * spdlog
 * Eigen3
 * MKL[可选]
@@ -103,11 +103,13 @@
 ### 使用前准备
 
 * 环境配置完成后，需根据运算平台及环境修改src下CMakeLists.txt
+* 若不使用MKL，注释掉src/radar2023/CMakeLists.txt ->34 include_directories(/opt/intel/oneapi/mkl/latest/include)、35 link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64) 、108 libmkl_rt.so 和 src/radar2023/RadarClass/Common/include/public.h
+-> 3 #define EIGEN_USE_MKL_ALL、4 #define EIGEN_VECTORIZE_SSE4_2 [可选]
 * 创建以下文件夹：src/radar2023/logs 、src/radar2023/Recorder 、  src/radar2023/RadarClass/Detectors/models  、 src/radar2023/RadarClass/Camera/params
 * 修改config.h中的路径
 * 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0，注意导出动态Onnx
 * 车辆分类[CAR]
-* 装甲板分类[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7]
+* 装甲板分类[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7] #程序中仅
 * 将yolov5导出的动态尺寸onnx放置于config.h定义位置
 * 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
 * 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
