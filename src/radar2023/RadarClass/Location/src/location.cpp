@@ -11,7 +11,8 @@ void __callback__click(int event, int x, int y, int flage, void *param)
     {
     case MouseEventTypes::EVENT_MOUSEMOVE:
         rect = cv::getWindowImageRect("PickPoints");
-        location->frame.frame(Rect(Point(max(x - 100, 0), max(y - 100, 0)), Point(min(x + 100, location->frame.frame.cols - 1), min(y + 100, location->frame.frame.rows - 1)))).copyTo(img_cut(Rect(0, 0, min(x + 100, location->frame.frame.cols - 1) - max(x - 100, 0), min(y + 100, location->frame.frame.rows - 1) - max(y - 100, 0))));
+        location->frame.frame(Rect(Point(max(x - 100, 0), max(y - 100, 0)), Point(min(x + 100, location->frame.frame.cols - 1), min(y + 100, location->frame.frame.rows - 1))))
+            .copyTo(img_cut(Rect(0, 0, min(x + 100, location->frame.frame.cols - 1) - max(x - 100, 0), min(y + 100, location->frame.frame.rows - 1) - max(y - 100, 0))));
         circle(img_cut, Point(100, 100), 1, Scalar(0, 255, 0), 1);
         imshow("ZOOM_WINDOW", img_cut);
         cv::moveWindow("ZOOM_WINDOW", rect.width - 400, rect.height + 200);
@@ -50,7 +51,8 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
     Mat K_0, C_0, E_0;
     if (!read_param(K_0, C_0, E_0))
         return false;
-    map<int, vector<string>> tips{{0, {"red_base", "blue_outpost", "b_right_top", "red_outpost"}}, {1, {"blue_base", "red_outpost", "r_right_top", "blue_outpost"}}};
+    map<int, vector<string>> tips{{0, {"red_base", "blue_outpost", "b_right_top", "red_outpost"}},
+                                  {1, {"blue_base", "red_outpost", "r_right_top", "blue_outpost"}}};
     vector<Point3f> ops;
     if (enemy == 0)
     {

@@ -160,7 +160,6 @@ void Radar::init(int argc, char **argv)
     cv2eigen(this->K_0_Mat, K_0);
     cv2eigen(this->C_0_Mat, C_0);
     cv2eigen(this->E_0_Mat, E_0);
-    // TODO: CHECK HERE
     this->depthQueue = DepthQueue(K_0, C_0, E_0);
     if (!this->_init_flag)
     {
@@ -270,9 +269,7 @@ void Radar::MainProcessLoop()
                     vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                     this->detectDepth(IouArmors);
                     slk.unlock();
-                    // TODO: FIX HERE
                     this->mapMapping.mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
-                    // TODO: FIX HERE
                     judge_message myJudge_message;
                     myJudge_message.task = 1;
                     myJudge_message.loc = this->mapMapping.getloc();

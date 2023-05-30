@@ -21,7 +21,7 @@ void ArmorDetector::accessModelTest()
 bool ArmorDetector::initModel()
 {
     this->logger->info("ArmorDetector init Moudel");
-    
+
     bool check = this->armorTensorRT.initModule(TensorRTEnginePath, 16, 24);
     this->logger->info("ArmorDetector Moudel inited");
     return check;
@@ -67,8 +67,19 @@ void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors
     {
         for (auto &it : armors[i])
         {
-            this->results.emplace_back(bboxAndRect{ArmorBoundingBox{true, (float)it.x1 + boxs[i].x, (float)it.y1 + boxs[i].y, abs((float)(it.x2 - it.x1)), abs((float)(it.y2 - it.y1)), (float)it.classId, it.confidence}, boxs[i]});
-            this->logger->info("Arrmor: [x0] " + to_string(this->results.back().armor.x0) + " [y0] " + to_string(this->results.back().armor.y0) + " [w] " + to_string(this->results.back().armor.w) + " [h] " + to_string(this->results.back().armor.h) + " [cls] " + to_string(it.classId) + " [conf] " + to_string(it.confidence));
+            this->results.emplace_back(bboxAndRect{ArmorBoundingBox{true,
+                                                                    (float)it.x1 + boxs[i].x,
+                                                                    (float)it.y1 + boxs[i].y,
+                                                                    abs((float)(it.x2 - it.x1)),
+                                                                    abs((float)(it.y2 - it.y1)),
+                                                                    (float)it.classId, it.confidence},
+                                                   boxs[i]});
+            this->logger->info("Arrmor: [x0] " + to_string(this->results.back().armor.x0) +
+                               " [y0] " + to_string(this->results.back().armor.y0) +
+                               " [w] " + to_string(this->results.back().armor.w) +
+                               " [h] " + to_string(this->results.back().armor.h) +
+                               " [cls] " + to_string(it.classId) +
+                               " [conf] " + to_string(it.confidence));
         }
     }
 }

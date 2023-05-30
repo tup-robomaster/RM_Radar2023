@@ -22,10 +22,17 @@ void MapMapping::_location_prediction()
 {
     for (size_t i = 0; i < this->_location3D.size(); ++i)
     {
-        bool do_pre = this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_cache[0][i].x != 0 && this->_location_cache[0][i].y != 0 && this->_location_cache[1][i].x != 0 && this->_location_cache[1][i].y != 0 && this->_location_pred_time[i] != 1;
+        bool do_pre = this->_location3D[i].x != 0 &&
+                      this->_location3D[i].y != 0 &&
+                      this->_location_cache[0][i].x != 0 &&
+                      this->_location_cache[0][i].y != 0 &&
+                      this->_location_cache[1][i].x != 0 &&
+                      this->_location_cache[1][i].y != 0 &&
+                      this->_location_pred_time[i] != 1;
         if (do_pre)
         {
-            float m_v[2] = {Pre_radio * (this->_location_cache[1][i].x - this->_location_cache[0][i].x), Pre_radio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};
+            float m_v[2] = {Pre_radio * (this->_location_cache[1][i].x - this->_location_cache[0][i].x),
+                            Pre_radio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};
             this->_location3D[i].x = m_v[0] + this->_location_cache[1][i].x;
             this->_location3D[i].y = m_v[1] + this->_location_cache[1][i].y;
         }
@@ -103,7 +110,12 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
                         current_rect.height = floor(current_rect.height / 5.);
                         current_rect.x += current_rect.width;
                         current_rect.y += current_rect.height * 3;
-                        pred_bbox.emplace_back(ArmorBoundingBox{true, (float)current_rect.x, (float)current_rect.y, (float)current_rect.width, (float)current_rect.height, pred[max_index].armor.cls});
+                        pred_bbox.emplace_back(ArmorBoundingBox{true,
+                                                                (float)current_rect.x,
+                                                                (float)current_rect.y,
+                                                                (float)current_rect.width,
+                                                                (float)current_rect.height,
+                                                                pred[max_index].armor.cls});
                     }
                 }
             }
@@ -246,7 +258,10 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
         {
             pred_loc[i].y += Real_Size_W;
             this->_location3D[this->_ids[(int)pred_loc[i].id]] = pred_loc[i];
-            this->logger->info("LOC: [CLS] " + to_string(pred_loc[i].id) + " [x] " + to_string(pred_loc[i].x) + " [y] " + to_string(pred_loc[i].y) + " [z] " + to_string(pred_loc[i].z));
+            this->logger->info("LOC: [CLS] " + to_string(pred_loc[i].id) +
+                               " [x] " + to_string(pred_loc[i].x) +
+                               " [y] " + to_string(pred_loc[i].y) +
+                               " [z] " + to_string(pred_loc[i].z));
         }
     }
     if (L_P)
