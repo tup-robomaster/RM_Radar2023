@@ -55,10 +55,14 @@
 
 运算平台 (tested && minimum)：
 
+[tested]
+
 * AMD R7 5800H CPU
 * DDR4 32G 3200 RAM
 * GeForce RTX 3070 Laptop GPU
-  or
+  
+[minimum]
+
 * Intel Core i5-1250P CPU
 * DDR4 16G 3200 RAM
 * GeForce RTX 3060 Laptop GPU [6GB]
