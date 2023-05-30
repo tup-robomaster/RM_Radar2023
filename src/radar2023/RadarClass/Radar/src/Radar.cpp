@@ -3,14 +3,13 @@
 void Radar::armor_filter(vector<bboxAndRect> &pred)
 {
     vector<bboxAndRect> results;
-    int ids[12] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     for (int i = 0; i < 12; ++i)
     {
         int max_id = 0;
         float max_conf = 0.f;
         for (size_t j = 0; j < pred.size(); ++j)
         {
-            if ((int)pred[j].armor.cls == ids[i] && pred[j].armor.conf - max_conf > 0)
+            if ((int)pred[j].armor.cls == this->ids[i] && pred[j].armor.conf - max_conf > 0)
             {
                 max_id = j;
                 max_conf = pred[j].armor.conf;

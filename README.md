@@ -53,11 +53,15 @@
 * Livox雷达驱动
 * 迈德威视相机驱动
 
-运算平台 (minimum)：
+运算平台 (tested && minimum)：
 
 * AMD R7 5800H CPU
-* 32G RAM
+* DDR4 32G 3200 RAM
 * GeForce RTX 3070 Laptop GPU
+  or
+* Intel Core i5-1250P CPU
+* DDR4 16G 3200 RAM
+* GeForce RTX 3060 Laptop GPU [6GB]
 
 2[best]
 
@@ -77,8 +81,8 @@
 
 运算平台 (best)：
 
-* i9 13900KF
-* 32G RAM
+* Intel Core i9 13900KF CPU
+* DDR5 32G 7400 RAM
 * GeForce RTX 4090 GPU
 
 ## 3.文件结构-SRC
@@ -94,6 +98,7 @@
     * Logger spdlog日志记录器
     * Radar 程序主线程及线程管理
     * UART 官方裁判系统通讯
+  * tools 调试工具
   * Recorder 录制文件存放
   * CMakeLists.txt CMake文件
   * config.h 程序参数配置文件
@@ -147,7 +152,9 @@
   * 本项目不存在测试用视频，需自行准备并放置于TestVideoPath对应路径
 * 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0，注意导出动态Onnx
 * 车辆分类[CAR]
-* 装甲板分类[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7] #程序中仅
+* 装甲板分类[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7]
+
+  * 程序中仅使用[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7]
 * 将yolov5导出的动态尺寸onnx放置于config.h定义位置
 * 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
 * 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
@@ -183,9 +190,21 @@ roslaunch radar2023 radar2023.launch
 预置pcds.txt由上交开源程序提供，需搭配上交开源视频[非上交视频仅用于正常运行]
 
 * OfflinePointCloudPub_and_Rviz.launch //启动离线点云发布及Rviz
+  ```
+  roslaunch radar2023 OfflinePointCloudPub_and_Rviz.launch
+  ```
 * OfflinePointCloudPub.launch //启动离线点云发布
+  ```
+  roslaunch radar2023 OfflinePointCloudPub.launch
+  ```
 * radar2023_with_OfflinePointCloudPub_and_Rviz.launch //启动离线点云发布、Rviz及雷达主程序
+  ```
+  roslaunch radar2023 radar2023_with_OfflinePointCloudPub_and_Rviz.launch
+  ```
 * radar2023_with_OfflinePointCloudPub.launch //启动离线点云发布及雷达主程序
+  ```
+  roslaunch radar2023 radar2023_with_OfflinePointCloudPub.launch
+  ```
 
 ### 开发日志
 
@@ -200,3 +219,30 @@ Date:2023.5.13 更换推理模块，删除废弃功能，发布V0.3a内部测试
 Date:2022-12-31 经过一轮调试Debug与更新，发布V0.2a内部测试版本
 
 Date:2022-12-04 完成所有基本功能构建，发布V0.1a内部测试版本
+
+### Q&A
+
+1. Q: 程序内存占用持续升高，过不了多久就会OOM怎么办？
+   * A: 使用视频或高帧率相机时，图像队列可能会因为主线程无法即使pop出而持续累积，应适当减少config.h中 FRAME_DEPTH 的值。
+2. Q: 程序可否运行在6GB显存的显卡上？
+   * A: 可以，正常运行时，程序的显存占用为5GB左右。
+3. Q: 在程序初次运行时，会长时间没有输出，并抛出TRT警告。
+   * A: 此为正常现象，初次运行时程序会根据设备进行onnx到engine的转化，因设备性能差异持续1～10分钟不等。
+4. Q: 我是3060显卡，运行时抛出cuda failure: 2怎么办？
+   * A: 检查config.h中TensorRTEnginePath、TensorRTEnginePath_c路径是否合法，报错中应当存在"Engine bad file"。
+   * A: 运行雷达程序时，尽可能减少其他程序对显存的占用。
+5. Q: engine生成了，但是运行程序时没有检出怎么办？
+   * A: 程序中所提供的onnx模型已在多台设备上通过测试，请确认CMakeLists.txt中CUDA_GEN_CODE项设置正确。
+6. Q: 可否更换到自用Yolov5模型？
+   * A: 可以，但需要导出动态onnx并确认单输入但输出，程序中相应修改：MapMapping.h -> _ids的映射值、Radar.h -> ids过滤id。
+
+### Issues
+
+1. 在控制窗口再次进入四点标定模式时会抛出窗口丢失的错误，导致窗口缩放异常无法完成标定
+   1. 暂时通过重启程序来避开此问题
+   2. 进入标定的控制滑条已移除
+2. 在使用相机时绘制结果会发生闪烁
+   1. 暂时不影响程序运行
+   2. 疑似相机驱动类存在逻辑BUG
+3. 异常退出的程序并不会释放显存
+   1. 通过关闭终端来释放显存

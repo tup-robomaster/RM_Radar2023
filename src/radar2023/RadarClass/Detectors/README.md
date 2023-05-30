@@ -41,6 +41,7 @@
 
 ArmorDetector
 
+* accessModelTest() 检查模型是否存在，不存在则创建
 * initModel() 初始化Tensorrt模型
 * infer() 检测并返回装甲板检测框
 * preProcess() 图像分割预处理
@@ -56,6 +57,7 @@ ArmorDetector
 
 CarDetector
 
+* accessModelTest() 检查模型是否存在，不存在则创建
 * initModel() 初始化Tensorrt模型
 * infer() 检测并返回车辆检测框
 
