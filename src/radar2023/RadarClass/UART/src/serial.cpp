@@ -70,10 +70,12 @@ bool MySerial::_is_open()
 
 void MySerial::msread(unsigned char buffer[], size_t size)
 {
-    this->rr_num = read(this->fd, buffer, size);
+    if(this->_is_open())
+        this->rr_num = read(this->fd, buffer, size);
 }
 
 void MySerial::mswrite(unsigned char buffer[], size_t size)
 {
-    this->wr_num = write(fd, buffer, size);
+    if(this->_is_open())
+        this->wr_num = write(fd, buffer, size);
 }

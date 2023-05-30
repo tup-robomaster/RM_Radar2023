@@ -89,7 +89,7 @@
   * RadarClass 雷达模块库
     * Camera 相机及录制相关
     * Common 通用文件
-    * Detectors 检测器及Tensorrt
+    * Detectors 检测器
     * Location 坐标系处理相关
     * Logger spdlog日志记录器
     * Radar 程序主线程及线程管理
@@ -108,6 +108,36 @@
 
   * 特别注意事项：
   * 应根据设备显卡型号及其算力修改第20行 CUDA_GEN_CODE 例：RTX 3060 ： -gencode=arch=compute_86, code=sm_86 ; RTX 3070 : -gencode=arch=compute_86, code=sm_86 ; RTX 2080 -gencode=arch=compute_75, code=sm_75 ;
+  * 支持：
+  * | **Pascal (CUDA 8 and later)**                                                                                                                                                                                                              |
+    | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | **SM60 or `SM_60, compute_60`** –                                                                                                                                                                                                       |
+    | Quadro GP100, Tesla P100, DGX-1 (Generic Pascal)                                                                                                                                                                                                 |
+    | **SM61 or `SM_61, compute_61`** –                                                                                                                                                                                                       |
+    | GTX 1080, GTX 1070, GTX 1060, GTX 1050, GTX 1030 (GP108), GT 1010,<br />(GP108) Titan Xp, Tesla P40, Tesla P4, Discrete GPU on the NVIDIA Drive,<br />PX2                                                                                        |
+    | **SM62 or `SM_62, compute_62`** –                                                                                                                                                                                                       |
+    | Integrated GPU on the NVIDIA Drive PX2, Tegra (Jetson) TX2                                                                                                                                                                                       |
+    | **Volta (CUDA 9 and later)**                                                                                                                                                                                                               |
+    | **SM70 or `SM_70, compute_70`** –                                                                                                                                                                                                       |
+    | DGX-1 with Volta, Tesla V100, GTX 1180 (GV104), Titan V, Quadro GV100                                                                                                                                                                            |
+    | **SM72 or `SM_72, compute_72`** –                                                                                                                                                                                                       |
+    | Jetson AGX Xavier, Drive AGX Pegasus, Xavier NX                                                                                                                                                                                                  |
+    | **Turing (CUDA 10 and later)**                                                                                                                                                                                                             |
+    | **SM75 or `SM_75, compute_75`** –                                                                                                                                                                                                       |
+    | GTX/RTX Turing – GTX 1660 Ti, RTX 2060,RTX 2070, RTX 2080, Titan RTX,<br /> Quadro RTX 4000, Quadro RTX 5000, Quadro RTX 6000, Quadro RTX 8000, <br />Quadro T1000/T2000, Tesla T4                                                              |
+    | **Ampere (CUDA 11.1 and later)**                                                                                                                                                                                                           |
+    | **SM80 or `SM_80, compute_80`** –                                                                                                                                                                                                       |
+    | NVIDIA[A100] (the name “Tesla” has been dropped – GA100), NVIDIA DGX-A100                                                                                                                                                                     |
+    | ****SM86 or `SM_86, compute_86`** –** <br />(from [CUDA 11.1 onwards](https://docs.nvidia.com/cuda/ptx-compiler-api/index.html))                                                                                                     |
+    | Tesla GA10x cards, RTX Ampere – RTX 3080, GA102 – RTX 3090, RTX<br />A2000, A3000, RTX A4000, A5000, A6000, NVIDIA A40, GA106 – RTX 3060,<br />GA104 – RTX 3070, GA107 – RTX 3050, RTX A10, RTX A16, RTX A40, A2 <br />Tensor Core GPU     |
+    | ****SM87 or `SM_87, compute_87`** –** <br />(from [CUDA 11.4 onwards](https://docs.nvidia.com/cuda/ptx-compiler-api/index.html), introduced with PTX ISA 7.4 / Driver r470 and newer) – for Jetson AGX Orin and Drive AGX Orin only |
+    | **Lovelace (CUDA 11.8 and later)**                                                                                                                                                                                                         |
+    | **SM89 or `SM_89, compute_89`** –                                                                                                                                                                                                       |
+    | NVIDIA GeForce RTX 4090, RTX 4080,RTX 6000, Tesla L40                                                                                                                                                                                            |
+    | **Hopper (CUDA 12 and later)**                                                                                                                                                                                                             |
+    | **SM90 or `SM_90, compute_90`** –                                                                                                                                                                                                       |
+    | NVIDIA H100 (GH100)                                                                                                                                                                                                                              |
+    | **SM90a or `SM_90a, compute_90a`** – (for PTX ISA version 8.0) – adds                                                                                                                                                                  |
 * 若不使用MKL，注释掉src/radar2023/CMakeLists.txt ->34 include_directories(/opt/intel/oneapi/mkl/latest/include)、35 link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64) 、108 libmkl_rt.so 和 src/radar2023/RadarClass/Common/include/public.h
   -> 3 #define EIGEN_USE_MKL_ALL、4 #define EIGEN_VECTORIZE_SSE4_2 [可选]
 * 创建以下文件夹：src/radar2023/logs 、src/radar2023/Recorder 、  src/radar2023/RadarClass/Detectors/models  、 src/radar2023/RadarClass/Camera/params
