@@ -8,14 +8,19 @@ CarDetector::~CarDetector()
 {
 }
 
-bool CarDetector::initModel()
+void CarDetector::accessModelTest()
 {
-    this->logger->info("CarDetector init Moudel");
     if (access(TensorRTEnginePath_c, F_OK) != 0)
     {
         auto engine = this->carTensorRT.createEngine(OnnxMoudlePath_c, 4, 1280, 1280);
         this->carTensorRT.saveEngineFile(engine, TensorRTEnginePath_c);
+        delete engine;
     }
+}
+
+bool CarDetector::initModel()
+{
+    this->logger->info("CarDetector init Moudel");
     bool check = this->carTensorRT.initModule(TensorRTEnginePath_c, 1, 1);
     if (check)
         this->logger->info("CarDetector Moudel inited");

@@ -8,14 +8,20 @@ ArmorDetector::~ArmorDetector()
 {
 }
 
-bool ArmorDetector::initModel()
+void ArmorDetector::accessModelTest()
 {
-    this->logger->info("ArmorDetector init Moudel");
     if (access(TensorRTEnginePath, F_OK) != 0)
     {
         auto engine = this->armorTensorRT.createEngine(OnnxMoudlePath, 64, 640, 640);
         this->armorTensorRT.saveEngineFile(engine, TensorRTEnginePath);
+        delete engine;
     }
+}
+
+bool ArmorDetector::initModel()
+{
+    this->logger->info("ArmorDetector init Moudel");
+    
     bool check = this->armorTensorRT.initModule(TensorRTEnginePath, 16, 24);
     this->logger->info("ArmorDetector Moudel inited");
     return check;

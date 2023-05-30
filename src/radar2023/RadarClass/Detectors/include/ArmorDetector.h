@@ -23,6 +23,7 @@ public:
     ArmorDetector();
     ~ArmorDetector();
 
+    void accessModelTest();
     bool initModel();
     vector<bboxAndRect> infer(Mat &image, vector<Rect> &targets);
     void unInit();

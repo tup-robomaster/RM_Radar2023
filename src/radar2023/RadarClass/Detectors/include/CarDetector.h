@@ -18,6 +18,7 @@ public:
     CarDetector();
     ~CarDetector();
 
+    void accessModelTest();
     bool initModel();
     vector<Rect> infer(Mat &image);
     void unInit();

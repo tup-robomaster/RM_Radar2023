@@ -170,6 +170,8 @@ void Radar::init(int argc, char **argv)
         createTrackbar("Recorder", "ControlPanel", 0, 1, nullptr);
         setTrackbarPos("Recorder", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
+        this->armorDetector.accessModelTest();
+        this->carDetector.accessModelTest();
         if (!(this->armorDetector.initModel() && this->carDetector.initModel()))
         {
             this->stop();

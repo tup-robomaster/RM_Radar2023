@@ -35,7 +35,9 @@
 
 ## 2.环境配置
 
-1[recommend]
+在使用minimum配置或显存为6G时，应注意程序占用，雷达程序显存占用约为5G，显存吃紧时不应运行其他程序。
+
+1[minimum]
 
 * Ubuntu 20.04 LTS
 * GCC 9.3.0
@@ -51,7 +53,7 @@
 * Livox雷达驱动
 * 迈德威视相机驱动
 
-运算平台 (recommend)：
+运算平台 (minimum)：
 
 * AMD R7 5800H CPU
 * 32G RAM
@@ -103,10 +105,16 @@
 ### 使用前准备
 
 * 环境配置完成后，需根据运算平台及环境修改src下CMakeLists.txt
+
+  * 特别注意事项：
+  * 应根据设备显卡型号及其算力修改第20行 CUDA_GEN_CODE 例：RTX 3060 ： -gencode=arch=compute_86, code=sm_86 ; RTX 3070 : -gencode=arch=compute_86, code=sm_86 ; RTX 2080 -gencode=arch=compute_75, code=sm_75 ;
 * 若不使用MKL，注释掉src/radar2023/CMakeLists.txt ->34 include_directories(/opt/intel/oneapi/mkl/latest/include)、35 link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64) 、108 libmkl_rt.so 和 src/radar2023/RadarClass/Common/include/public.h
--> 3 #define EIGEN_USE_MKL_ALL、4 #define EIGEN_VECTORIZE_SSE4_2 [可选]
+  -> 3 #define EIGEN_USE_MKL_ALL、4 #define EIGEN_VECTORIZE_SSE4_2 [可选]
 * 创建以下文件夹：src/radar2023/logs 、src/radar2023/Recorder 、  src/radar2023/RadarClass/Detectors/models  、 src/radar2023/RadarClass/Camera/params
-* 修改config.h中的路径
+* 修改config.h中的路径及相关配置
+
+  * 特别注意事项：
+  * 本项目不存在测试用视频，需自行准备并放置于TestVideoPath对应路径
 * 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0，注意导出动态Onnx
 * 车辆分类[CAR]
 * 装甲板分类[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7] #程序中仅
@@ -128,7 +136,7 @@ roslaunch radar2023 radar2023.launch
 
 ### 使用
 
-1.若第一次运行，程序会针对运行设备进行Onnx生成Engine，根据设备算力，时间在1～10分钟不等，此操作会一共进行两次（车辆模型和装甲板模型）。
+1.若第一次运行，程序会针对运行设备进行Onnx生成Engine的过程，根据设备算力，时间在1～10分钟不等，此操作会一共进行两次（车辆模型和装甲板模型）。
 
 2.初始化完成后，程序会尝试启动相机并展示一张预览图，若对相机曝光、增益不满意，在预览图上按“t”进入调节界面，在调节界面中有相应的退出滑条。
 
