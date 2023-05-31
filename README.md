@@ -238,7 +238,7 @@ Date:2022-12-04 完成所有基本功能构建，发布V0.1a内部测试版本
 5. Q: engine生成了，但是运行程序时没有检出怎么办？
    * A: 程序中所提供的onnx模型已在多台设备上通过测试，请确认CMakeLists.txt中CUDA_GEN_CODE项设置正确。
 6. Q: 可否更换到自用Yolov5模型？
-   * A: 可以，但需要导出动态onnx并确认单输入但输出，程序中相应修改：MapMapping.h -> _ids的映射值、Radar.h -> ids过滤id。
+   * A: 可以，但需要导出动态onnx并确认单输入单输出，程序中相应修改：MapMapping.h -> _ids的映射值、Radar.h -> ids过滤id。
 
 ### Issues
 
