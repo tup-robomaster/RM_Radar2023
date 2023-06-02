@@ -81,11 +81,16 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
             {
                 cache_check = it.armor.cls == iter->first ? true : false;
                 if (cache_check)
+                {
                     cached_pred.armor = it.armor;
+                    break;
+                }
             }
             for (const auto &it : pred)
             {
                 pred_check = it.armor.cls != iter->first ? true : false;
+                if (pred_check)
+                    break;
             }
             if (cache_check && pred_check)
             {
@@ -115,7 +120,7 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
                                                                 (float)current_rect.y,
                                                                 (float)current_rect.width,
                                                                 (float)current_rect.height,
-                                                                pred[max_index].armor.cls});
+                                                                (float)iter->first});
                     }
                 }
             }
