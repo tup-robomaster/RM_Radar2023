@@ -16,15 +16,6 @@ MV_Camera::MV_Camera(bool Is_init)
         this->logger->error("No camera found!");
         return;
     }
-    // this->iStatus = -1;
-    // for(int i=0;i < this->iCameraCounts;i++){
-    //     if(camera_match_index == this->tCameraEnumList[i].uInstance)
-    //         iStatus = 0;
-    // }
-    // if(this->iStatus==-1){
-    //     cout<<"None Using Camera Found!"<<endl;
-    //     return;
-    // }
     try
     {
         this->iStatus = CameraInit(&this->tCameraEnumList[0], -1, -1, &this->hCamera);
@@ -91,8 +82,6 @@ FrameBag MV_Camera::read()
 void MV_Camera::uninit()
 {
     CameraUnInit(this->hCamera);
-    // CameraAlignFree(this->pFrameBuffer);
-    // CameraAlignFree(this->pRawDataBuffer);
 }
 
 void MV_Camera::setExposureTime(int ex)
@@ -203,7 +192,6 @@ void CameraThread::openCamera(bool is_init)
     catch (const std::exception &e)
     {
         this->logger->error("CameraThread::openCamera(){}", e.what());
-        this->_cap.uninit();
         return;
     }
     this->_cap._openflag = initFlag;
