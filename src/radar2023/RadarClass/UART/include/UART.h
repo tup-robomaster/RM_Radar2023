@@ -59,7 +59,7 @@ private:
     void Refree_dart_remaining_time();
 
     void Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char ReceiverId, unsigned char data[48], MySerial &ser);
-    void Referee_Transmit_Map(unsigned int cmdID, int datalength, int targetId, float x, float y, MySerial &ser);
+    void Referee_Transmit_Map(unsigned int cmdID, int targetId, float x, float y, MySerial &ser);
     void Robot_Data_Transmit_Map(MySerial &ser);
 
 public:

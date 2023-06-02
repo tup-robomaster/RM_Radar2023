@@ -42,6 +42,16 @@ using namespace cv;
 using namespace pcl;
 using namespace ros;
 
+#ifdef __cplusplus
+    extern "C++"
+    {
+        template <typename _Ty, size_t _Size>
+        char (*__countof_helper(_Ty (&arr)[_Size]))[_Size];
+
+        #define __crt_countof(arr) (sizeof(*__countof_helper(arr)) + 0)
+    }
+#endif
+
 /**
  * @brief 装甲板BBox
  */

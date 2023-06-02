@@ -56,8 +56,8 @@ void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char Receiv
 {
     unsigned char local_buffer[200];
     local_buffer[0] = 0xA5;
-    local_buffer[1] = 10; // 数据帧中 data 的长度,占两个字节
-    local_buffer[2] = 0;
+    local_buffer[1] = (54) & 0x00ff; // 数据帧中 data 的长度
+    local_buffer[2] = ((54) & 0xff00) >> 8;
     local_buffer[3] = 0;
     local_buffer[4] = this->myHandler.Get_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);
     local_buffer[5] = 0x01;
@@ -126,15 +126,15 @@ void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char Receiv
     ser.mswrite(buffer_tmp_array, 54 + 9);
 }
 
-void UART::Referee_Transmit_Map(unsigned int cmdID, int datalength, int targetId, float x, float y, MySerial &ser)
+void UART::Referee_Transmit_Map(unsigned int cmdID, int targetId, float x, float y, MySerial &ser)
 {
     unsigned char t_x[4], t_y[4];
     this->FloatToBytes(t_x, x);
     this->FloatToBytes(t_y, y);
     unsigned char local_buffer[200];
     local_buffer[0] = 0xA5;
-    local_buffer[1] = (datalength)&0x00ff; // 数据帧中 data 的长度,占两个字节
-    local_buffer[2] = ((datalength)&0xff00) >> 8;
+    local_buffer[1] = (14) & 0x00ff; // 数据帧中 data 的长度
+    local_buffer[2] = ((14) & 0xff00) >> 8;
     local_buffer[3] = 0;
     local_buffer[4] = this->myHandler.Get_CRC8_Check_Sum(local_buffer, 5 - 1, 0xff);
     local_buffer[5] = cmdID & 0x00ff;
@@ -154,11 +154,11 @@ void UART::Referee_Transmit_Map(unsigned int cmdID, int datalength, int targetId
     local_buffer[18] = 0;
     local_buffer[19] = 0;
     local_buffer[20] = 0;
-    myHandler.Append_CRC16_Check_Sum(local_buffer, datalength + 9);
-    unsigned char buffer_tmp_array[datalength + 9];
-    for (int i = 0; i < datalength + 9; ++i)
+    myHandler.Append_CRC16_Check_Sum(local_buffer, 14 + 9);
+    unsigned char buffer_tmp_array[14 + 9];
+    for (int i = 0; i < 14 + 9; ++i)
         buffer_tmp_array[i] = local_buffer[i];
-    ser.mswrite(buffer_tmp_array, datalength + 9);
+    ser.mswrite(buffer_tmp_array, 14 + 9);
 }
 
 void UART::Robot_Data_Transmit_Map(MySerial &ser)
@@ -171,12 +171,12 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
         flag = true;
     if (!ENEMY && flag)
     {
-        this->Referee_Transmit_Map(0x0305, 14, this->Id_red, _Float32(location[0]), _Float32(location[1]), ser);
+        this->Referee_Transmit_Map(0x0305, this->Id_red, _Float32(location[0]), _Float32(location[1]), ser);
         this->ControlLoop_red();
     }
     else if (flag)
     {
-        this->Referee_Transmit_Map(0x0305, 14, this->Id_blue, _Float32(location[0]), _Float32(location[1]), ser);
+        this->Referee_Transmit_Map(0x0305, this->Id_blue, _Float32(location[0]), _Float32(location[1]), ser);
         this->ControlLoop_blue();
     }
     if (flag)
