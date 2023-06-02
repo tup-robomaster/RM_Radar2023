@@ -1,8 +1,4 @@
 <launch>
-    <node name="radar2023"
-          pkg="radar2023"
-	      type="radar2023"
-	      output="screen"
-          respawn="false"/>
+    <node name="radar2023" pkg="radar2023" type="radar2023" output="screen" respawn="false"/>
 
 </launch>

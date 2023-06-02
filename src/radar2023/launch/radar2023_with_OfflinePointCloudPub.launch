@@ -1,10 +1,6 @@
 <launch>
     <param name="pcd_path" type="string" value="/home/ninefish/nine-fish/RM_Radar2023/resources/pcds.txt"/> 
     <node pkg="radar2023" type="offline_point_cloud_publisher" name="point_cloud_node" output="screen"></node>
-    <node name="radar2023"
-          pkg="radar2023"
-	      type="radar2023"
-	      output="screen"
-          respawn="false"/>
+    <node name="radar2023" pkg="radar2023" type="radar2023" output="screen" respawn="false"/>
 
 </launch>
