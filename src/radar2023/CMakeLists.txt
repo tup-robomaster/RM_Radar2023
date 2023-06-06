@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.9.0)
 SET(CMAKE_BUILD_TYPE "Release")
 project(radar2023 LANGUAGES CXX CUDA)
 find_package(OpenCV REQUIRED)
-find_package(fmt REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
@@ -10,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
 find_package(CUDA 11.8 REQUIRED)
+find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 message("CUDA_LIBRARIES:${CUDA_LIBRARIES}")
 message("CUDA_INCLUDE_DIRS:${CUDA_INCLUDE_DIRS}")
@@ -17,7 +17,7 @@ include_directories()
 add_compile_options(-std=c++17)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=16000000")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread -lpthread -O3  -Wall")
-set(CUDA_GEN_CODE "-gencode=arch=compute_89,code=sm_89")
+set(CUDA_GEN_CODE "-gencode=arch=compute_86,code=sm_86")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
 catkin_package(CATKIN_DEPENDS
@@ -33,7 +33,8 @@ link_directories(/user/local/cuda/cuda-11.8/cudnn/v8.0.4/lib64)
 # mkl
 include_directories(/opt/intel/oneapi/mkl/latest/include)
 link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64)
-
+# fmt
+include_directories(${FMT_INCLUDE_DIRS})
 
 include_directories(
   # include
@@ -42,8 +43,6 @@ include_directories(
 )
 include_directories(${EIGEN3_INCLUDE_DIRS})
 link_directories(
-  # /opt/intel/mkl/lib/intel64
-  # /opt/intel/lib/intel64
   ${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
@@ -111,7 +110,7 @@ target_link_libraries(radar2023
   Eigen3::Eigen
   cuda
   spdlog
-  fmt::fmt
+  fmt::fmt-header-only
   cudart
   nvonnxparser
   nvinfer

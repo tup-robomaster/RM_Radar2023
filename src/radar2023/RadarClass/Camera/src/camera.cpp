@@ -43,7 +43,7 @@ MV_Camera::MV_Camera(bool Is_init)
         this->logger->error("None suitable camera!");
     }
     CameraSetTriggerMode(this->hCamera, 0);
-    if (Is_init)
+    if (Is_init || access(CameraConfigPath, F_OK) == 0)
         CameraReadParameterFromFile(this->hCamera, CameraConfigPath);
     CameraSetAeState(this->hCamera, 0);
     CameraPlay(this->hCamera);
