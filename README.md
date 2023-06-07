@@ -2,7 +2,7 @@
 
 沈阳航空航天大学T-UP战队2023赛季雷达程序
 
-## Version: V1.1 Gamma
+## Version: V1.2 GameReady
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
@@ -46,8 +46,9 @@
 * Tensorrt 8.5.1.7
 * ros-noetic
 * OpenCV4.6.0
-* PCL 1.10.0
+* PCL 1.10.0(ROS安装附带)
 * spdlog
+* fmt[选择性安装]
 * Eigen3
 * MKL[可选]
 * Livox雷达驱动
@@ -76,8 +77,9 @@
 * Tensorrt 8.5.2.2
 * ros-noetic
 * OpenCV4.6.0
-* PCL 1.10.0
+* PCL 1.10.0(ROS安装附带)
 * spdlog
+* fmt[选择性安装]
 * Eigen3
 * MKL[可选]
 * Livox雷达驱动
@@ -211,6 +213,8 @@ roslaunch radar2023 radar2023.launch
   ```
 
 ### 开发日志
+
+Date:2023.6.8  V1.2:修复UART错误，切换spdlog至head-only,更新v1.2 GameReady版本
 
 Date:2023.5.30 V1.1:添加离线点云调试工具
 
