@@ -14,3 +14,6 @@ resources/2.mp4
 src/radar2023/RadarClass/Detectors/models/model_trt_c.engine
 src/radar2023/RadarClass/Detectors/models/model_trt.engine
 resources/3.mp4
+resources/pcds.txt
+src/radar2023/RadarClass/Detectors/models/43best.onnx
+src/radar2023/RadarClass/Detectors/models/best.onnx

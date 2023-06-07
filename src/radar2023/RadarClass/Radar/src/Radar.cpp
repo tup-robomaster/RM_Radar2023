@@ -124,6 +124,7 @@ void Radar::drawArmorsForDebug(vector<bboxAndRect> &armors, Mat &img)
     {
         Rect temp = Rect(it.armor.x0, it.armor.y0, it.armor.w, it.armor.h);
         cv::rectangle(img, temp, Scalar(0, 255, 0), 2);
+        cv::putText(img, to_string(int(it.armor.cls)), cv::Point2i(temp.x, temp.y), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 3);
     }
 }
 

@@ -171,13 +171,11 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
         flag = true;
     if (!ENEMY && flag)
     {
-        this->Referee_Transmit_Map(0x0305, this->Id_red, _Float32(location[0]), _Float32(location[1]), ser);
-        this->ControlLoop_red();
+        this->Referee_Transmit_Map(0x0305, this->Id_red, _Float32(location[0]), _Float32(location[1]), ser);  
     }
     else if (flag)
     {
         this->Referee_Transmit_Map(0x0305, this->Id_blue, _Float32(location[0]), _Float32(location[1]), ser);
-        this->ControlLoop_blue();
     }
     if (flag)
         ++this->myUARTPasser.loop_send;
@@ -186,6 +184,8 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
         if (this->myUARTPasser.loop_send == 0)
             this->myUARTPasser.loop_send = 0;
     }
+    this->ControlLoop_red();
+    this->ControlLoop_blue();
     this->ind = (this->ind + 1) % 6;
 }
 
