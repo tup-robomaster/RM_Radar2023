@@ -158,7 +158,7 @@
   * 本项目不存在测试用视频，需自行准备并放置于TestVideoPath对应路径
 * 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0，注意导出动态Onnx
 * 车辆分类[CAR]
-* 装甲板分类[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7]
+* 装甲板分类[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7]
 
   * 程序中仅使用[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7]
 * 将yolov5导出的动态尺寸onnx放置于config.h定义位置
