@@ -3,7 +3,7 @@
 void Radar::armor_filter(vector<bboxAndRect> &pred)
 {
     vector<bboxAndRect> results;
-    for (int i = 0; i < 12; ++i)
+    for (int i = 0; i < int(this->mapMapping._ids.size()); ++i)
     {
         int max_id = 0;
         float max_conf = 0.f;

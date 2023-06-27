@@ -10,16 +10,19 @@
  */
 class MapMapping
 {
+public:
+    map<int, int> _ids = {{0, 6}, {1, 7}, {2, 8}, {3, 9}, {4, 10}, {5, 11}, {6, 0}, {7, 1}, {8, 2}, {9, 3}, {10, 4}, {11, 5}};
+
 private:
     vector<MapLocation3D> _location3D;
     vector<MapLocation3D> cached_location3D;
-    map<int, int> _ids = {{0, 6}, {1, 7}, {2, 8}, {3, 9}, {4, 10}, {5, 11}, {6, 0}, {7, 1}, {8, 2}, {9, 3}, {10, 4}, {11, 5}};
+
     Matrix<float, 4, 4> _T;
     Matrix<float, 3, 1> cameraPostion;
     Mat rvec, tvec;
     bool _pass_flag = false;
 
-    int _location_pred_time[10] = {0};
+    int _location_pred_time[12] = {0};
     vector<vector<MapLocation3D>> _location_cache;
     vector<bboxAndRect> _IoU_pred_cache;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");

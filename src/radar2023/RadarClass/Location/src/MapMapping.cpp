@@ -42,9 +42,9 @@ void MapMapping::_location_prediction()
             this->_location_pred_time[i] = Pre_Time + 1;
         if (do_pre)
             --this->_location_pred_time[i];
-        this->_location_cache[0] = this->_location_cache[1];
-        this->_location_cache[1] = this->_location3D;
     }
+    this->_location_cache[0] = this->_location_cache[1];
+    this->_location_cache[1] = this->_location3D;
 }
 
 void MapMapping::_plot_region_rect(vector<vector<Point3f>> &points, Mat &frame, Mat &K_0, Mat &C_0)
