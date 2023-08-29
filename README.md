@@ -160,7 +160,7 @@
 * 车辆分类[CAR]
 * 装甲板分类[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7]
 
-  * 程序中仅使用[B1 B2 B3 B4 B5 B6 B7 R1 R2 R3 R4 R5 R7]
+  * 程序中仅使用[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7]
 * 将yolov5导出的动态尺寸onnx放置于config.h定义位置
 * 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
 * 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
