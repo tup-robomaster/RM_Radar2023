@@ -223,7 +223,7 @@ roslaunch radar2023 radar2023.launch
 
 本程序提供实验性的基于点云深度图的目标分割算法
 
-点云深度图背景分割算法为纯CPU负载算法，开启后可极大减轻GPU运算压力和现存使用，但相较于双层神经网络方案存在精度较差的问题
+点云深度图背景分割算法为纯CPU负载算法，开启后可极大减轻GPU运算压力和显存占用，但相较于双层神经网络方案存在精度较差的问题
 
 #### 使用
 
@@ -232,6 +232,10 @@ roslaunch radar2023 radar2023.launch
 修改CMakeLists.txt中注释掉的RadarClass/Detectors/src/MovementDetector.cpp项目
 
 重新编译即可使用
+
+#### 注意
+
+此为实验性功能，不保证有效效果
 
 ### 开发日志
 
