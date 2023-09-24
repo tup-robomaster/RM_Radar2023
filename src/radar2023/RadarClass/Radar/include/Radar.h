@@ -7,10 +7,18 @@
 #include "../../Common/include/SharedQueue.h"
 #include "../../Detectors/include/depthProcesser.h"
 #include "../../Detectors/include/ArmorDetector.h"
-#include "../../Detectors/include/CarDetector.h"
+
+#ifdef UsePointCloudSepTarget
+    #include "../../Detectors/include/MovementDetector.h"
+#else
+    #include "../../Detectors/include/CarDetector.h"
+#endif
+
 #include "../../Location/include/MapMapping.h"
 #include "../../UART/include/UART.h"
 #include "../../Location/include/location.h"
+
+
 
 /**
  * @brief 主要雷达类
@@ -36,6 +44,13 @@ private:
 
     DepthQueue depthQueue;
     ArmorDetector armorDetector;
+
+#ifdef UsePointCloudSepTarget
+    MovementDetector movementDetector;
+#else
+    CarDetector carDetector;
+#endif
+
     CarDetector carDetector;
     CameraThread cameraThread;
     Location myLocation;

@@ -170,13 +170,23 @@ void Radar::init(int argc, char **argv)
         setTrackbarPos("Recorder", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
         this->armorDetector.accessModelTest();
+#ifndef UsePointCloudSepTarget
         this->carDetector.accessModelTest();
-        if (!(this->armorDetector.initModel() && this->carDetector.initModel()))
+#endif
+        if (!this->armorDetector.initModel())
         {
             this->stop();
             this->logger->flush();
             return;
         }
+#ifndef UsePointCloudSepTarget
+        if (!this->carDetector.initModel())
+        {
+            this->stop();
+            this->logger->flush();
+            return;
+        }
+#endif
         this->mySerial.initSerial(SerialPortNAME, PASSWORD);
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH)) ? setTrackbarPos("Recorder", "ControlPanel", 1) : setTrackbarPos("Recorder", "ControlPanel", 0);
         this->cameraThread.start();
@@ -249,8 +259,15 @@ void Radar::MainProcessLoop()
         FrameBag frameBag = this->cameraThread.read();
         if (frameBag.flag)
         {
+#ifdef UsePointCloudSepTarget
+            shared_lock<shared_timed_mutex> slk_md(this->myMutex_publicDepth);
+            vector<Rect> sepTargets = this->movementDetector.applyMovementDetector(this->publicDepth);
+            slk_md.unlock();
+            vector<bboxAndRect> pred = this->movementDetector._ifHistoryBuild() ? this->armorDetector.infer(frameBag.frame, sepTargets) : {};
+#else
             vector<Rect> sepTargets = this->carDetector.infer(frameBag.frame);
             vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
+#endif
 #if defined Test && defined TestWithVis
             this->drawBbox(sepTargets, frameBag.frame);
             this->drawArmorsForDebug(pred, frameBag.frame);
@@ -428,7 +445,9 @@ void Radar::stop()
     this->videoRecorder.close();
     this->_if_record = false;
     this->armorDetector.unInit();
+#ifndef UsePointCloudSepTarget
     this->carDetector.unInit();
+#endif
     this->logger->warn("Program Shutdown");
 }
 
