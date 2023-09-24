@@ -56,6 +56,7 @@ cuda_add_executable(radar2023
   RadarClass/Detectors/src/ArmorDetector.cpp
   RadarClass/Detectors/src/CarDetector.cpp
   RadarClass/Detectors/src/depthProcesser.cpp
+#  RadarClass/Detectors/src/MovementDetector.cpp
   RadarClass/Location/src/location.cpp
   RadarClass/Location/src/MapMapping.cpp
   RadarClass/Radar/src/Radar.cpp
