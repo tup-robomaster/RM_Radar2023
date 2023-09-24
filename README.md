@@ -239,6 +239,8 @@ roslaunch radar2023 radar2023.launch
 
 ### 开发日志
 
+Date:2023.9.24 V1.3:上传实验性点云背景分割
+
 Date:2023.6.8  V1.2:修复UART错误，切换spdlog至head-only,更新v1.2 GameReady版本
 
 Date:2023.5.30 V1.1:添加离线点云调试工具
