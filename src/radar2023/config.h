@@ -41,8 +41,10 @@
 #define LOGPATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/logs/" // log日志存储文件夹
 
 /*---For old SepTarget method [实验性][已废弃][谨慎使用]---*/
+
 //#define UsePointCloudSepTarget
 #define MDHistorySize 200 //背景深度图帧队列大小，影响背景深度图密度
 #define _blockSizeH 36 //栅格大小[建议取值能被图像大小整除]
 #define _blockSizeW 36 //栅格大小
 #define MTBoxRatio 0.1 //分割框扩大比例
+#define OffsetRatio 1.3 //点云离散兼容比例

@@ -217,6 +217,22 @@ roslaunch radar2023 radar2023.launch
   roslaunch radar2023 radar2023_with_OfflinePointCloudPub.launch
   ```
 
+### 实验性功能
+
+#### 简介
+
+本程序提供实验性的基于点云深度图的目标分割算法
+
+点云深度图背景分割算法为纯CPU负载算法，开启后可极大减轻GPU运算压力和现存使用，但相较于双层神经网络方案存在精度较差的问题
+
+#### 使用
+
+修改Config.h中注释掉的UsePointCloudSepTarget项目及配套配置
+
+修改CMakeLists.txt中注释掉的RadarClass/Detectors/src/MovementDetector.cpp项目
+
+重新编译即可使用
+
 ### 开发日志
 
 Date:2023.6.8  V1.2:修复UART错误，切换spdlog至head-only,更新v1.2 GameReady版本
