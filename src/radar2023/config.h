@@ -1,16 +1,16 @@
-#define Test                                                //测试标志
-#define TestWithVis                                         //显示可视化检测结果
+#define Test        // 测试标志
+#define TestWithVis // 显示可视化检测结果
 // #define UsingVideo                                          //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
 
-#define PASSWORD (char *)"momoko11"                         //用户密码，用于串口权限
+#define PASSWORD (char *)"momoko11" // 用户密码，用于串口权限
 
 #define SerialPortNAME (char *)"/dev/ttyUSB0"
 #define lidarTopicName (char *)"/livox/lidar"
 
-#define FRAME_DEPTH 500                                     //图像队列深度
+#define FRAME_DEPTH 500 // 图像队列深度
 
 #define CameraConfigPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/Config_0.Config" // 相机配置文件名称
-#define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resources/1.mp4"                    // DEMO视频路径
+#define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resources/1.mp4"                                           // DEMO视频路径
 
 #define MaxPointsNum 10000 // 最大点云数量
 #define ImageH 2064        // 图像高度
@@ -19,7 +19,7 @@
 #define LidarQueueSize 1   // 雷达消息队列
 
 #define CAMERA_PARAM_PATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/camera0.yaml" // 相机参数文件
-#define VideoRecoderRath (char *)"/home/ninefish/nine-fish/RM_Radar2023/Record/"                              // 录制保存文件
+#define VideoRecoderRath (char *)"/home/ninefish/nine-fish/RM_Radar2023/Record/"                                              // 录制保存文件
 
 #define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/43best.onnx"
 #define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/best.onnx"
@@ -27,7 +27,7 @@
 #define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/model_trt_c.engine" // Engine
 
 #define MAXBO 3
-#define ENEMY 1         // 0 RED 1 BLUE
+#define ENEMY 1 // 0 RED 1 BLUE
 
 #define Z_A true        // Z轴突变调整
 #define L_P true        // 位置预测
@@ -42,9 +42,9 @@
 
 /*---For old SepTarget method [实验性][已废弃][谨慎使用]---*/
 
-//#define UsePointCloudSepTarget
-#define MDHistorySize 200 //背景深度图帧队列大小，影响背景深度图密度
-#define _blockSizeH 36 //栅格大小[建议取值能被图像大小整除]
-#define _blockSizeW 36 //栅格大小
-#define MTBoxRatio 0.1 //分割框扩大比例
-#define OffsetRatio 1.3 //点云离散兼容比例
+// #define UsePointCloudSepTarget
+#define MDHistorySize 200 // 背景深度图帧队列大小，影响背景深度图密度
+#define _blockSizeH 36    // 栅格大小[建议取值能被图像大小整除]
+#define _blockSizeW 36    // 栅格大小
+#define MTBoxRatio 0.1    // 分割框扩大比例
+#define OffsetRatio 1.3   // 点云离散兼容比例

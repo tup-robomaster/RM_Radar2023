@@ -51,7 +51,6 @@ private:
     CarDetector carDetector;
 #endif
 
-    CarDetector carDetector;
     CameraThread cameraThread;
     Location myLocation;
     MapMapping mapMapping;

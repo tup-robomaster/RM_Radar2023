@@ -31,8 +31,8 @@ link_directories(/user/local/cuda/cuda-11.8/cuda/lib)
 include_directories(/user/local/cuda/cuda-11.8/cudnn/v8.0.4/include)
 link_directories(/user/local/cuda/cuda-11.8/cudnn/v8.0.4/lib64)
 # mkl
-include_directories(/opt/intel/oneapi/mkl/latest/include)
-link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64)
+include_directories(/usr/include/mkl)
+link_directories(/usr/include/mkl/intel64)
 # fmt
 include_directories(${FMT_INCLUDE_DIRS})
 
