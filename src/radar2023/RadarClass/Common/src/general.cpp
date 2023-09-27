@@ -34,3 +34,17 @@ void makeRectSafe(Rect &rect, Mat &src)
 {
     rect &= Rect(0, 0, src.cols, src.rows);
 }
+
+Rect rectCenterScale(Rect rect, Size size)
+{
+    rect = rect + size;
+    Point pt;
+    pt.x = cvRound(size.width / 2.0);
+    pt.y = cvRound(size.height / 2.0);
+    return (rect - pt);
+}
+
+Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH)
+{
+    return Rect(rect.x * blocksizeW, rect.y * blocksizeH, rect.width * blocksizeW, rect.height * blocksizeH);
+}

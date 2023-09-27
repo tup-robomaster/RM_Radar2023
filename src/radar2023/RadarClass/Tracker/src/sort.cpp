@@ -153,7 +153,6 @@ NearestNeighborDistanceMetric::_cosine_distance(
     FEATURESS bb = b;
     if (!data_is_normalized)
     {
-        // undo:
         for (int i = 0; i < a.rows(); ++i)
         {
             aa.row(i) = a.row(i) / sqrt(a.row(i).squaredNorm());

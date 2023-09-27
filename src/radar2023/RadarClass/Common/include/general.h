@@ -11,4 +11,8 @@ float f_max(float x, float y);
 
 void makeRectSafe(Rect &rect, Mat &src);
 
+Rect rectCenterScale(Rect rect, Size size);
+
+Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH);
+
 #endif

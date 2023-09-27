@@ -152,7 +152,7 @@ Rect MovementDetector::rebuildRect(Rect input)
 {
     // TODO:进阶预测框滤除
     input = reMapRect(input, _blockSizeW, _blockSizeH);
-    input = rectCenterScale(input, Size(int(input.width * (MTBoxRatio + 1)), int(input.height * (MTBoxRatio + 1))));
+    input = rectCenterScale(input, Size(int(input.width * MTBoxRatio), int(input.height * MTBoxRatio)));
     // TODO:重合框合并
     // TODO:历史帧预测框判断（IOU）
     return input;
