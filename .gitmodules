@@ -1,7 +1,7 @@
 [submodule "src/radar2023/RadarClass/TRTInference"]
 	path = src/radar2023/RadarClass/TRTInference
-	url = https://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@github.com/tup-robomaster/TRTInferenceForYolo.git
+	url = https://github.com/tup-robomaster/TRTInferenceForYolo.git
 	branch = yolov5
-[submodule "/home/nine-fish/projects/RM_Radar2023/src/radar2023/RadarClass/TRTGenerator"]
-	path = /home/nine-fish/projects/RM_Radar2023/src/radar2023/RadarClass/TRTGenerator
-	url = git@github.com:INIF-FISH/onnx2tensorrt_cpp.git
+[submodule "src/radar2023/RadarClass/TRTGenerator"]
+	path = src/radar2023/RadarClass/TRTGenerator
+	url = https://github.com/INIF-FISH/onnx2tensorrt_cpp.git

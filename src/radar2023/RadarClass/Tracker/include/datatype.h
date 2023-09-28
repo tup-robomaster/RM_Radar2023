@@ -1,6 +1,11 @@
 #ifndef DATATYPE_H
 #define DATATYPE_H
 
+#include <cstddef>
+#include <vector>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
 typedef struct DetectBox
 {
     DetectBox(float x1 = 0, float y1 = 0, float x2 = 0, float y2 = 0,
@@ -20,15 +25,6 @@ typedef struct DetectBox
     float trackID;
 } DetectBox;
 
-#endif // DATATYPE_H
-
-#ifndef DEEPSORTDATATYPE_H
-#define DEEPSORTDATATYPE_H
-
-#include <cstddef>
-#include <vector>
-#include <Eigen/Core>
-#include <Eigen/Dense>
 typedef struct CLSCONF
 {
     CLSCONF()
