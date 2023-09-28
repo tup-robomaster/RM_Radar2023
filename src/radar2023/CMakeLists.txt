@@ -50,6 +50,7 @@ cuda_add_executable(radar2023
   main.cpp
   RadarClass/TRTInference/TRTInfer/CUDA/preprocess.cu
   RadarClass/TRTInference/TRTInfer/src/Inference.cpp
+  RadarClass/TRTGenerator/TRTGenerator/src/Generator.cpp
   RadarClass/Camera/src/camera.cpp
   RadarClass/Camera/src/VideoRecorder.cpp
   RadarClass/Common/src/general.cpp
@@ -75,12 +76,14 @@ target_sources(radar2023
   main.cpp
   RadarClass/TRTInference/TRTInfer/CUDA/preprocess.cu
   RadarClass/TRTInference/TRTInfer/src/Inference.cpp
+  RadarClass/TRTGenerator/TRTGenerator/src/Generator.cpp
   RadarClass/Camera/src/camera.cpp
   RadarClass/Camera/src/VideoRecorder.cpp
   RadarClass/Common/src/general.cpp
   RadarClass/Detectors/src/ArmorDetector.cpp
   RadarClass/Detectors/src/CarDetector.cpp
   RadarClass/Detectors/src/depthProcesser.cpp
+#  RadarClass/Detectors/src/MovementDetector.cpp
   RadarClass/Location/src/location.cpp
   RadarClass/Location/src/MapMapping.cpp
   RadarClass/Radar/src/Radar.cpp
