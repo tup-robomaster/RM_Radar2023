@@ -199,7 +199,6 @@ void FeatureTensor::stream2det(float *stream, DETECTIONS &det)
     {
         for (int j = 0; j < featureDim; ++j)
             dbox.feature[j] = stream[i * featureDim + j];
-        // dbox.feature[j] = (float)1.0;
         ++i;
     }
 }

@@ -66,6 +66,16 @@ cuda_add_executable(radar2023
   RadarClass/UART/src/UART.cpp
   RadarClass/UART/src/UARTPasser.cpp
   RadarClass/Logger/src/Logger.cpp
+  RadarClass/DsTracker/src/deep.cpp
+  RadarClass/DsTracker/src/deepsort.cpp
+  RadarClass/DsTracker/src/featuretensor.cpp
+  RadarClass/DsTracker/src/kalmanfilter.cpp
+  RadarClass/DsTracker/src/linear_assignment.cpp
+  RadarClass/DsTracker/src/sort.cpp
+  RadarClass/DsTracker/src/track.cpp
+  RadarClass/DsTracker/src/tracker.cpp
+  RadarClass/DsTracker/src/hungarianoper.cpp
+  RadarClass/DsTracker/src/DsTracker.cpp
 )
 
 add_executable(offline_point_cloud_publisher tools/offline_point_cloud_pub.cpp)
@@ -92,6 +102,16 @@ target_sources(radar2023
   RadarClass/UART/src/UART.cpp
   RadarClass/UART/src/UARTPasser.cpp
   RadarClass/Logger/src/Logger.cpp
+  RadarClass/DsTracker/src/deep.cpp
+  RadarClass/DsTracker/src/deepsort.cpp
+  RadarClass/DsTracker/src/featuretensor.cpp
+  RadarClass/DsTracker/src/kalmanfilter.cpp
+  RadarClass/DsTracker/src/linear_assignment.cpp
+  RadarClass/DsTracker/src/sort.cpp
+  RadarClass/DsTracker/src/track.cpp
+  RadarClass/DsTracker/src/tracker.cpp
+  RadarClass/DsTracker/src/hungarianoper.cpp
+  RadarClass/DsTracker/src/DsTracker.cpp
 )
 set_target_properties(radar2023 PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON)

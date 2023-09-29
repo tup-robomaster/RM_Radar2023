@@ -2,14 +2,15 @@
 #define __TRACKER_H
 
 #include "../../Common/include/public.h"
+#include "deepsort.h"
 
-class Tracker
+class DsTracker
 {
 private:
     /* data */
 public:
-    Tracker(/* args */);
-    ~Tracker();
+    DsTracker(/* args */);
+    ~DsTracker();
 };
 
 #endif
