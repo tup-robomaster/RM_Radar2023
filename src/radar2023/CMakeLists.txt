@@ -66,7 +66,6 @@ cuda_add_executable(radar2023
   RadarClass/UART/src/UART.cpp
   RadarClass/UART/src/UARTPasser.cpp
   RadarClass/Logger/src/Logger.cpp
-  RadarClass/DsTracker/src/deep.cpp
   RadarClass/DsTracker/src/deepsort.cpp
   RadarClass/DsTracker/src/featuretensor.cpp
   RadarClass/DsTracker/src/kalmanfilter.cpp
@@ -102,7 +101,6 @@ target_sources(radar2023
   RadarClass/UART/src/UART.cpp
   RadarClass/UART/src/UARTPasser.cpp
   RadarClass/Logger/src/Logger.cpp
-  RadarClass/DsTracker/src/deep.cpp
   RadarClass/DsTracker/src/deepsort.cpp
   RadarClass/DsTracker/src/featuretensor.cpp
   RadarClass/DsTracker/src/kalmanfilter.cpp

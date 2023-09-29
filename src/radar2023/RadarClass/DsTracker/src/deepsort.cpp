@@ -86,7 +86,7 @@ void DeepSort::sort(cv::Mat &frame, DETECTIONS &detections)
 
 void DeepSort::sort(cv::Mat &frame, DETECTIONSV2 &detectionsv2)
 {
-    std::vector<CLSCONF> &clsConf = detectionsv2.first;
+    //std::vector<CLSCONF> &clsConf = detectionsv2.first;
     DETECTIONS &detections = detectionsv2.second;
     bool flag = featureExtractor->getRectsFeature(frame, detections);
     if (flag)

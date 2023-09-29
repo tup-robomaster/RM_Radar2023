@@ -51,16 +51,21 @@ class Track
         vector is added to this list.
 
     """*/
-    enum TrackState {Tentative = 1, Confirmed, Deleted};
+    enum TrackState
+    {
+        Tentative = 1,
+        Confirmed,
+        Deleted
+    };
 
 public:
-    Track(KAL_MEAN& mean, KAL_COVA& covariance, int track_id,
-          int n_init, int max_age, const FEATURE& feature);
-    Track(KAL_MEAN& mean, KAL_COVA& covariance, int track_id,
-          int n_init, int max_age, const FEATURE& feature, int cls, float conf);
-    void predit(MyKalmanFilter* kf);
-    void update(MyKalmanFilter* const kf, const DETECTION_ROW &detection);
-    void update(MyKalmanFilter* const kf, const DETECTION_ROW & detection, CLSCONF pair_det);
+    Track(KAL_MEAN &mean, KAL_COVA &covariance, int track_id,
+          int n_init, int max_age, const FEATURE &feature);
+    Track(KAL_MEAN &mean, KAL_COVA &covariance, int track_id,
+          int n_init, int max_age, const FEATURE &feature, int cls, float conf);
+    void predit(MyKalmanFilter *kf);
+    void update(MyKalmanFilter *const kf, const DETECTION_ROW &detection);
+    void update(MyKalmanFilter *const kf, const DETECTION_ROW &detection, CLSCONF pair_det);
     void mark_missed();
     bool is_confirmed();
     bool is_deleted();
@@ -80,8 +85,9 @@ public:
 
     int cls;
     float conf;
+
 private:
-    void featuresAppendOne(const FEATURE& f);
+    void featuresAppendOne(const FEATURE &f);
 };
 
 #endif // TRACK_H

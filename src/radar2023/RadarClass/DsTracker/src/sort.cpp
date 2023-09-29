@@ -93,7 +93,7 @@ void NearestNeighborDistanceMetric::partial_fit(
         {
             samples[track_id] = newFeatOne;
         }
-    } 
+    }
 
     for (std::map<int, FEATURESS>::iterator i = samples.begin(); i != samples.end();)
     {

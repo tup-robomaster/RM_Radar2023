@@ -24,7 +24,7 @@ public:
 
 public:
     std::vector<Track> tracks;
-    tracker(/*NearNeighborDisMetric* metric,*/
+    tracker(/*NearestNeighborDistanceMetric* metric,*/
             float max_cosine_distance, int nn_budget,
             float max_iou_distance = 0.7,
             int max_age = 200, int n_init = 20);
