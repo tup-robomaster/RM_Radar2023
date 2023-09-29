@@ -1,12 +1,10 @@
 #ifndef DEEPSORT_H
 #define DEEPSORT_H
 
-#include <iostream>
-#include <opencv2/opencv.hpp>
+#include "../../Common/include/public.h"
 #include "featuretensor.h"
 #include "tracker.h"
 #include "datatype.h"
-#include <vector>
 
 using nvinfer1::ILogger;
 using std::vector;
@@ -14,7 +12,7 @@ using std::vector;
 class DeepSort
 {
 public:
-    DeepSort(std::string modelPath, int batchSize, int featureDim, int gpuID, ILogger *gLogger);
+    DeepSort(std::string onnx_path, std::string engine_path, int batchSize, int featureDim, int gpuID, ILogger *gLogger);
     ~DeepSort();
 
 public:
@@ -28,7 +26,8 @@ private:
     void init();
 
 private:
-    std::string enginePath;
+    std::string onnx_path;
+    std::string engine_path;
     int batchSize;
     int featureDim;
     cv::Size imgShape;

@@ -1,8 +1,10 @@
 #include "../include/deepsort.h"
 
-DeepSort::DeepSort(std::string modelPath, int batchSize, int featureDim, int gpuID, ILogger* gLogger) {
+DeepSort::DeepSort(std::string onnx_path, std::string engine_path, int batchSize, int featureDim, int gpuID, ILogger *gLogger)
+{
     this->gpuID = gpuID;
-    this->enginePath = modelPath;
+    this->onnx_path = onnx_path;
+    this->engine_path = engine_path;
     this->batchSize = batchSize;
     this->featureDim = featureDim;
     this->imgShape = cv::Size(64, 128);
@@ -12,27 +14,29 @@ DeepSort::DeepSort(std::string modelPath, int batchSize, int featureDim, int gpu
     init();
 }
 
-void DeepSort::init() {
+void DeepSort::init()
+{
     objTracker = new tracker(maxCosineDist, maxBudget);
     featureExtractor = new FeatureTensor(batchSize, imgShape, featureDim, gpuID, gLogger);
-    int ret = enginePath.find(".onnx");
-    if (ret != -1)
-        featureExtractor->loadOnnx(enginePath);
-    else
-        featureExtractor->loadEngine(enginePath);
+    if (access(this->engine_path.c_str(), F_OK) != 0)
+        featureExtractor->loadOnnx(this->onnx_path, this->engine_path);
+    featureExtractor->loadEngine(this->engine_path);
 }
 
-DeepSort::~DeepSort() {
+DeepSort::~DeepSort()
+{
     delete objTracker;
 }
 
-void DeepSort::sort(cv::Mat& frame, vector<DetectBox>& dets) {
+void DeepSort::sort(cv::Mat &frame, vector<DetectBox> &dets)
+{
     // preprocess Mat -> DETECTION
     DETECTIONS detections;
     vector<CLSCONF> clsConf;
-    
-    for (DetectBox i : dets) {
-        DETECTBOX box(i.x1, i.y1, i.x2-i.x1, i.y2-i.y1);
+
+    for (DetectBox i : dets)
+    {
+        DETECTBOX box(i.x1, i.y1, i.x2 - i.x1, i.y2 - i.y1);
         DETECTION_ROW d;
         d.tlwh = box;
         d.confidence = i.confidence;
@@ -41,33 +45,38 @@ void DeepSort::sort(cv::Mat& frame, vector<DetectBox>& dets) {
     }
     result.clear();
     results.clear();
-    if (detections.size() > 0) {
+    if (detections.size() > 0)
+    {
         DETECTIONSV2 detectionsv2 = make_pair(clsConf, detections);
         sort(frame, detectionsv2);
     }
     // postprocess DETECTION -> Mat
     dets.clear();
-    for (auto r : result) {
+    for (auto r : result)
+    {
         DETECTBOX i = r.second;
-        DetectBox b(i(0), i(1), i(2)+i(0), i(3)+i(1), 1.);
+        DetectBox b(i(0), i(1), i(2) + i(0), i(3) + i(1), 1.);
         b.trackID = (float)r.first;
         dets.push_back(b);
     }
-    for (int i = 0; i < results.size(); ++i) {
+    for (int i = 0; i < int(results.size()); ++i)
+    {
         CLSCONF c = results[i].first;
         dets[i].classID = c.cls;
         dets[i].confidence = c.conf;
     }
 }
 
-
-void DeepSort::sort(cv::Mat& frame, DETECTIONS& detections) {
+void DeepSort::sort(cv::Mat &frame, DETECTIONS &detections)
+{
     bool flag = featureExtractor->getRectsFeature(frame, detections);
-    if (flag) {
+    if (flag)
+    {
         objTracker->predict();
         objTracker->update(detections);
-        //result.clear();
-        for (Track& track : objTracker->tracks) {
+        // result.clear();
+        for (Track &track : objTracker->tracks)
+        {
             if (!track.is_confirmed() || track.time_since_update > 1)
                 continue;
             result.push_back(make_pair(track.track_id, track.to_tlwh()));
@@ -75,28 +84,33 @@ void DeepSort::sort(cv::Mat& frame, DETECTIONS& detections) {
     }
 }
 
-void DeepSort::sort(cv::Mat& frame, DETECTIONSV2& detectionsv2) {
-    std::vector<CLSCONF>& clsConf = detectionsv2.first;
-    DETECTIONS& detections = detectionsv2.second;
+void DeepSort::sort(cv::Mat &frame, DETECTIONSV2 &detectionsv2)
+{
+    std::vector<CLSCONF> &clsConf = detectionsv2.first;
+    DETECTIONS &detections = detectionsv2.second;
     bool flag = featureExtractor->getRectsFeature(frame, detections);
-    if (flag) {
+    if (flag)
+    {
         objTracker->predict();
         objTracker->update(detectionsv2);
         result.clear();
         results.clear();
-        for (Track& track : objTracker->tracks) {
+        for (Track &track : objTracker->tracks)
+        {
             if (!track.is_confirmed() || track.time_since_update > 1)
                 continue;
             result.push_back(make_pair(track.track_id, track.to_tlwh()));
-            results.push_back(make_pair(CLSCONF(track.cls, track.conf) ,track.to_tlwh()));
+            results.push_back(make_pair(CLSCONF(track.cls, track.conf), track.to_tlwh()));
         }
     }
 }
 
-void DeepSort::sort(vector<DetectBox>& dets) {
+void DeepSort::sort(vector<DetectBox> &dets)
+{
     DETECTIONS detections;
-    for (DetectBox i : dets) {
-        DETECTBOX box(i.x1, i.y1, i.x2-i.x1, i.y2-i.y1);
+    for (DetectBox i : dets)
+    {
+        DETECTBOX box(i.x1, i.y1, i.x2 - i.x1, i.y2 - i.y1);
         DETECTION_ROW d;
         d.tlwh = box;
         d.confidence = i.confidence;
@@ -105,7 +119,8 @@ void DeepSort::sort(vector<DetectBox>& dets) {
     if (detections.size() > 0)
         sort(detections);
     dets.clear();
-    for (auto r : result) {
+    for (auto r : result)
+    {
         DETECTBOX i = r.second;
         DetectBox b(i(0), i(1), i(2), i(3), 1.);
         b.trackID = r.first;
@@ -113,13 +128,16 @@ void DeepSort::sort(vector<DetectBox>& dets) {
     }
 }
 
-void DeepSort::sort(DETECTIONS& detections) {
+void DeepSort::sort(DETECTIONS &detections)
+{
     bool flag = featureExtractor->getRectsFeature(detections);
-    if (flag) {
+    if (flag)
+    {
         objTracker->predict();
         objTracker->update(detections);
         result.clear();
-        for (Track& track : objTracker->tracks) {
+        for (Track &track : objTracker->tracks)
+        {
             if (!track.is_confirmed() || track.time_since_update > 1)
                 continue;
             result.push_back(make_pair(track.track_id, track.to_tlwh()));

@@ -79,43 +79,17 @@ void FeatureTensor::loadEngine(std::string enginePath)
         engineCache.append(buffer.str());
     }
     engineStream.close();
-    engine = runtime->deserializeCudaEngine(engineCache.data(), engineCache.size(), nullptr);
+    engine = runtime->deserializeCudaEngine(engineCache.data(), engineCache.size());
     assert(engine != nullptr);
     context = engine->createExecutionContext();
     assert(context != nullptr);
     initResource();
 }
 
-void FeatureTensor::loadOnnx(std::string onnxPath)
+void FeatureTensor::loadOnnx(std::string onnxPath, std::string enginePath)
 {
-    auto builder = createInferBuilder(*gLogger);
-    assert(builder != nullptr);
-    const auto explicitBatch = 1U << static_cast<uint32_t>(NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);
-    auto network = builder->createNetworkV2(explicitBatch);
-    assert(network != nullptr);
-    auto config = builder->createBuilderConfig();
-    assert(config != nullptr);
-
-    auto profile = builder->createOptimizationProfile();
-    Dims dims = Dims4{1, 3, imgShape.height, imgShape.width};
-    profile->setDimensions(inputName.c_str(),
-                           OptProfileSelector::kMIN, Dims4{1, dims.d[1], dims.d[2], dims.d[3]});
-    profile->setDimensions(inputName.c_str(),
-                           OptProfileSelector::kOPT, Dims4{maxBatchSize, dims.d[1], dims.d[2], dims.d[3]});
-    profile->setDimensions(inputName.c_str(),
-                           OptProfileSelector::kMAX, Dims4{maxBatchSize, dims.d[1], dims.d[2], dims.d[3]});
-    config->addOptimizationProfile(profile);
-
-    nvonnxparser::IParser *parser = nvonnxparser::createParser(*network, *gLogger);
-    assert(parser != nullptr);
-    auto parsed = parser->parseFromFile(onnxPath.c_str(), static_cast<int>(ILogger::Severity::kWARNING));
-    assert(parsed);
-    config->setMaxWorkspaceSize(1 << 20);
-    engine = builder->buildEngineWithConfig(*network, *config);
-    assert(engine != nullptr);
-    context = engine->createExecutionContext();
-    assert(context != nullptr);
-    initResource();
+    TRTgeneratorV1::TRTgenerator myTRTgenerator;
+    myTRTgenerator.createEngine(onnxPath, enginePath, imgShape.width, imgShape.height, maxBatchSize, inputName);
 }
 
 int FeatureTensor::getResult(float *&buffer)
@@ -139,8 +113,21 @@ void FeatureTensor::doInference(vector<cv::Mat> &imgMats)
 
 void FeatureTensor::initResource()
 {
-    inputIndex = engine->getBindingIndex(inputName.c_str());
-    outputIndex = engine->getBindingIndex(outputName.c_str());
+    int IOtensorsNum = engine->getNbIOTensors();
+    assert(IOtensorsNum == 2);
+    for (int i = 0; i < IOtensorsNum; ++i)
+    {
+        if (strcmp(this->engine->getIOTensorName(i), this->inputName.c_str()))
+        {
+            this->inputIndex = i;
+            assert(this->engine->getTensorDataType(this->inputName.c_str()) == nvinfer1::DataType::kFLOAT);
+        }
+        else if (strcmp(this->engine->getIOTensorName(i), this->inputName.c_str()))
+        {
+            this->outputIndex = i;
+            assert(this->engine->getTensorDataType(this->inputName.c_str()) == nvinfer1::DataType::kFLOAT);
+        }
+    }
     // Create CUDA stream
     cudaStreamCreate(&cudaStream);
     buffers[inputIndex] = inputBuffer;
@@ -157,9 +144,16 @@ void FeatureTensor::doInference(float *inputBuffer, float *outputBuffer)
 {
     cudaMemcpyAsync(buffers[inputIndex], inputBuffer, inputStreamSize * sizeof(float), cudaMemcpyHostToDevice, cudaStream);
     Dims4 inputDims{curBatchSize, 3, imgShape.height, imgShape.width};
-    context->setBindingDimensions(0, inputDims);
-
-    context->enqueueV2(buffers, cudaStream, nullptr);
+    context->setInputShape(this->inputName.c_str(), inputDims);
+    this->context->setOptimizationProfileAsync(0, cudaStream);
+    this->context->setTensorAddress(this->inputName.c_str(), this->buffers[this->inputIndex]);
+    this->context->setTensorAddress(this->outputName.c_str(), this->buffers[this->outputIndex]);
+    bool success = context->enqueueV3(cudaStream);
+    if (!success)
+    {
+        this->gLogger->log(ILogger::Severity::kERROR, "DoInference failed");
+        return;
+    }
     cudaMemcpyAsync(outputBuffer, buffers[outputIndex], outputStreamSize * sizeof(float), cudaMemcpyDeviceToHost, cudaStream);
     // cudaStreamSynchronize(cudaStream);
 }
