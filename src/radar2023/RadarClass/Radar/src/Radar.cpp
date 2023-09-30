@@ -170,15 +170,18 @@ void Radar::init(int argc, char **argv)
         setTrackbarPos("Recorder", "ControlPanel", 0);
         this->LidarListenerBegin(argc, argv);
         this->armorDetector.accessModelTest();
+
 #ifndef UsePointCloudSepTarget
         this->carDetector.accessModelTest();
 #endif
+
         if (!this->armorDetector.initModel())
         {
             this->stop();
             this->logger->flush();
             return;
         }
+
 #ifndef UsePointCloudSepTarget
         if (!this->carDetector.initModel())
         {
@@ -187,6 +190,11 @@ void Radar::init(int argc, char **argv)
             return;
         }
 #endif
+
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+        this->dsTracker = std::make_shared<DsTracker>(DsTracker(SORT_ONNX_PATH, SORT_ENGINE_PATH));
+#endif
+
         this->mySerial.initSerial(SerialPortNAME, PASSWORD);
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH)) ? setTrackbarPos("Recorder", "ControlPanel", 1) : setTrackbarPos("Recorder", "ControlPanel", 0);
         this->cameraThread.start();
@@ -266,6 +274,9 @@ void Radar::MainProcessLoop()
             vector<bboxAndRect> pred = this->movementDetector._ifHistoryBuild() ? this->armorDetector.infer(frameBag.frame, sepTargets) : {};
 #else
             vector<DetectBox> sepTargets = this->carDetector.infer(frameBag.frame);
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+            this->dsTracker->sort(frameBag.frame, sepTargets);
+#endif
             vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
 #endif
 #if defined Test && defined TestWithVis

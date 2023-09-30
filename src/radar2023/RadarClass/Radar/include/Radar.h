@@ -14,6 +14,10 @@
     #include "../../Detectors/include/CarDetector.h"
 #endif
 
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+    #include "../../DsTracker/include/DsTracker.h"
+#endif
+
 #include "../../Location/include/MapMapping.h"
 #include "../../UART/include/UART.h"
 #include "../../Location/include/location.h"
@@ -49,6 +53,10 @@ private:
     MovementDetector movementDetector;
 #else
     CarDetector carDetector;
+#endif
+
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+    std::shared_ptr<DsTracker> dsTracker;
 #endif
 
     CameraThread cameraThread;

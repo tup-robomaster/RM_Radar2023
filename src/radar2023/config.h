@@ -48,3 +48,9 @@
 #define _blockSizeW 36    // 栅格大小
 #define MTBoxRatio 1.1    // 分割框扩大比例
 #define OffsetRatio 1.3   // 点云离散兼容比例
+
+/*---For deepsort [实验性][高性能消耗][谨慎使用]---*/
+
+// #define UseDeepSort
+#define SORT_ONNX_PATH (char *)""   // Sort使用的Onnx路径
+#define SORT_ENGINE_PATH (char *)"" // Sort生成的Engine路径

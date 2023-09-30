@@ -2,7 +2,7 @@
 
 沈阳航空航天大学T-UP战队2023赛季雷达程序
 
-## Version: V1.2 GameReady
+## Version: V1.4 Experimental
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
@@ -217,7 +217,7 @@ roslaunch radar2023 radar2023.launch
   roslaunch radar2023 radar2023_with_OfflinePointCloudPub.launch
   ```
 
-### 实验性功能
+### 实验性功能-深度图背景分割
 
 #### 简介
 
@@ -229,19 +229,37 @@ roslaunch radar2023 radar2023.launch
 
 修改Config.h中注释掉的UsePointCloudSepTarget项目及配套配置
 
-修改CMakeLists.txt中注释掉的RadarClass/Detectors/src/MovementDetector.cpp项目
-
 重新编译即可使用
 
 #### 注意
 
 此为实验性功能，不保证有效效果
 
+### 实验性功能-深度图背景分割
+
+#### 简介
+
+本程序提供实验性的DeepSort目标跟踪
+
+利用DeepSort稳定目标类别跟踪，可有效应对装甲板长时间丢失的情况
+
+#### 使用
+
+修改Config.h中注释掉的UseDeepSort项目及配套配置
+
+重新编译即可使用
+
+#### 注意
+
+此为实验性功能且性能消耗极大，不保证有效效果
+
 ### 开发日志
+
+Date:2023.9.30 V1.4:更新实验性DeepSort
 
 Date:2023.9.24 V1.3:上传实验性点云背景分割
 
-Date:2023.6.8  V1.2:修复UART错误，切换spdlog至head-only,更新v1.2 GameReady版本
+Date:2023.6.8 V1.2:修复UART错误，切换spdlog至head-only,更新v1.2 GameReady版本
 
 Date:2023.5.30 V1.1:添加离线点云调试工具
 
