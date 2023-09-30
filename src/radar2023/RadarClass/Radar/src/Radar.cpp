@@ -294,6 +294,9 @@ void Radar::MainProcessLoop()
                 else
                 {
                     this->detectDepth(pred);
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+                    this->mapMapping._DeepSort_prediction(pred, sepTargets);
+#endif
                     vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
                     this->detectDepth(IouArmors);
                     slk.unlock();

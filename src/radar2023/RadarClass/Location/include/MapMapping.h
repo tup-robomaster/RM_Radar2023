@@ -25,6 +25,9 @@ private:
     int _location_pred_time[12] = {0};
     vector<vector<MapLocation3D>> _location_cache;
     vector<bboxAndRect> _IoU_pred_cache;
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+    map<int, int> _DeepSort_pred_cache; //classid, trackid
+#endif
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 private:
@@ -39,6 +42,9 @@ public:
     void push_T(Mat &rvec, Mat &tvec);
     void _plot_region_rect(vector<vector<Point3f>> &points, Mat &frame, Mat &K_0, Mat &C_0);
     vector<ArmorBoundingBox> _IoU_prediction(vector<bboxAndRect> pred, vector<DetectBox> sepboxs);
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+    void _DeepSort_prediction(vector<bboxAndRect> &pred, vector<DetectBox> sepboxs);
+#endif
     vector<MapLocation3D> getloc();
     void mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, Mat &K_0, Mat &C_0);
 };

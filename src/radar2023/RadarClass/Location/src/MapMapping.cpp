@@ -134,6 +134,55 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
     return pred_bbox;
 }
 
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+void MapMapping::_DeepSort_prediction(vector<bboxAndRect> &pred, vector<DetectBox> sepboxs)
+{
+    map<int, int> _DeepSort_pred_temp;
+    if (this->_DeepSort_pred_cache.size() == 0)
+    {
+        for (const auto &it : pred)
+        {
+            _DeepSort_pred_temp[it.armor.cls] = it.rect.trackID;
+        }
+    }
+    else
+    {
+        for (const auto &it : pred)
+        {
+            _DeepSort_pred_temp[it.armor.cls] = it.rect.trackID;
+        }
+        map<int, int>::iterator iter;
+        iter = this->_ids.begin();
+        while (iter != this->_ids.end())
+        {
+            if (_DeepSort_pred_temp.find(iter->first) == _DeepSort_pred_temp.end())
+            {
+                if (this->_DeepSort_pred_cache.find(iter->first) != this->_DeepSort_pred_cache.end())
+                {
+                    for (auto it : sepboxs)
+                    {
+                        if (it.trackID == this->_DeepSort_pred_cache[iter->first])
+                        {
+                            _DeepSort_pred_temp[iter->first] = it.trackID;
+                            pred.emplace_back(bboxAndRect{
+                                ArmorBoundingBox{true,
+                                                 (float)(it.x1 + (it.x2 - it.x1) / 3.),
+                                                 (float)((it.y1 + ((it.y1 + it.y2) / 5.) * 3.)),
+                                                 (float)((it.x2 - it.x1) / 3.),
+                                                 (float)((it.y2 - it.y1) / 5.),
+                                                 (float)iter->first},
+                                it});
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    this->_DeepSort_pred_cache.swap(_DeepSort_pred_temp);
+}
+#endif
+
 void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
 {
     rvec_input.copyTo(this->rvec);
