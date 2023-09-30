@@ -7,10 +7,16 @@
 class DsTracker
 {
 private:
-    /* data */
+    std::string sort_onnxPath;
+    std::string sort_enginePath;
+    std::shared_ptr<DeepSort> DS;
+    std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
+
 public:
-    DsTracker(/* args */);
+    DsTracker(std::string sort_onnxPath, std::string sort_enginePath);
     ~DsTracker();
+
+    void sort(cv::Mat &frame, vector<DetectBox> &targets);
 };
 
 #endif

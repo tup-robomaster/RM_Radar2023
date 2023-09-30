@@ -38,7 +38,7 @@ public:
     bool _is_pass();
     void push_T(Mat &rvec, Mat &tvec);
     void _plot_region_rect(vector<vector<Point3f>> &points, Mat &frame, Mat &K_0, Mat &C_0);
-    vector<ArmorBoundingBox> _IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs);
+    vector<ArmorBoundingBox> _IoU_prediction(vector<bboxAndRect> pred, vector<DetectBox> sepboxs);
     vector<MapLocation3D> getloc();
     void mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox> &Ioubbox, Mat &K_0, Mat &C_0);
 };

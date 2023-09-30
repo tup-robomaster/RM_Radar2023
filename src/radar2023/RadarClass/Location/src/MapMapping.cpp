@@ -65,7 +65,7 @@ void MapMapping::_plot_region_rect(vector<vector<Point3f>> &points, Mat &frame, 
     }
 }
 
-vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<Rect> sepboxs)
+vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, vector<DetectBox> sepboxs)
 {
     vector<ArmorBoundingBox> pred_bbox = {};
     map<int, int>::iterator iter;
@@ -97,10 +97,10 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
                 vector<float> iou;
                 for (const auto &it : sepboxs)
                 {
-                    float x1 = f_max(cached_pred.armor.x0, it.x);
-                    float x2 = f_min(cached_pred.armor.x0 + cached_pred.armor.w, it.x + it.width);
-                    float y1 = f_max(cached_pred.armor.y0, it.y);
-                    float y2 = f_min(cached_pred.armor.y0 + cached_pred.armor.h, it.y + it.height);
+                    float x1 = f_max(cached_pred.armor.x0, it.x1);
+                    float x2 = f_min(cached_pred.armor.x0 + cached_pred.armor.w, it.x2);
+                    float y1 = f_max(cached_pred.armor.y0, it.y1);
+                    float y2 = f_min(cached_pred.armor.y0 + cached_pred.armor.h, it.y2);
                     float overlap = f_max(0, x2 - x1) * f_max(0, y2 - y1);
                     float area = cached_pred.armor.w * cached_pred.armor.h;
                     iou.emplace_back(overlap / area);
@@ -110,7 +110,7 @@ vector<ArmorBoundingBox> MapMapping::_IoU_prediction(vector<bboxAndRect> pred, v
                     int max_index = std::distance(iou.begin(), max_element(iou.begin(), iou.end()));
                     if (iou[max_index] > IoU_THRE)
                     {
-                        Rect current_rect = sepboxs[max_index];
+                        Rect current_rect = Rect(sepboxs[max_index].x1, sepboxs[max_index].y1, sepboxs[max_index].x2 - sepboxs[max_index].x1, sepboxs[max_index].y2 - sepboxs[max_index].y1);
                         current_rect.width = floor(current_rect.width / 3.);
                         current_rect.height = floor(current_rect.height / 5.);
                         current_rect.x += current_rect.width;

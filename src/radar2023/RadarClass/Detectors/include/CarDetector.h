@@ -20,7 +20,7 @@ public:
 
     void accessModelTest();
     bool initModel();
-    vector<Rect> infer(Mat &image);
+    vector<DetectBox> infer(Mat &image);
     void unInit();
 };
 

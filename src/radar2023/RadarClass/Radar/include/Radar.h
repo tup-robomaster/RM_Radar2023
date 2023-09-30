@@ -84,7 +84,7 @@ private:
     void detectDepth(vector<ArmorBoundingBox> &armors);
     void send_judge(judge_message &message);
 
-    void drawBbox(vector<Rect> &bboxs, Mat &img);
+    void drawBbox(vector<DetectBox> &bboxs, Mat &img);
     void drawArmorsForDebug(vector<ArmorBoundingBox> &armors, Mat &img);
     void drawArmorsForDebug(vector<bboxAndRect> &armors, Mat &img);
 

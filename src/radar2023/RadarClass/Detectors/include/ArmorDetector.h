@@ -16,8 +16,8 @@ private:
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 private:
-    vector<Mat> preProcess(Mat &image, vector<Rect> &movingTargets);
-    void reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors, vector<Rect> &boxs, vector<Mat> &img);
+    vector<Mat> preProcess(Mat &image, vector<DetectBox> &movingTargets);
+    void reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors, vector<DetectBox> &boxs, vector<Mat> &img);
 
 public:
     ArmorDetector();
@@ -25,7 +25,7 @@ public:
 
     void accessModelTest();
     bool initModel();
-    vector<bboxAndRect> infer(Mat &image, vector<Rect> &targets);
+    vector<bboxAndRect> infer(Mat &image, vector<DetectBox> &targets);
     void unInit();
 };
 

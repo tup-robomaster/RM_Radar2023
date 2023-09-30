@@ -98,11 +98,11 @@ void Radar::send_judge(judge_message &message)
     }
 }
 
-void Radar::drawBbox(vector<Rect> &bboxs, Mat &img)
+void Radar::drawBbox(vector<DetectBox> &bboxs, Mat &img)
 {
-    for (Rect &it : bboxs)
+    for (DetectBox &it : bboxs)
     {
-        cv::rectangle(img, it, Scalar(0, 255, 0), 2);
+        cv::rectangle(img, Rect(it.x1, it.y1, it.x2 - it.x1, it.y2 - it.y1), Scalar(0, 255, 0), 2);
     }
 }
 
@@ -265,7 +265,7 @@ void Radar::MainProcessLoop()
             slk_md.unlock();
             vector<bboxAndRect> pred = this->movementDetector._ifHistoryBuild() ? this->armorDetector.infer(frameBag.frame, sepTargets) : {};
 #else
-            vector<Rect> sepTargets = this->carDetector.infer(frameBag.frame);
+            vector<DetectBox> sepTargets = this->carDetector.infer(frameBag.frame);
             vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
 #endif
 #if defined Test && defined TestWithVis

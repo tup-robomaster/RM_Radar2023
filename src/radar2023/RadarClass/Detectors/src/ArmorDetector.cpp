@@ -27,7 +27,7 @@ bool ArmorDetector::initModel()
     return check;
 }
 
-vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
+vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<DetectBox> &targets)
 {
     vector<vector<TRTInferV1::DetectionObj>> results_pre;
     if (targets.size() == 0)
@@ -38,19 +38,20 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<Rect> &targets)
     return this->results;
 }
 
-vector<Mat> ArmorDetector::preProcess(Mat &image, vector<Rect> &movingTargets)
+vector<Mat> ArmorDetector::preProcess(Mat &image, vector<DetectBox> &movingTargets)
 {
     vector<Mat> output;
-    for (vector<Rect>::iterator it = movingTargets.begin(); it != movingTargets.end();)
+    for (vector<DetectBox>::iterator it = movingTargets.begin(); it != movingTargets.end();)
     {
-        if (it->width == 0 || it->height == 0)
+        if (it->x2 - it->x1 == 0 || it->y2 - it->y1 == 0)
         {
             it = movingTargets.erase(it);
         }
         else
         {
-            makeRectSafe(*it, image);
-            output.emplace_back(image(*it).clone());
+            Rect target = Rect(it->x1, it->y1, it->x2 - it->x1, it->y2 - it->y1);
+            makeRectSafe(target, image);
+            output.emplace_back(image(target).clone());
             ++it;
         }
     }
@@ -58,7 +59,7 @@ vector<Mat> ArmorDetector::preProcess(Mat &image, vector<Rect> &movingTargets)
     return output;
 }
 
-void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors, vector<Rect> &boxs, vector<Mat> &img)
+void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors, vector<DetectBox> &boxs, vector<Mat> &img)
 {
     vector<bboxAndRect>().swap(this->results);
     if (armors.size() != boxs.size())
@@ -68,8 +69,8 @@ void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors
         for (auto &it : armors[i])
         {
             this->results.emplace_back(bboxAndRect{ArmorBoundingBox{true,
-                                                                    (float)it.x1 + boxs[i].x,
-                                                                    (float)it.y1 + boxs[i].y,
+                                                                    (float)it.x1 + boxs[i].x1,
+                                                                    (float)it.y1 + boxs[i].y1,
                                                                     abs((float)(it.x2 - it.x1)),
                                                                     abs((float)(it.y2 - it.y1)),
                                                                     (float)it.classId, it.confidence},

@@ -9,6 +9,7 @@
 #include "datatype.h"
 #include "cuda_runtime_api.h"
 #include "../../TRTGenerator/TRTGenerator/include/Generator.h"
+#include "logging.h"
 
 using nvinfer1::ILogger;
 using std::vector;
