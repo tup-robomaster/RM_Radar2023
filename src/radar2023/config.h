@@ -48,6 +48,7 @@
 #define _blockSizeW 36    // 栅格大小
 #define MTBoxRatio 1.1    // 分割框扩大比例
 #define OffsetRatio 1.3   // 点云离散兼容比例
+#define K_size 3          // 卷积核大小
 
 /*---For deepsort [实验性][高性能消耗][谨慎使用]---*/
 
