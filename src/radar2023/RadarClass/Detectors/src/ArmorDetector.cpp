@@ -22,7 +22,7 @@ bool ArmorDetector::initModel()
 {
     this->logger->info("ArmorDetector init Moudel");
 
-    bool check = this->armorTensorRT.initModule(TensorRTEnginePath, 16, 24);
+    bool check = this->armorTensorRT.initModule(TensorRTEnginePath, 16, 12);
     this->logger->info("ArmorDetector Moudel inited");
     return check;
 }
