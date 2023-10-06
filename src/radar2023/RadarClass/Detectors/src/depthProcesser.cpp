@@ -9,10 +9,6 @@ DepthQueue::DepthQueue(Matrix<float, 3, 3> &K_0, Matrix<float, 1, 5> &C_0, Matri
     this->K_0 = K_0;
     this->C_0 = C_0;
     this->E_0 = E_0;
-    this->tvec = E_0.block(0, 3, 3, 1).transpose();
-    eigen2cv(Matrix<float, 3, 3>(E_0.block(0, 0, 3, 3)), this->E_0_Mat);
-    Rodrigues(this->E_0_Mat, this->rvec_Mat);
-    cv2eigen(this->rvec_Mat, this->rvec);
     vector<float> tmp(ImageW, 0.);
     this->depth.resize(ImageH, tmp);
 }
