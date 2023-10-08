@@ -9,13 +9,13 @@
 #include "../../Detectors/include/ArmorDetector.h"
 
 #ifdef UsePointCloudSepTarget
-    #include "../../Detectors/include/MovementDetector.h"
+#include "../../Detectors/include/MovementDetector.h"
 #else
-    #include "../../Detectors/include/CarDetector.h"
+#include "../../Detectors/include/CarDetector.h"
 #endif
 
 #if defined UseDeepSort && !(defined UsePointCloudSepTarget)
-    #include "../../DsTracker/include/DsTracker.h"
+#include "../../DsTracker/include/DsTracker.h"
 #endif
 
 #include "../../Location/include/MapMapping.h"
@@ -48,11 +48,11 @@ private:
     ArmorDetector armorDetector;
 
 #if !(defined UseOneLayerInfer)
-    #ifdef UsePointCloudSepTarget
+#ifdef UsePointCloudSepTarget
     MovementDetector movementDetector;
-    #else
+#else
     CarDetector carDetector;
-    #endif
+#endif
 #endif
 
 #if defined UseDeepSort && !(defined UsePointCloudSepTarget)

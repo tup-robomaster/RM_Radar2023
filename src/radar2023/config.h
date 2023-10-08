@@ -1,6 +1,6 @@
 #define Test        // 测试标志
 #define TestWithVis // 显示可视化检测结果
-// #define UsingVideo                                          //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
+// #define UsingVideo  //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
 
 #define PASSWORD (char *)"momoko11" // 用户密码，用于串口权限
 
@@ -58,5 +58,6 @@
 
 /*---For experimental [实验数据输出]---*/
 
-//#define Experimental
-//#define UseOneLayerInfer
+// #define Experimental     //启用实验模式
+// #define UseOneLayerInfer //启用单层神经网络预测模式
+// #define ExpOutputDir (char *)"/home/nine-fish/projects/RM_Radar2023_localtest/ExpResultDir" //实验数据输出目录

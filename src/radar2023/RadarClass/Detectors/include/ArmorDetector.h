@@ -16,8 +16,7 @@ private:
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 #ifdef Experimental
-    long int frame_count = 0;
-    std::vector<int> detectedObjNum;
+    ofstream oFile;
 #endif
 
 private:

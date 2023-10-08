@@ -268,25 +268,25 @@ void Radar::MainProcessLoop()
         if (frameBag.flag)
         {
 #ifndef UseOneLayerInfer
-    #ifdef UsePointCloudSepTarget
+#ifdef UsePointCloudSepTarget
             shared_lock<shared_timed_mutex> slk_md(this->myMutex_publicDepth);
             vector<Rect> sepTargets = this->movementDetector.applyMovementDetector(this->publicDepth);
             slk_md.unlock();
             vector<bboxAndRect> pred = this->movementDetector._ifHistoryBuild() ? this->armorDetector.infer(frameBag.frame, sepTargets) : {};
-    #else
-            vector<DetectBox> sepTargets = this->carDetector.infer(frameBag.frame);
-        #if defined UseDeepSort && !(defined UsePointCloudSepTarget)
-            this->dsTracker->sort(frameBag.frame, sepTargets);
-        #endif
-            vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
-    #endif
 #else
-    vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame);
+            vector<DetectBox> sepTargets = this->carDetector.infer(frameBag.frame);
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+            this->dsTracker->sort(frameBag.frame, sepTargets);
+#endif
+            vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
+#endif
+#else
+            vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame);
 #endif
 #if defined Test && defined TestWithVis
-    #ifndef UseOneLayerInfer
+#ifndef UseOneLayerInfer
             this->drawBbox(sepTargets, frameBag.frame);
-    #endif
+#endif
             this->drawArmorsForDebug(pred, frameBag.frame);
 #endif
 
@@ -296,6 +296,7 @@ void Radar::MainProcessLoop()
                 shared_lock<shared_timed_mutex> slk(this->myMutex_publicDepth);
                 if (this->publicDepth.size() == 0)
                 {
+                    slk.unlock();
                     this->logger->info("No Lidar Msg , Return");
                 }
                 else

@@ -23,6 +23,11 @@ bool VideoRecorder::init(char *videoPath, int coder, Size size)
         strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d %H%M%S", localtime(&currentTime));
         strcat(chCurrentTime, ".mp4");
         strcpy(filename, videoPath);
+        int length = strlen(videoPath);
+        if (videoPath[length - 1] != '/')
+        {
+            strcat(filename, "/");
+        }
         strcat(filename, chCurrentTime);
         this->vw = VideoWriter();
         if (!this->vw.open(filename, coder, 60.0, size, true))
