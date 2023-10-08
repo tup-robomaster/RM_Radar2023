@@ -139,11 +139,6 @@ vector<Rect> MovementDetector::detectMovementTarget(float input[int(ImageH / _bl
         this->movementTargets.emplace_back(this->rebuildRect(boundingRect(it)));
     }
 
-#ifdef Test
-    imshow("Test_MovementMask", this->tempDepth * 255);
-    waitKey(1);
-#endif
-
     // TODO:结果有效性评估
     return this->movementTargets;
 }

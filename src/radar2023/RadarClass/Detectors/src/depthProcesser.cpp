@@ -25,7 +25,7 @@ vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
     }
     Matrix4Xf pc_Matrix = pc.getMatrixXfMap();
     int cols = pc_Matrix.cols();
-    Matrix3Xf transformed_points = (this->E_0 * pc_Matrix).block(0, 0, 3, cols);
+    Matrix3Xf transformed_points = (this->E_0 * pc_Matrix).topRows(3);
     Matrix<float, 3, MaxPointsNum> pointsBox;
     Matrix<float, 1, MaxPointsNum> dptBox;
     Matrix<int, 2, MaxPointsNum> ipBox;

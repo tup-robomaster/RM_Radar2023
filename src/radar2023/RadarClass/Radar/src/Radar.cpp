@@ -171,7 +171,7 @@ void Radar::init(int argc, char **argv)
         this->LidarListenerBegin(argc, argv);
         this->armorDetector.accessModelTest();
 
-#ifndef UsePointCloudSepTarget
+#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
         this->carDetector.accessModelTest();
 #endif
 
@@ -182,7 +182,7 @@ void Radar::init(int argc, char **argv)
             return;
         }
 
-#ifndef UsePointCloudSepTarget
+#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
         if (!this->carDetector.initModel())
         {
             this->stop();
@@ -267,22 +267,29 @@ void Radar::MainProcessLoop()
         FrameBag frameBag = this->cameraThread.read();
         if (frameBag.flag)
         {
-#ifdef UsePointCloudSepTarget
+#ifndef UseOneLayerInfer
+    #ifdef UsePointCloudSepTarget
             shared_lock<shared_timed_mutex> slk_md(this->myMutex_publicDepth);
             vector<Rect> sepTargets = this->movementDetector.applyMovementDetector(this->publicDepth);
             slk_md.unlock();
             vector<bboxAndRect> pred = this->movementDetector._ifHistoryBuild() ? this->armorDetector.infer(frameBag.frame, sepTargets) : {};
-#else
+    #else
             vector<DetectBox> sepTargets = this->carDetector.infer(frameBag.frame);
-#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+        #if defined UseDeepSort && !(defined UsePointCloudSepTarget)
             this->dsTracker->sort(frameBag.frame, sepTargets);
-#endif
+        #endif
             vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
+    #endif
+#else
+    vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame);
 #endif
 #if defined Test && defined TestWithVis
+    #ifndef UseOneLayerInfer
             this->drawBbox(sepTargets, frameBag.frame);
+    #endif
             this->drawArmorsForDebug(pred, frameBag.frame);
 #endif
+
             if (pred.size() != 0)
             {
                 this->armor_filter(pred);
@@ -297,7 +304,11 @@ void Radar::MainProcessLoop()
 #if defined UseDeepSort && !(defined UsePointCloudSepTarget)
                     this->mapMapping._DeepSort_prediction(pred, sepTargets);
 #endif
+#ifndef UseOneLayerInfer
                     vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
+#else
+                    vector<ArmorBoundingBox> IouArmors = {};
+#endif
                     this->detectDepth(IouArmors);
                     slk.unlock();
                     this->mapMapping.mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
@@ -459,7 +470,7 @@ void Radar::stop()
     this->videoRecorder.close();
     this->_if_record = false;
     this->armorDetector.unInit();
-#ifndef UsePointCloudSepTarget
+#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
     this->carDetector.unInit();
 #endif
     this->logger->warn("Program Shutdown");

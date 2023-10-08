@@ -55,3 +55,8 @@
 // #define UseDeepSort
 #define SORT_ONNX_PATH (char *)""   // Sort使用的Onnx路径
 #define SORT_ENGINE_PATH (char *)"" // Sort生成的Engine路径
+
+/*---For experimental [实验数据输出]---*/
+
+//#define Experimental
+//#define UseOneLayerInfer

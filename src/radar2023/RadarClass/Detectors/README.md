@@ -16,7 +16,7 @@
 │   ├── cuda_utils.h [deleted]			//TRT相关头文件
 │   ├── depthProcesser.h		//点云深度图映射头文件
 │   ├── macros.h [deleted]			//TRT相关头文件
-│   ├── MovementDetector.h [deleted]	//点云背景分割头文件
+│   ├── MovementDetector.h [untested]	//点云背景分割头文件
 │   ├── preprocess.h [deleted]		//TRT相关头文件
 │   ├── tensorRT_v5.h [deleted]		//TRT主要头文件
 │   ├── utils.h [deleted]				//TRT相关头文件
@@ -28,7 +28,7 @@
      ├── CarDetector.cpp		//车辆检测器cpp文件
      ├── common.cpp [deleted]		//TRT相关cpp文件
      ├── depthProcesser.cpp	//点云深度图映射cpp文件
-     ├── MovementDetector.cpp [deleted]	//点云背景分割cpp文件
+     ├── MovementDetector.cpp [untested]	//点云背景分割cpp文件
      └── tensorRT_v5.cpp	[deleted]	//TRT主要cpp文件
 
 ## 装甲板检测模块

@@ -12,7 +12,11 @@ void ArmorDetector::accessModelTest()
 {
     if (access(TensorRTEnginePath, F_OK) != 0)
     {
+#ifndef UseOneLayerInfer
         auto engine = this->armorTensorRT.createEngine(OnnxMoudlePath, 64, 640, 640);
+#else
+        auto engine = this->armorTensorRT.createEngine(OnnxMoudlePath, 64, 1280, 1280);
+#endif
         this->armorTensorRT.saveEngineFile(engine, TensorRTEnginePath);
         delete engine;
     }
@@ -89,3 +93,34 @@ void ArmorDetector::unInit()
 {
     this->armorTensorRT.unInitModule();
 }
+
+#ifdef UseOneLayerInfer
+
+vector<bboxAndRect> ArmorDetector::infer(Mat &image)
+{
+    vector<bboxAndRect>().swap(this->results);
+    vector<vector<TRTInferV1::DetectionObj>> results_pre;
+    vector<Mat> images = {image};
+    results_pre = this->armorTensorRT.doInference(images, 0.1, 0.25, 0.45);
+    if (results_pre.size() == 0)
+        return {};
+    for (auto &it : results_pre[0])
+    {
+        this->results.emplace_back(bboxAndRect{ArmorBoundingBox{true,
+                                                                (float)it.x1,
+                                                                (float)it.y1,
+                                                                abs((float)(it.x2 - it.x1)),
+                                                                abs((float)(it.y2 - it.y1)),
+                                                                (float)it.classId, it.confidence},
+                                               DetectBox()});
+        this->logger->info("Arrmor: [x0] " + to_string(this->results.back().armor.x0) +
+                           " [y0] " + to_string(this->results.back().armor.y0) +
+                           " [w] " + to_string(this->results.back().armor.w) +
+                           " [h] " + to_string(this->results.back().armor.h) +
+                           " [cls] " + to_string(it.classId) +
+                           " [conf] " + to_string(it.confidence));
+    }
+    return this->results;
+}
+
+#endif

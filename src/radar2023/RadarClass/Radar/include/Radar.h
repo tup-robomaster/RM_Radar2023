@@ -22,8 +22,6 @@
 #include "../../UART/include/UART.h"
 #include "../../Location/include/location.h"
 
-
-
 /**
  * @brief 主要雷达类
  * 负责相关工作线程的管理，获取雷达点云数据并进行处理
@@ -49,10 +47,12 @@ private:
     DepthQueue depthQueue;
     ArmorDetector armorDetector;
 
-#ifdef UsePointCloudSepTarget
+#if !(defined UseOneLayerInfer)
+    #ifdef UsePointCloudSepTarget
     MovementDetector movementDetector;
-#else
+    #else
     CarDetector carDetector;
+    #endif
 #endif
 
 #if defined UseDeepSort && !(defined UsePointCloudSepTarget)

@@ -51,6 +51,7 @@
 * fmt[选择性安装]
 * Eigen3
 * MKL[可选]
+* matplotlibcpp[可选]
 * Livox雷达驱动
 * 迈德威视相机驱动
 
@@ -82,6 +83,7 @@
 * fmt[选择性安装]
 * Eigen3
 * MKL[可选]
+* matplotlibcpp[可选]
 * Livox雷达驱动
 * 迈德威视相机驱动
 
