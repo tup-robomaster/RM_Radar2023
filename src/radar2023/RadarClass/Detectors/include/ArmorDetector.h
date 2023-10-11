@@ -16,7 +16,8 @@ private:
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 #ifdef Experimental
-    ofstream oFile;
+    int detectedArmorNumThisFrame = 0;
+    float averageConfThisFrame = 0.0;
 #endif
 
 private:

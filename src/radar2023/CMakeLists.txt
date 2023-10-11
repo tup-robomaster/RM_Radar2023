@@ -75,6 +75,7 @@ cuda_add_executable(radar2023
   RadarClass/DsTracker/src/tracker.cpp
   RadarClass/DsTracker/src/hungarianoper.cpp
   RadarClass/DsTracker/src/DsTracker.cpp
+  RadarClass/Logger/src/ExpLog.cpp
 )
 
 add_executable(offline_point_cloud_publisher tools/offline_point_cloud_pub.cpp)

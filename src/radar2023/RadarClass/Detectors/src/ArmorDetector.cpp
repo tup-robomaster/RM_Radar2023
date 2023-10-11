@@ -27,31 +27,6 @@ bool ArmorDetector::initModel()
     this->logger->info("ArmorDetector init Moudel");
     bool check = this->armorTensorRT.initModule(TensorRTEnginePath, 16, 12);
     this->logger->info("ArmorDetector Moudel inited");
-#ifdef Experimental
-    if (access(ExpOutputDir, 0) == -1)
-    {
-        this->logger->error("[ERR] ExpOutputDir, non-existent");
-    }
-    else
-    {
-        char filename[1024];
-        time_t currentTime = time(NULL);
-        char chCurrentTime[256];
-        strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d %H%M%S", localtime(&currentTime));
-        strcat(chCurrentTime, ".csv");
-        strcpy(filename, ExpOutputDir);
-        int length = strlen(ExpOutputDir);
-        string outputdir = ExpOutputDir;
-        if (outputdir[length - 1] != '/')
-        {
-            strcat(filename, "/");
-        }
-        strcat(filename, "ArmorExpData");
-        strcat(filename, chCurrentTime);
-        this->oFile.open(filename, ios::out | ios::trunc);
-        this->oFile << "识别数" << endl;
-    }
-#endif
     return check;
 }
 
@@ -61,7 +36,8 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<DetectBox> &targets)
     if (targets.size() == 0)
     {
 #ifdef Experimental
-        this->oFile << to_string(0) << endl;
+        this->detectedArmorNumThisFrame = 0;
+        this->averageConfThisFrame = 0.0;
 #endif
         return {};
     }
@@ -69,7 +45,8 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<DetectBox> &targets)
     results_pre = this->armorTensorRT.doInference(preProcessedImage, 0.1, 0.25, 0.45);
     this->reBuildBoxs(results_pre, targets, preProcessedImage);
 #ifdef Experimental
-    this->oFile << to_string(this->results.size()) << endl;
+    this->detectedArmorNumThisFrame = this->results.size();
+    this->averageConfThisFrame = sumConfAverage(this->results);
 #endif
     return this->results;
 }
@@ -124,9 +101,6 @@ void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors
 void ArmorDetector::unInit()
 {
     this->armorTensorRT.unInitModule();
-#ifdef Experimental
-    this->oFile.close();
-#endif
 }
 
 #ifdef UseOneLayerInfer
@@ -140,7 +114,8 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image)
     if (results_pre.size() == 0)
     {
 #ifdef Experimental
-        this->oFile << to_string(0) << endl;
+        this->detectedArmorNumThisFrame = 0;
+        this->averageConfThisFrame = 0.0;
 #endif
         return {};
     }
@@ -161,7 +136,8 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image)
                            " [conf] " + to_string(it.confidence));
     }
 #ifdef Experimental
-    this->oFile << to_string(this->results.size()) << endl;
+    this->detectedArmorNumThisFrame = this->results.size();
+    this->averageConfThisFrame = sumConfAverage(this->results);
 #endif
     return this->results;
 }
