@@ -33,7 +33,9 @@ void ExpLog::init(string outputDir)
         this->oFile.open(filename, ios::out | ios::trunc);
         this->oFile << "识别数"
                     << ","
-                    << "平均置信度" << std::endl;
+                    << "平均置信度"
+                    << ","
+                    << "耗时(ns)" << std::endl;
     }
 }
 
@@ -49,5 +51,6 @@ void ExpLog::input(vector<string> &msg)
 
 void ExpLog::uninit()
 {
+    this->oFile.flush();
     this->oFile.close();
 }

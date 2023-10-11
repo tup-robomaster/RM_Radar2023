@@ -48,3 +48,14 @@ Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH)
 {
     return Rect(rect.x * blocksizeW, rect.y * blocksizeH, rect.width * blocksizeW, rect.height * blocksizeH);
 }
+
+float sumConfAverage(std::vector<bboxAndRect> &items)
+{
+    float sum = 0.;
+    for (const auto &data : items)
+    {
+        sum += data.armor.conf;
+    }
+
+    return sum / items.size();
+}

@@ -15,4 +15,6 @@ Rect rectCenterScale(Rect rect, Size size);
 
 Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH);
 
+float sumConfAverage(std::vector<bboxAndRect> &items);
+
 #endif

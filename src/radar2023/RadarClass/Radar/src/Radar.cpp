@@ -195,6 +195,10 @@ void Radar::init(int argc, char **argv)
         this->dsTracker = std::make_shared<DsTracker>(DsTracker(SORT_ONNX_PATH, SORT_ENGINE_PATH));
 #endif
 
+#ifdef Experimental
+        this->myExpLog.init(ExpOutputDir);
+#endif
+
         this->mySerial.initSerial(SerialPortNAME, PASSWORD);
         this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH)) ? setTrackbarPos("Recorder", "ControlPanel", 1) : setTrackbarPos("Recorder", "ControlPanel", 0);
         this->cameraThread.start();
@@ -328,6 +332,13 @@ void Radar::MainProcessLoop()
 #endif
             this->myFrames.push(frameBag.frame);
             this->logger->flush();
+#ifdef Experimental
+            std::vector<string> msg;
+            msg.emplace_back(to_string(pred.size()));
+            msg.emplace_back(to_string(sumConfAverage(pred)));
+            msg.emplace_back(to_string((end_t - start_t).count()));
+            this->myExpLog.input(msg);
+#endif
         }
         else
             continue;
@@ -473,6 +484,10 @@ void Radar::stop()
     this->armorDetector.unInit();
 #if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
     this->carDetector.unInit();
+#endif
+
+#ifdef Experimental
+    this->myExpLog.uninit();
 #endif
     this->logger->warn("Program Shutdown");
 }

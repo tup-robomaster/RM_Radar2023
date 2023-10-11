@@ -63,6 +63,10 @@ private:
     std::shared_ptr<DsTracker> dsTracker;
 #endif
 
+#ifdef Experimental
+    ExpLog myExpLog;
+#endif
+
     CameraThread cameraThread;
     Location myLocation;
     MapMapping mapMapping;
