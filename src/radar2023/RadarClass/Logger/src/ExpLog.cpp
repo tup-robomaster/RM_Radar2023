@@ -2,7 +2,15 @@
 
 ExpLog::ExpLog()
 {
-    if (access(ExpOutputDir, 0) == -1)
+}
+
+ExpLog::~ExpLog()
+{
+}
+
+void ExpLog::init(string outputDir)
+{
+    if (access(outputDir.c_str(), 0) == -1)
     {
         this->logger->error("[ERR] ExpOutputDir, non-existent");
     }
@@ -29,6 +37,17 @@ ExpLog::ExpLog()
     }
 }
 
-ExpLog::~ExpLog()
+void ExpLog::input(vector<string> &msg)
 {
+    for (const auto &it : msg)
+    {
+        this->oFile << it << ",";
+    }
+    this->oFile << endl;
+    this->oFile.flush();
+}
+
+void ExpLog::uninit()
+{
+    this->oFile.close();
 }

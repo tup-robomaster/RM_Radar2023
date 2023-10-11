@@ -22,6 +22,10 @@
 #include "../../UART/include/UART.h"
 #include "../../Location/include/location.h"
 
+#ifdef Experimental
+#include "../../Logger/include/ExpLog.h"
+#endif
+
 /**
  * @brief 主要雷达类
  * 负责相关工作线程的管理，获取雷达点云数据并进行处理

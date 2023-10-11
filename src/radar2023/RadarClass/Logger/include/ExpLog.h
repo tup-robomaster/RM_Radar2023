@@ -13,6 +13,10 @@ private:
 public:
     ExpLog();
     ~ExpLog();
+
+    void init(string outpoutDir);
+    void input(vector<string> &msg);
+    void uninit();
 };
 
 #endif
