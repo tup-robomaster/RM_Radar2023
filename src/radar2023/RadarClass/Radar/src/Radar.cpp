@@ -293,7 +293,10 @@ void Radar::MainProcessLoop()
 #endif
             this->drawArmorsForDebug(pred, frameBag.frame);
 #endif
-
+#ifdef Experimental
+            int pred_size = pred.size();
+            float pred_conf_average = sumConfAverage(pred);
+#endif
             if (pred.size() != 0)
             {
                 this->armor_filter(pred);
@@ -335,7 +338,9 @@ void Radar::MainProcessLoop()
 #ifdef Experimental
             std::vector<string> msg;
             msg.emplace_back(to_string(pred.size()));
+            msg.emplace_back(to_string(pred_size));
             msg.emplace_back(to_string(sumConfAverage(pred)));
+            msg.emplace_back(to_string(pred_conf_average));
             msg.emplace_back(to_string((end_t - start_t).count()));
             this->myExpLog.input(msg);
 #endif

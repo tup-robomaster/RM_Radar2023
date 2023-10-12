@@ -33,7 +33,11 @@ void ExpLog::init(string outputDir)
         this->oFile.open(filename, ios::out | ios::trunc);
         this->oFile << "识别数"
                     << ","
+                    << "推理识别数"
+                    << ","
                     << "平均置信度"
+                    << ","
+                    << "推理平均置信度"
                     << ","
                     << "耗时(ns)" << std::endl;
     }
