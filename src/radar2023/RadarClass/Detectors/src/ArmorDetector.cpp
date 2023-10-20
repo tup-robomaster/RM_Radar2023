@@ -87,7 +87,7 @@ void ArmorDetector::reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors
                                                                     abs((float)(it.x2 - it.x1)),
                                                                     abs((float)(it.y2 - it.y1)),
                                                                     (float)it.classId, it.confidence},
-                                                   boxs[i]});
+                                                   Rect {boxs[i].x1, boxs[i].y1, boxs[i].x2 - boxs[i].x1, boxs[i].y2 - boxs[i].y1}});
             this->logger->info("Arrmor: [x0] " + to_string(this->results.back().armor.x0) +
                                " [y0] " + to_string(this->results.back().armor.y0) +
                                " [w] " + to_string(this->results.back().armor.w) +
