@@ -60,4 +60,4 @@
 
 // #define Experimental     //启用实验模式
 // #define UseOneLayerInfer //启用单层神经网络预测模式
-// #define ExpOutputDir (char *)"/home/nine-fish/projects/RM_Radar2023_localtest/ExpResultDir" //实验数据输出目录
+#define ExpOutputDir (char *)"/home/nine-fish/projects/RM_Radar2023_localtest/ExpResultDir" //实验数据输出目录
