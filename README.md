@@ -2,6 +2,8 @@
 
 沈阳航空航天大学T-UP战队2023赛季雷达程序
 
+clone时请注意携带--recursive拉取子仓库，资源文件放置于release中
+
 ## Version: V1.4 Experimental
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
