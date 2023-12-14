@@ -7,6 +7,8 @@
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
 [雷达站赛场识别效果](https://www.bilibili.com/video/BV11u4y1x7qh/?vd_source=5db413777174c970e9df0ab76facd06c "B站链接")
+[TRT-YOLOV5推理模块](https://github.com/tup-robomaster/TRTInferenceForYolo "GitHub链接")
+[通用onnx->engine转换器](https://github.com/INIF-FISH/onnx2tensorrt_cpp "GitHub链接")
 
 ## 0.前言
 
