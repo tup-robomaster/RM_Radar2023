@@ -296,7 +296,7 @@ Date:2022-12-04 完成所有基本功能构建，发布V0.1a内部测试版本
 3. Q: 在程序初次运行时，会长时间没有输出，并抛出TRT警告。
    * A: 此为正常现象，初次运行时程序会根据设备进行onnx到engine的转化，因设备性能差异持续1～10分钟不等。
 4. Q: 我是3060显卡，运行时抛出cuda failure: 2怎么办？
-   * A: 检查config.h中TensorRTEnginePath、TensorRTEnginePath_c路径是否合法，报错中应当存在"Engine bad file"。
+   * A: 检查default.yaml中路径是否合法，报错中应当存在"Engine bad file"。
    * A: 运行雷达程序时，尽可能减少其他程序对显存的占用。
 5. Q: engine生成了，但是运行程序时没有检出怎么办？
    * A: 程序中所提供的onnx模型已在多台设备上通过测试，请确认CMakeLists.txt中CUDA_GEN_CODE项设置正确。
