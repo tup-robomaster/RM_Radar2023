@@ -3,7 +3,7 @@
 void Radar::armor_filter(vector<bboxAndRect> &pred)
 {
     vector<bboxAndRect> results;
-    for (int i = 0; i < int(this->mapMapping._ids.size()); ++i)
+    for (int i = 0; i < int(this->mapMapping->_ids.size()); ++i)
     {
         int max_id = 0;
         float max_conf = 0.f;
@@ -27,6 +27,8 @@ void Radar::detectDepth(vector<bboxAndRect> &pred)
         return;
     for (size_t i = 0; i < pred.size(); ++i)
     {
+        if (pred[i].armor.x0 > ImageW || pred[i].armor.y0 > ImageH || pred[i].armor.x0 + pred[i].armor.w > ImageW || pred[i].armor.y0 + pred[i].armor.h > ImageH)
+            continue;
         vector<float> tempBox;
         float center[2] = {pred[i].armor.x0 + pred[i].armor.w / 2.f, pred[i].armor.y0 + pred[i].armor.h / 2.f};
         for (int j = int(max<float>(center[1] - pred[i].armor.h / 2.f, 0.)); j < int(min<float>(center[1] + pred[i].armor.h / 2.f, ImageH)); ++j)
@@ -43,7 +45,7 @@ void Radar::detectDepth(vector<bboxAndRect> &pred)
         {
             tempDepth += jt;
         }
-        pred[i].armor.depth = tempDepth / tempBox.size();
+        pred[i].armor.depth = tempBox.size() != 0 ? tempDepth / tempBox.size() : 0.;
         this->logger->info("Depth: [CLS] " + to_string(pred[i].armor.cls) + " [Depth] " + to_string(pred[i].armor.depth));
     }
 }
@@ -54,9 +56,11 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
         return;
     for (size_t i = 0; i < armors.size(); ++i)
     {
+        if (armors[i].x0 > ImageW || armors[i].y0 > ImageH || armors[i].x0 + armors[i].w > ImageW || armors[i].y0 + armors[i].h > ImageH)
+            continue;
         float count = 0;
         vector<float> tempBox;
-        float center[2] = {armors.at(i).x0 + armors[i].w / 2.f, armors[i].y0 + armors[i].h / 2.f};
+        float center[2] = {armors[i].x0 + armors[i].w / 2.f, armors[i].y0 + armors[i].h / 2.f};
         for (int j = int(max<float>(center[1] - armors[i].h / 2.f, 0.)); j < int(min<float>(center[1] + armors[i].h / 2.f, ImageH)); ++j)
         {
             for (int k = int(max<float>(center[0] - armors[i].w / 2.f, 0.)); k < int(min<float>(center[0] + armors[i].w / 2.f, ImageW)); ++k)
@@ -72,7 +76,7 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
         {
             tempNum += jt;
         }
-        armors[i].depth = tempNum / count;
+        armors[i].depth = count != 0 ? tempNum / count : 0.;
         this->logger->info("Depth: [CLS] " + to_string(armors[i].cls) + " [Depth] " + to_string(armors[i].depth));
     }
 }
@@ -86,11 +90,11 @@ void Radar::send_judge(judge_message &message)
         for (int i = 0; i < int(message.loc.size() / 2); ++i)
         {
             vector<float> temp_location;
-            temp_location.emplace_back(message.loc[i + ENEMY * 6].x);
-            temp_location.emplace_back(message.loc[i + ENEMY * 6].y);
+            temp_location.emplace_back(message.loc[i + this->ENEMY * 6].x);
+            temp_location.emplace_back(message.loc[i + this->ENEMY * 6].y);
             loc.emplace_back(temp_location);
         }
-        this->myUART.myUARTPasser.push_loc(loc);
+        this->myUART->myUARTPasser.push_loc(loc);
         break;
 
     default:
@@ -140,8 +144,115 @@ Radar::~Radar()
     this->logger->flush();
 }
 
-void Radar::init(int argc, char **argv)
+void Radar::init()
 {
+    assert(this->nh);
+    assert(!share_path.empty());
+    std::string param_name;
+    if (this->nh->searchParam("/radar2023/EnemyType", param_name))
+    {
+        this->nh->getParam(param_name, this->ENEMY);
+    }
+    else
+    {
+        ROS_WARN("Parameter EnemyType not defined");
+    }
+    if (this->nh->searchParam("/radar2023/CameraParam", param_name))
+    {
+        this->nh->getParam(param_name, this->CAMERA_PARAM);
+    }
+    else
+    {
+        ROS_WARN("Parameter CameraParam not defined");
+    }
+    if (this->nh->searchParam("/radar2023/AuthPassword", param_name))
+    {
+        this->nh->getParam(param_name, this->PASSWORD);
+    }
+    else
+    {
+        ROS_WARN("Parameter AuthPassword not defined");
+    }
+    if (this->nh->searchParam("/radar2023/EngineForArmor", param_name))
+    {
+        this->nh->getParam(param_name, this->EngineForArmor);
+    }
+    else
+    {
+        ROS_WARN("Parameter EngineForArmor not defined");
+    }
+    if (this->nh->searchParam("/radar2023/OnnxForArmor", param_name))
+    {
+        this->nh->getParam(param_name, this->OnnxForArmor);
+    }
+    else
+    {
+        ROS_WARN("Parameter OnnxForArmor not defined");
+    }
+    if (this->nh->searchParam("/radar2023/CameraConfig", param_name))
+    {
+        this->nh->getParam(param_name, this->CameraConfig);
+    }
+    else
+    {
+        ROS_WARN("Parameter CameraConfig not defined");
+    }
+    if (this->nh->searchParam("/radar2023/SerialPortName", param_name))
+    {
+        this->nh->getParam(param_name, this->SerialPortName);
+    }
+    else
+    {
+        ROS_WARN("Parameter SerialPortName not defined");
+    }
+
+#ifdef UsingVideo
+    if (this->nh->searchParam("/radar2023/TestVideo", param_name))
+    {
+        this->nh->getParam(param_name, this->TestVideo);
+    }
+    else
+    {
+        ROS_WARN("Parameter TestVideo not defined");
+    }
+#endif
+#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
+    if (this->nh->searchParam("/radar2023/EngineForCar", param_name))
+    {
+        this->nh->getParam(param_name, this->EngineForCar);
+    }
+    else
+    {
+        ROS_WARN("Parameter EngineForCar not defined");
+    }
+    if (this->nh->searchParam("/radar2023/OnnxForCar", param_name))
+    {
+        this->nh->getParam(param_name, this->OnnxForCar);
+    }
+    else
+    {
+        ROS_WARN("Parameter OnnxForCar not defined");
+    }
+#endif
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+    if (this->nh->searchParam("/radar2023/EngineForSort", param_name))
+    {
+        this->nh->getParam(param_name, this->EngineForSort);
+    }
+    else
+    {
+        ROS_WARN("Parameter EngineForSort not defined");
+    }
+    if (this->nh->searchParam("/radar2023/OnnxForSort", param_name))
+    {
+        this->nh->getParam(param_name, this->OnnxForSort);
+    }
+    else
+    {
+        ROS_WARN("Parameter OnnxForSort not defined");
+    }
+#endif
+
     if (this->_init_flag)
         return;
     this->logger->info("Initing ...Process");
@@ -152,69 +263,91 @@ void Radar::init(int argc, char **argv)
     Matrix<float, 3, 3> K_0;
     Matrix<float, 1, 5> C_0;
     Matrix<float, 4, 4> E_0;
-    if (!read_param(this->K_0_Mat, this->C_0_Mat, this->E_0_Mat))
+    if (!read_param(this->K_0_Mat, this->C_0_Mat, this->E_0_Mat, this->share_path + "/params/" + this->CAMERA_PARAM))
     {
-        this->logger->error("Can't read CAMERA_PARAM: {}!", CAMERA_PARAM_PATH);
+        this->logger->error("Can't read CAMERA_PARAM: {}!", this->share_path + "/params/" + this->CAMERA_PARAM);
         return;
     }
     cv2eigen(this->K_0_Mat, K_0);
     cv2eigen(this->C_0_Mat, C_0);
     cv2eigen(this->E_0_Mat, E_0);
-    this->depthQueue = DepthQueue(K_0, C_0, E_0);
-    if (!this->_init_flag)
+    this->depthQueue = std::make_shared<DepthQueue>(K_0, C_0, E_0);
+    this->myUART = std::make_shared<UART>(this->ENEMY);
+    this->myLocation = std::make_shared<Location>();
+    this->videoRecorder = std::make_shared<VideoRecorder>();
+    this->mySerial = std::make_shared<MySerial>();
+    this->mapMapping = std::make_shared<MapMapping>();
+
+#ifdef UsingVideo
+    this->cameraThread = std::make_shared<CameraThread>(this->share_path + "/params/" + this->CameraConfig,
+                                                        this->share_path + "/resources/" + this->TestVideo);
+#else
+    this->cameraThread = std::make_shared<CameraThread>(this->share_path + "/params/" + this->CameraConfig);
+#endif
+
+    namedWindow("ControlPanel", WindowFlags::WINDOW_NORMAL);
+    createTrackbar("Exit Program", "ControlPanel", 0, 1, nullptr);
+    setTrackbarPos("Exit Program", "ControlPanel", 0);
+    createTrackbar("Recorder", "ControlPanel", 0, 1, nullptr);
+    setTrackbarPos("Recorder", "ControlPanel", 0);
+    this->LidarListenerBegin();
+    this->armorDetector = std::make_shared<ArmorDetector>(this->share_path + "/models/" + this->EngineForArmor,
+                                                          this->share_path + "/models/" + this->OnnxForArmor);
+    this->armorDetector->accessModelTest();
+
+#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
+    this->carDetector = std::make_shared<CarDetector>(this->share_path + "/models/" + this->EngineForCar,
+                                                      this->share_path + "/models/" + this->OnnxForCar);
+    this->carDetector->accessModelTest();
+#endif
+
+    if (!this->armorDetector->initModel())
     {
-        namedWindow("ControlPanel", WindowFlags::WINDOW_NORMAL);
-        createTrackbar("Exit Program", "ControlPanel", 0, 1, nullptr);
-        setTrackbarPos("Exit Program", "ControlPanel", 0);
-        createTrackbar("Recorder", "ControlPanel", 0, 1, nullptr);
-        setTrackbarPos("Recorder", "ControlPanel", 0);
-        this->LidarListenerBegin(argc, argv);
-        this->armorDetector.accessModelTest();
-
-#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
-        this->carDetector.accessModelTest();
-#endif
-
-        if (!this->armorDetector.initModel())
-        {
-            this->stop();
-            this->logger->flush();
-            return;
-        }
-
-#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
-        if (!this->carDetector.initModel())
-        {
-            this->stop();
-            this->logger->flush();
-            return;
-        }
-#endif
-
-#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
-        this->dsTracker = std::make_shared<DsTracker>(DsTracker(SORT_ONNX_PATH, SORT_ENGINE_PATH));
-#endif
-
-#ifdef Experimental
-        this->myExpLog.init(ExpOutputDir);
-#endif
-
-        this->mySerial.initSerial(SerialPortNAME, PASSWORD);
-        this->videoRecorder.init(VideoRecoderRath, VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH)) ? setTrackbarPos("Recorder", "ControlPanel", 1) : setTrackbarPos("Recorder", "ControlPanel", 0);
-        this->cameraThread.start();
-        this->_init_flag = true;
-        this->logger->info("Init Done");
+        this->stop();
+        this->logger->flush();
+        return;
     }
+
+#if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
+    if (!this->carDetector->initModel())
+    {
+        this->stop();
+        this->logger->flush();
+        return;
+    }
+#endif
+#if defined UseDeepSort && !(defined UsePointCloudSepTarget)
+    this->dsTracker = std::make_shared<DsTracker>(this->share_path + "/models/" + this->OnnxForSort,
+                                                  this->share_path + "/models/" + this->EngineForSort);
+#endif
+#ifdef Experimental
+    this->myExpLog = std::make_shared<ExpLog>();
+    this->myExpLog->init(this->share_path + "/ExpResultDir/");
+#endif
+
+    this->videoRecorder->init((this->share_path + "/Record/").c_str(), VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH)) ? setTrackbarPos("Recorder", "ControlPanel", 1) : setTrackbarPos("Recorder", "ControlPanel", 0);
+    this->cameraThread->start();
+    this->_init_flag = true;
+    this->logger->info("Init Done");
     this->is_alive = true;
 }
 
-void Radar::LidarListenerBegin(int argc, char **argv)
+void Radar::setRosNodeHandle(ros::NodeHandle &nh)
 {
+    this->nh = std::make_shared<ros::NodeHandle>(nh);
+}
+
+void Radar::setRosPackageSharedPath(String &path)
+{
+    this->share_path = path;
+}
+
+void Radar::LidarListenerBegin()
+{
+    assert(this->nh);
     if (this->_is_LidarInited)
         return;
-    ros::init(argc, argv, "laser_listener");
-    ros::NodeHandle nh;
-    sub = nh.subscribe(lidarTopicName, LidarQueueSize, &Radar::LidarCallBack, this);
+    this->sub = this->nh->subscribe(lidarTopicName, LidarQueueSize, &Radar::LidarCallBack, this);
     this->_is_LidarInited = true;
     this->logger->info("Lidar inited");
 }
@@ -234,7 +367,7 @@ void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *pc);
-    std::vector<std::vector<float>> tempDepth = this->depthQueue.pushback(*pc);
+    std::vector<std::vector<float>> tempDepth = this->depthQueue->pushback(*pc);
     unique_lock<shared_timed_mutex> ulk(this->myMutex_publicDepth);
     this->publicDepth.swap(tempDepth);
     ulk.unlock();
@@ -244,7 +377,7 @@ void Radar::SerReadLoop()
 {
     while (this->_Ser_working)
     {
-        this->myUART.read(this->mySerial);
+        this->myUART->read(this->mySerial);
     }
     this->logger->critical("SerReadLoop Exit");
 }
@@ -253,7 +386,7 @@ void Radar::SerWriteLoop()
 {
     while (this->_Ser_working)
     {
-        this->myUART.write(this->mySerial);
+        this->myUART->write(this->mySerial);
     }
     this->logger->critical("SerWriteLoop Exit");
 }
@@ -263,29 +396,29 @@ void Radar::MainProcessLoop()
     while (this->__MainProcessLoop_working)
     {
         auto start_t = std::chrono::system_clock::now().time_since_epoch();
-        if (!this->cameraThread.is_open())
+        if (!this->cameraThread->is_open())
         {
-            this->cameraThread.open();
+            this->cameraThread->open();
             continue;
         }
-        FrameBag frameBag = this->cameraThread.read();
+        FrameBag frameBag = this->cameraThread->read();
         if (frameBag.flag)
         {
 #ifndef UseOneLayerInfer
 #ifdef UsePointCloudSepTarget
             shared_lock<shared_timed_mutex> slk_md(this->myMutex_publicDepth);
-            vector<Rect> sepTargets = this->movementDetector.applyMovementDetector(this->publicDepth);
+            vector<Rect> sepTargets = this->movementDetector->applyMovementDetector(this->publicDepth);
             slk_md.unlock();
-            vector<bboxAndRect> pred = this->movementDetector._ifHistoryBuild() ? this->armorDetector.infer(frameBag.frame, sepTargets) : {};
+            vector<bboxAndRect> pred = this->movementDetector->_ifHistoryBuild() ? this->armorDetector.infer(frameBag.frame, sepTargets) : {};
 #else
-            vector<DetectBox> sepTargets = this->carDetector.infer(frameBag.frame);
+            vector<DetectBox> sepTargets = this->carDetector->infer(frameBag.frame);
 #if defined UseDeepSort && !(defined UsePointCloudSepTarget)
             this->dsTracker->sort(frameBag.frame, sepTargets);
 #endif
-            vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame, sepTargets);
+            vector<bboxAndRect> pred = this->armorDetector->infer(frameBag.frame, sepTargets);
 #endif
 #else
-            vector<bboxAndRect> pred = this->armorDetector.infer(frameBag.frame);
+            vector<bboxAndRect> pred = this->armorDetector->infer(frameBag.frame);
 #endif
 #if defined Test && defined TestWithVis
 #ifndef UseOneLayerInfer
@@ -313,16 +446,16 @@ void Radar::MainProcessLoop()
                     this->mapMapping._DeepSort_prediction(pred, sepTargets);
 #endif
 #ifndef UseOneLayerInfer
-                    vector<ArmorBoundingBox> IouArmors = this->mapMapping._IoU_prediction(pred, sepTargets);
+                    vector<ArmorBoundingBox> IouArmors = this->mapMapping->_IoU_prediction(pred, sepTargets);
 #else
                     vector<ArmorBoundingBox> IouArmors = {};
 #endif
                     this->detectDepth(IouArmors);
                     slk.unlock();
-                    this->mapMapping.mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
+                    this->mapMapping->mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
                     judge_message myJudge_message;
                     myJudge_message.task = 1;
-                    myJudge_message.loc = this->mapMapping.getloc();
+                    myJudge_message.loc = this->mapMapping->getloc();
                     this->send_judge(myJudge_message);
                 }
             }
@@ -342,7 +475,7 @@ void Radar::MainProcessLoop()
             msg.emplace_back(to_string(sumConfAverage(pred)));
             msg.emplace_back(to_string(pred_conf_average));
             msg.emplace_back(to_string((end_t - start_t).count()));
-            this->myExpLog.input(msg);
+            this->myExpLog->input(msg);
 #endif
         }
         else
@@ -357,20 +490,36 @@ void Radar::VideoRecorderLoop()
     {
         if (this->_if_record && this->myFrames.size() > 0)
         {
-            this->videoRecorder.write(this->myFrames.front().clone());
+            this->videoRecorder->write(this->myFrames.front().clone());
         }
         else if (!this->_if_record)
         {
-            this->videoRecorder.close();
+            this->videoRecorder->close();
         }
     }
     this->logger->critical("VideoRecorderLoop Exit");
 }
 
-void Radar::spin(int argc, char **argv)
+void Radar::spin()
 {
     // TODO: 增加更多标志位来扩展流程控制
-    this->init(argc, argv);
+    this->init();
+    assert(depthQueue && armorDetector);
+
+#if !(defined UseOneLayerInfer)
+#ifdef UsePointCloudSepTarget
+    assert(movementDetector);
+#else
+    assert(carDetector);
+#endif
+#endif
+
+    assert(cameraThread && myLocation && mapMapping && myUART && mySerial && videoRecorder);
+
+#ifdef Experimental
+    assert(myExpLog);
+#endif
+
     if (!this->_init_flag)
         return;
     if (getTrackbarPos("Exit Program", "ControlPanel") == 1)
@@ -379,7 +528,7 @@ void Radar::spin(int argc, char **argv)
         return;
     }
     this->_if_record = getTrackbarPos("Recorder", "ControlPanel");
-    if (!this->mapMapping._is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
+    if (!this->mapMapping->_is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
     {
         this->logger->info("Locate pick start ...Process");
         // TODO: Fix here
@@ -387,7 +536,7 @@ void Radar::spin(int argc, char **argv)
         unique_lock<shared_timed_mutex> ulk(myMutex_cameraThread);
         try
         {
-            if (!this->myLocation.locate_pick(this->cameraThread, ENEMY, rvec, tvec))
+            if (!this->myLocation->locate_pick(this->cameraThread, this->ENEMY, rvec, tvec, this->K_0_Mat, this->C_0_Mat, this->E_0_Mat))
             {
                 ulk.unlock();
                 return;
@@ -399,7 +548,7 @@ void Radar::spin(int argc, char **argv)
             this->logger->error(e.what());
             return;
         }
-        this->mapMapping.push_T(rvec, tvec);
+        this->mapMapping->push_T(rvec, tvec);
         this->logger->info("Locate pick Done");
     }
     if (!this->_thread_working && this->is_alive)
@@ -423,13 +572,13 @@ void Radar::spin(int argc, char **argv)
         }
         this->logger->info("Thread starting ...Done");
     }
-    if (!this->mySerial._is_open() && this->is_alive)
+    if (!this->mySerial->_is_open() && this->is_alive)
     {
         this->logger->info("Serial initing ...Process");
-        this->mySerial.initSerial(SerialPortNAME, PASSWORD);
+        this->mySerial->initSerial(this->SerialPortName, this->PASSWORD);
         this->logger->info("Serial initing ...Done");
     }
-    if (!this->_Ser_working && this->mySerial._is_open() && this->is_alive)
+    if (!this->_Ser_working && this->mySerial->_is_open() && this->is_alive)
     {
         this->logger->info("SerThread initing ...Process");
         this->_Ser_working = true;
@@ -440,7 +589,7 @@ void Radar::spin(int argc, char **argv)
     if (myFrames.size() > 0 && this->is_alive)
     {
         Mat frame = myFrames.front().clone();
-        this->mapMapping._plot_region_rect(this->show_region, frame, this->K_0_Mat, this->C_0_Mat);
+        this->mapMapping->_plot_region_rect(this->show_region, frame, this->K_0_Mat, this->C_0_Mat);
         cv::Mat map1, map2;
         cv::Size imageSize = frame.size();
         cv::initUndistortRectifyMap(this->K_0_Mat, this->C_0_Mat, cv::Mat(), cv::getOptimalNewCameraMatrix(this->K_0_Mat, this->C_0_Mat, imageSize, 1, imageSize, 0), imageSize, CV_16SC2, map1, map2);
@@ -456,8 +605,8 @@ void Radar::stop()
     this->is_alive = false;
     this->logger->warn("Start Shutdown Process...");
     this->logger->flush();
-    if (this->cameraThread.is_open())
-        this->cameraThread.stop();
+    if (this->cameraThread->is_open())
+        this->cameraThread->stop();
     cv::destroyAllWindows();
     if (this->_thread_working)
     {
@@ -484,15 +633,15 @@ void Radar::stop()
             this->serWrite.join();
         }
     }
-    this->videoRecorder.close();
+    this->videoRecorder->close();
     this->_if_record = false;
-    this->armorDetector.unInit();
+    this->armorDetector->unInit();
 #if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
-    this->carDetector.unInit();
+    this->carDetector->unInit();
 #endif
 
 #ifdef Experimental
-    this->myExpLog.uninit();
+    this->myExpLog->uninit();
 #endif
     this->logger->warn("Program Shutdown");
 }

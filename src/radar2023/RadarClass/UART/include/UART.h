@@ -14,6 +14,10 @@
 class UART
 {
 public:
+    typedef std::shared_ptr<UART> Ptr;
+
+    int ENEMY;
+
     int ind = 0;
     int Id_red = 1;
     int Id_blue = 101;
@@ -58,18 +62,18 @@ private:
     void Refree_Warning();
     void Refree_dart_remaining_time();
 
-    void Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char ReceiverId, unsigned char data[48], MySerial &ser);
-    void Referee_Transmit_Map(unsigned int cmdID, int targetId, float x, float y, MySerial &ser);
-    void Robot_Data_Transmit_Map(MySerial &ser);
+    void Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char ReceiverId, unsigned char data[48], MySerial::Ptr ser);
+    void Referee_Transmit_Map(unsigned int cmdID, int targetId, float x, float y, MySerial::Ptr ser);
+    void Robot_Data_Transmit_Map(MySerial::Ptr ser);
 
 public:
-    UART();
+    UART(int ENEMY);
     ~UART();
 
     void ControlLoop_red();
     void ControlLoop_blue();
-    void read(MySerial &ser);
-    void write(MySerial &ser);
+    void read(MySerial::Ptr ser);
+    void write(MySerial::Ptr ser);
 };
 
 #endif

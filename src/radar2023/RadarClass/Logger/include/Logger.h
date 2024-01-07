@@ -20,7 +20,7 @@ public:
 public:
     SpdLogger();
     ~SpdLogger();
-    void registerLogger(char *logFile, char *loggerName);
+    void registerLogger(const char *logFile, const char *loggerName);
 };
 
 #endif

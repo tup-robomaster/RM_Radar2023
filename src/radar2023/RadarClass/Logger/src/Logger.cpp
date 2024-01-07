@@ -8,9 +8,9 @@ SpdLogger::~SpdLogger()
 {
 }
 
-void SpdLogger::registerLogger(char *logFile, char *loggerName)
+void SpdLogger::registerLogger(const char *logFile, const char *loggerName)
 {
-    if (access(logFile, 0) == -1)
+    if (access(logFile, F_OK) == -1)
     {
         std::cout << "[ERR] LogFile, non-existent" << std::endl;
     }

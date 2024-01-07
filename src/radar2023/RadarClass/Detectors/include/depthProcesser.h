@@ -9,6 +9,10 @@
  */
 class DepthQueue
 {
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    typedef std::shared_ptr<DepthQueue> Ptr;
+
 private:
     bool _initflag = false;
     queue<Matrix<int, 2, MaxPointsNum>> processQueue;

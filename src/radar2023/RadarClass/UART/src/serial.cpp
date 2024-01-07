@@ -12,7 +12,7 @@ void MySerial::initSerial(std::string sername, std::string password)
 {
     if (this->fd != -1)
         return;
-    if (access(sername.c_str(), 0) == -1)
+    if (access(sername.c_str(), F_OK) == -1)
     {
         this->logger->warn("Serial :Serial Port Not Found !");
         return;

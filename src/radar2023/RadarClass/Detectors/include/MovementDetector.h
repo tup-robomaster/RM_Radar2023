@@ -10,6 +10,10 @@
  */
 class MovementDetector
 {
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    typedef std::shared_ptr<MovementDetector> Ptr;
+
 private:
     vector<vector<vector<float>>> backgroundHistory;
     int historyCount = 0;

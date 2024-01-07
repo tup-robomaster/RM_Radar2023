@@ -10,10 +10,16 @@
  */
 class ArmorDetector
 {
+public:
+    typedef std::shared_ptr<ArmorDetector> Ptr;
+
 private:
     TRTInferV1::TRTInfer armorTensorRT = TRTInferV1::TRTInfer(0);
     vector<bboxAndRect> results;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
+
+    string TensorRTEnginePath;
+    string OnnxPath;
 
 #ifdef Experimental
     int detectedArmorNumThisFrame = 0;
@@ -25,7 +31,7 @@ private:
     void reBuildBoxs(vector<vector<TRTInferV1::DetectionObj>> &armors, vector<DetectBox> &boxs, vector<Mat> &img);
 
 public:
-    ArmorDetector();
+    ArmorDetector(string engine_path, string onnx_path);
     ~ArmorDetector();
 
     void accessModelTest();

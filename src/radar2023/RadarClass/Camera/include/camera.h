@@ -11,6 +11,9 @@
  */
 class MV_Camera
 {
+public:
+    typedef std::shared_ptr<MV_Camera> Ptr;
+
 private:
     int iCameraCounts = 1;
     int iStatus = -1;
@@ -20,15 +23,16 @@ private:
     tSdkFrameHead sFrameInfo;
     unsigned char *pFrameBuffer;
     unsigned char *pRawDataBuffer;
-    
+
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
+    string CameraConfigPath;
 
 public:
     bool _openflag = false;
 
 public:
     MV_Camera();
-    MV_Camera(bool Is_init);
+    MV_Camera(bool Is_init, string config_path);
     ~MV_Camera();
 
     FrameBag read();
@@ -36,7 +40,7 @@ public:
 
     void setExposureTime(int ex = 30);
     void setGain(int gain);
-    void saveParam(char tCameraConfigPath[23]);
+    void saveParam(const char tCameraConfigPath[23]);
     void disableAutoEx();
     int getExposureTime();
     int getAnalogGain();
@@ -49,16 +53,23 @@ public:
  */
 class CameraThread
 {
+public:
+    typedef std::shared_ptr<CameraThread> Ptr;
+
 private:
     bool _open = false;
     bool _alive = true;
+
 #ifdef UsingVideo
     VideoCapture _cap;
     int frame_counter = 0;
+    string TestVideoPath;
 #else
-    MV_Camera _cap;
+    MV_Camera::Ptr _cap;
 #endif
+
     bool _is_init = false;
+    string CameraConfigPath;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
 
 public:
@@ -66,7 +77,13 @@ public:
     void openCamera(bool is_init);
     void adjustExposure();
 #endif
-    CameraThread();
+
+#ifdef UsingVideo
+    CameraThread(string config_path, string video_path);
+#else
+    CameraThread(string config_path);
+#endif
+
     ~CameraThread();
     void open();
     bool is_open();

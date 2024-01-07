@@ -1,7 +1,10 @@
 #include "../include/ArmorDetector.h"
 
-ArmorDetector::ArmorDetector()
+ArmorDetector::ArmorDetector(string engine_path, string onnx_path)
 {
+    assert(!engine_path.empty() && !onnx_path.empty());
+    this->TensorRTEnginePath = engine_path;
+    this->OnnxPath = onnx_path;
 }
 
 ArmorDetector::~ArmorDetector()
@@ -10,12 +13,12 @@ ArmorDetector::~ArmorDetector()
 
 void ArmorDetector::accessModelTest()
 {
-    if (access(TensorRTEnginePath, F_OK) != 0)
+    if (access(TensorRTEnginePath.c_str(), F_OK) != 0)
     {
 #ifndef UseOneLayerInfer
-        auto engine = this->armorTensorRT.createEngine(OnnxMoudlePath, 64, 640, 640);
+        auto engine = this->armorTensorRT.createEngine(OnnxPath, 64, 640, 640, 0);
 #else
-        auto engine = this->armorTensorRT.createEngine(OnnxMoudlePath, 64, 1280, 1280);
+        auto engine = this->armorTensorRT.createEngine(OnnxPath, 64, 1280, 1280, 0);
 #endif
         this->armorTensorRT.saveEngineFile(engine, TensorRTEnginePath);
         delete engine;

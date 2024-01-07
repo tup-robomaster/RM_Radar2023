@@ -1,13 +1,13 @@
 #include "../include/general.h"
 
-bool read_param(Mat &K_0, Mat &C_0, Mat &E_0)
+bool read_param(Mat &K_0, Mat &C_0, Mat &E_0, String path)
 {
-    if (access(CAMERA_PARAM_PATH, F_OK) != 0)
+    if (access(path.c_str(), F_OK) != 0)
         return false;
     cv::FileStorage fs;
     try
     {
-        fs = cv::FileStorage(CAMERA_PARAM_PATH, FileStorage::READ);
+        fs = cv::FileStorage(path, FileStorage::READ);
     }
     catch (const std::exception &e)
     {
@@ -49,6 +49,7 @@ Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH)
     return Rect(rect.x * blocksizeW, rect.y * blocksizeH, rect.width * blocksizeW, rect.height * blocksizeH);
 }
 
+#ifdef Experimental
 float sumConfAverage(std::vector<bboxAndRect> &items)
 {
     float sum = 0.;
@@ -57,5 +58,6 @@ float sumConfAverage(std::vector<bboxAndRect> &items)
         sum += data.armor.conf;
     }
 
-    return sum / items.size();
+    return items.size() != 0 ? sum / items.size() : 0.;
 }
+#endif

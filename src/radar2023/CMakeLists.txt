@@ -4,6 +4,9 @@ project(radar2023 LANGUAGES CXX CUDA)
 find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
+  roslib
+  std_msgs
   sensor_msgs
 )
 find_package(Eigen3 REQUIRED)
@@ -22,6 +25,9 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w $
 
 catkin_package(CATKIN_DEPENDS
 	roscpp
+  rospy
+  roslib
+  std_msgs
 	sensor_msgs
 	)
 # cuda
@@ -146,8 +152,14 @@ install(TARGETS radar2023
 	)
 
 install(DIRECTORY
-  launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  # config
+  Config
+  launch 
+  logs 
+  models 
+  params 
+  Record 
+  ExpResultDir 
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 	)
 
 # macro(remove_warnings)

@@ -1,16 +1,10 @@
 #define Test        // 测试标志
 #define TestWithVis // 显示可视化检测结果
-// #define UsingVideo  //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
+#define UsingVideo  //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
 
-#define PASSWORD (char *)"momoko11" // 用户密码，用于串口权限
-
-#define SerialPortNAME (char *)"/dev/ttyUSB0"
 #define lidarTopicName (char *)"/livox/lidar"
 
-#define FRAME_DEPTH 500 // 图像队列深度
-
-#define CameraConfigPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/Config_0.Config" // 相机配置文件名称
-#define TestVideoPath (char *)"/home/ninefish/nine-fish/RM_Radar2023/resources/1.mp4"                                           // DEMO视频路径
+#define FRAME_DEPTH 500 // 图像队列深度，OOM时适当减少
 
 #define MaxPointsNum 10000 // 最大点云数量
 #define ImageH 2064        // 图像高度
@@ -18,16 +12,7 @@
 #define maxQueueSize 100   // 点云最大帧队列长度
 #define LidarQueueSize 1   // 雷达消息队列
 
-#define CAMERA_PARAM_PATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Camera/params/camera0.yaml" // 相机参数文件
-#define VideoRecoderRath (char *)"/home/ninefish/nine-fish/RM_Radar2023/Record/"                                              // 录制保存文件
-
-#define OnnxMoudlePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/43best.onnx"
-#define OnnxMoudlePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/best.onnx"
-#define TensorRTEnginePath (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/model_trt.engine"     // Engine
-#define TensorRTEnginePath_c (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/RadarClass/Detectors/models/model_trt_c.engine" // Engine
-
 #define MAXBO 3
-#define ENEMY 1 // 0 RED 1 BLUE
 
 #define Z_A true        // Z轴突变调整
 #define L_P true        // 位置预测
@@ -37,8 +22,6 @@
 #define Real_Size_W 15. // 真实宽度
 #define Real_Size_H 28. // 真实高度（长）
 #define IoU_THRE 0.8f   // IoU预测阈值
-
-#define LOGPATH (char *)"/home/ninefish/nine-fish/RM_Radar2023/src/radar2023/logs/" // log日志存储文件夹
 
 /*---For old SepTarget method [实验性][已废弃][谨慎使用]---*/
 
@@ -53,11 +36,8 @@
 /*---For deepsort [实验性][高性能消耗][谨慎使用]---*/
 
 // #define UseDeepSort
-#define SORT_ONNX_PATH (char *)""   // Sort使用的Onnx路径
-#define SORT_ENGINE_PATH (char *)"" // Sort生成的Engine路径
 
-/*---For experimental [实验数据输出]---*/
+/*---For experimental [实验数据输出][仅作识别效率记录][识别数据将混乱]---*/
 
 // #define Experimental     //启用实验模式
 // #define UseOneLayerInfer //启用单层神经网络预测模式
-#define ExpOutputDir (char *)"/home/nine-fish/projects/RM_Radar2023_localtest/ExpResultDir" //实验数据输出目录

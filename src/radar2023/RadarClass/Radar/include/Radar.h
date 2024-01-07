@@ -32,8 +32,25 @@
  */
 class Radar
 {
+public:
+    typedef std::shared_ptr<Radar> Ptr;
+
 private:
+    string share_path;
+    int ENEMY;
+    string CAMERA_PARAM;
+    string PASSWORD;
+    string OnnxForArmor;
+    string EngineForArmor;
+    string CameraConfig;
+    string SerialPortName;
+
+#ifdef UsingVideo
+    string TestVideo;
+#endif
+
     bool _is_LidarInited = false;
+    std::shared_ptr<ros::NodeHandle> nh;
     ros::Subscriber sub;
     thread lidarMainloop;
     thread serRead;
@@ -48,34 +65,37 @@ private:
     bool __MainProcessLoop_working = false;
     bool __VideoRecorderLoop_working = false;
 
-    DepthQueue depthQueue;
-    ArmorDetector armorDetector;
+    DepthQueue::Ptr depthQueue;
+    ArmorDetector::Ptr armorDetector;
 
 #if !(defined UseOneLayerInfer)
 #ifdef UsePointCloudSepTarget
-    MovementDetector movementDetector;
+    MovementDetector::Ptr movementDetector;
 #else
-    CarDetector carDetector;
+    string OnnxForCar;
+    string EngineForCar;
+    CarDetector::Ptr carDetector;
 #endif
 #endif
 
 #if defined UseDeepSort && !(defined UsePointCloudSepTarget)
-    std::shared_ptr<DsTracker> dsTracker;
+    string OnnxForSort;
+    string EngineForSort;
+    DsTracker::Ptr dsTracker;
 #endif
 
 #ifdef Experimental
-    ExpLog myExpLog;
+    ExpLog::Ptr myExpLog;
 #endif
 
-    CameraThread cameraThread;
-    Location myLocation;
-    MapMapping mapMapping;
-    UART myUART;
-    MySerial mySerial;
-    VideoRecorder videoRecorder;
+    CameraThread::Ptr cameraThread;
+    Location::Ptr myLocation;
+    MapMapping::Ptr mapMapping;
+    UART::Ptr myUART;
+    MySerial::Ptr mySerial;
+    VideoRecorder::Ptr videoRecorder;
 
     bool _if_record = false;
-
     bool is_alive = true;
 
     vector<vector<float>> publicDepth;
@@ -108,9 +128,12 @@ public:
     Radar();
     ~Radar();
 
-    void init(int argc, char **argv);
+    void init();
 
-    void LidarListenerBegin(int argc, char **argv);
+    void setRosNodeHandle(ros::NodeHandle &nh);
+    void setRosPackageSharedPath(String &path);
+
+    void LidarListenerBegin();
     void LidarMainLoop();
     void LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg);
     void SerReadLoop();
@@ -118,7 +141,7 @@ public:
     void MainProcessLoop();
     void VideoRecorderLoop();
 
-    void spin(int argc, char **argv);
+    void spin();
     void stop();
 
     bool alive();

@@ -1,7 +1,10 @@
 #include "../include/CarDetector.h"
 
-CarDetector::CarDetector()
+CarDetector::CarDetector(string engine_path, string onnx_path)
 {
+    assert(!engine_path.empty() && !onnx_path.empty());
+    this->TensorRTEnginePath = engine_path;
+    this->OnnxPath = onnx_path;
 }
 
 CarDetector::~CarDetector()
@@ -10,10 +13,10 @@ CarDetector::~CarDetector()
 
 void CarDetector::accessModelTest()
 {
-    if (access(TensorRTEnginePath_c, F_OK) != 0)
+    if (access(TensorRTEnginePath.c_str(), F_OK) != 0)
     {
-        auto engine = this->carTensorRT.createEngine(OnnxMoudlePath_c, 4, 1280, 1280);
-        this->carTensorRT.saveEngineFile(engine, TensorRTEnginePath_c);
+        auto engine = this->carTensorRT.createEngine(OnnxPath, 4, 1280, 1280, 0);
+        this->carTensorRT.saveEngineFile(engine, TensorRTEnginePath);
         delete engine;
     }
 }
@@ -21,7 +24,7 @@ void CarDetector::accessModelTest()
 bool CarDetector::initModel()
 {
     this->logger->info("CarDetector init Moudel");
-    bool check = this->carTensorRT.initModule(TensorRTEnginePath_c, 1, 1);
+    bool check = this->carTensorRT.initModule(TensorRTEnginePath, 1, 1);
     if (check)
         this->logger->info("CarDetector Moudel inited");
     return check;

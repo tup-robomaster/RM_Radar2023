@@ -6,6 +6,9 @@
 
 class ExpLog
 {
+public:
+    typedef std::shared_ptr<ExpLog> Ptr;   
+
 private:
     ofstream oFile;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");

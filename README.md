@@ -4,7 +4,7 @@
 
 clone时请注意携带--recursive拉取子仓库，资源文件放置于release中
 
-## Version: V1.4 Experimental
+## Version: V1.5 Experimental + Rebuild1.0
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
@@ -167,16 +167,15 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
     | **SM90a or `SM_90a, compute_90a`** – (for PTX ISA version 8.0) – adds                                                                                                                                                                  |
 * 若不使用MKL，注释掉src/radar2023/CMakeLists.txt ->34 include_directories(/opt/intel/oneapi/mkl/latest/include)、35 link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64) 、108 libmkl_rt.so 和 src/radar2023/RadarClass/Common/include/public.h
   -> 3 #define EIGEN_USE_MKL_ALL、4 #define EIGEN_VECTORIZE_SSE4_2 [可选]
-* 创建以下文件夹：src/radar2023/logs 、src/radar2023/Recorder 、  src/radar2023/RadarClass/Detectors/models  、 src/radar2023/RadarClass/Camera/params
-* 修改config.h中的路径及相关配置
+* 修改Config目录下default.yaml以适配参数
+* ExpResultDir[实验数据输出目录]、logs[日志存放目录]、models[模型存放目录『onnx、engine』]、params[相机参数存放目录『Config、yaml』]、Record[录制视频存放目录]、resources[资源存放目录『pcds.txt、*.mp4』]
+* 修改config.h中相关配置
 
   * 特别注意事项：
-  * 本项目不存在测试用视频，需自行准备并放置于TestVideoPath对应路径
+  * 本项目不存在测试用视频，需自行准备并放置于resources目录下
 * 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0，注意导出动态Onnx
 * 车辆分类[CAR]
-* 装甲板分类[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7 N1 N2 N3 N4 N5 N7 P1 P2 P3 P4 P5 P7]
-
-  * 程序中仅使用[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7]
+* 装甲板分类[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7]
 * 将yolov5导出的动态尺寸onnx放置于config.h定义位置
 * 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
 * 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
@@ -265,6 +264,8 @@ roslaunch radar2023 radar2023.launch
 此为实验性功能且性能消耗极大，不保证有效效果
 
 ### 开发日志
+
+Date:2024.1.07 V1.5:整理代码，优化交互，修复深度获取错误
 
 Date:2023.9.30 V1.4:更新实验性DeepSort
 

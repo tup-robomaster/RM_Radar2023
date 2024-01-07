@@ -10,6 +10,8 @@
 class MySerial
 {
 public:
+    typedef std::shared_ptr<MySerial> Ptr;
+
     int fd = -1;
     int flag;
     int wr_num = 0;

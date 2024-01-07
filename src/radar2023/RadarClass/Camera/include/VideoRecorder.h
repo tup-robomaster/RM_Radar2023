@@ -9,6 +9,9 @@
  */
 class VideoRecorder
 {
+public:
+    typedef std::shared_ptr<VideoRecorder> Ptr;
+
 private:
     VideoWriter vw;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
@@ -17,7 +20,7 @@ public:
     VideoRecorder();
     ~VideoRecorder();
 
-    bool init(char *videoPath, int coder, Size size);
+    bool init(const char *videoPath, int coder, Size size);
     void write(Mat src);
     void close();
 };

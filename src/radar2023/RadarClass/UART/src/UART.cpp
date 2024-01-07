@@ -1,7 +1,8 @@
 #include "../include/UART.h"
 
-UART::UART()
+UART::UART(int ENEMY)
 {
+    this->ENEMY = ENEMY;
 }
 
 UART::~UART()
@@ -52,7 +53,7 @@ void UART::Refree_dart_remaining_time()
     this->Game_dart_remaining_time.time = this->buffer[8];
 }
 
-void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char ReceiverId, unsigned char data[48], MySerial &ser)
+void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char ReceiverId, unsigned char data[48], MySerial::Ptr ser)
 {
     unsigned char local_buffer[200];
     local_buffer[0] = 0xA5;
@@ -64,7 +65,7 @@ void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char Receiv
     local_buffer[6] = 0x03;
     local_buffer[7] = dataID & 0x00ff;
     local_buffer[8] = (dataID & 0xff00) >> 8;
-    if (ENEMY)
+    if (this->ENEMY)
         local_buffer[9] = 9;
     else
         local_buffer[9] = 109;
@@ -123,10 +124,10 @@ void UART::Referee_Transmit_BetweenCar(unsigned int dataID, unsigned char Receiv
     unsigned char buffer_tmp_array[54 + 9];
     for (int i = 0; i < 54 + 9; ++i)
         buffer_tmp_array[i] = local_buffer[i];
-    ser.mswrite(buffer_tmp_array, 54 + 9);
+    ser->mswrite(buffer_tmp_array, 54 + 9);
 }
 
-void UART::Referee_Transmit_Map(unsigned int cmdID, int targetId, float x, float y, MySerial &ser)
+void UART::Referee_Transmit_Map(unsigned int cmdID, int targetId, float x, float y, MySerial::Ptr ser)
 {
     unsigned char t_x[4], t_y[4];
     this->FloatToBytes(t_x, x);
@@ -158,10 +159,10 @@ void UART::Referee_Transmit_Map(unsigned int cmdID, int targetId, float x, float
     unsigned char buffer_tmp_array[14 + 9];
     for (int i = 0; i < 14 + 9; ++i)
         buffer_tmp_array[i] = local_buffer[i];
-    ser.mswrite(buffer_tmp_array, 14 + 9);
+    ser->mswrite(buffer_tmp_array, 14 + 9);
 }
 
-void UART::Robot_Data_Transmit_Map(MySerial &ser)
+void UART::Robot_Data_Transmit_Map(MySerial::Ptr ser)
 {
     bool flag;
     vector<float> location = myUARTPasser.get_position()[this->ind];
@@ -169,9 +170,9 @@ void UART::Robot_Data_Transmit_Map(MySerial &ser)
         flag = false;
     else
         flag = true;
-    if (!ENEMY && flag)
+    if (!this->ENEMY && flag)
     {
-        this->Referee_Transmit_Map(0x0305, this->Id_red, _Float32(location[0]), _Float32(location[1]), ser);  
+        this->Referee_Transmit_Map(0x0305, this->Id_red, _Float32(location[0]), _Float32(location[1]), ser);
     }
     else if (flag)
     {
@@ -209,10 +210,10 @@ void UART::ControlLoop_blue()
         ++this->Id_blue;
 }
 
-void UART::read(MySerial &ser)
+void UART::read(MySerial::Ptr ser)
 {
     unsigned char tempBuffer[1];
-    ser.msread(tempBuffer, 1);
+    ser->msread(tempBuffer, 1);
     int s = (int)tempBuffer[0];
     if (this->buffercnt > 50)
         this->buffercnt = 0;
@@ -440,12 +441,12 @@ void UART::read(MySerial &ser)
     ++this->buffercnt;
 }
 
-void UART::write(MySerial &ser)
+void UART::write(MySerial::Ptr ser)
 {
     this->Robot_Data_Transmit_Map(ser);
     unsigned int dataID = 0x0200 + (1 & 0xFF);
     unsigned char receiverId;
-    if (ENEMY)
+    if (this->ENEMY)
         receiverId = 7;
     else
         receiverId = 107;

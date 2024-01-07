@@ -6,7 +6,7 @@ DsTracker::DsTracker(std::string sort_onnxPath, std::string sort_enginePath)
 {
     this->sort_onnxPath = sort_onnxPath;
     this->sort_enginePath = sort_enginePath;
-    this->DS = std::make_shared<DeepSort>(DeepSort(sort_onnxPath, sort_enginePath, 128, 256, 0, &gLogger));
+    this->DS = std::make_shared<DeepSort>(sort_onnxPath, sort_enginePath, 128, 256, 0, &gLogger);
 }
 
 DsTracker::~DsTracker()

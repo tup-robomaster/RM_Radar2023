@@ -43,14 +43,13 @@ Location::~Location()
 {
 }
 
-bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tvec_Mat)
+bool Location::locate_pick(CameraThread::Ptr cap, int enemy, Mat &rvec_Mat, Mat &tvec_Mat,
+                           Mat &K_0, Mat &C_0, Mat &E_0)
 {
     this->frame = FrameBag();
     this->flag = false;
     vector<Point2f>().swap(this->pick_points);
-    Mat K_0, C_0, E_0;
-    if (!read_param(K_0, C_0, E_0))
-        return false;
+
     map<int, vector<string>> tips{{0, {"red_base", "blue_outpost", "b_right_top", "red_outpost"}},
                                   {1, {"blue_base", "red_outpost", "r_right_top", "blue_outpost"}}};
     vector<Point3f> ops;
@@ -68,8 +67,8 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         ops.emplace_back(location_targets.find("r_rt")->second);
         ops.emplace_back(location_targets.find("blue_outpost")->second);
     }
-    frame = cap.read();
-    if (!cap.is_open() || !frame.flag)
+    frame = cap->read();
+    if (!cap->is_open() || !frame.flag)
         return false;
     int tip_w = floor(frame.frame.cols / 2.);
     int tip_h = frame.frame.rows - 200;
@@ -121,8 +120,8 @@ bool Location::locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tve
         }
         if (pick_points.size() == 4)
             break;
-        frame = cap.read();
-        if (!cap.is_open() || !frame.flag)
+        frame = cap->read();
+        if (!cap->is_open() || !frame.flag)
         {
             cv::destroyWindow("PickPoints");
             cv::destroyWindow("ZOOM_WINDOW");

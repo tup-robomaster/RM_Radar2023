@@ -7,8 +7,9 @@ MV_Camera::MV_Camera()
 {
 }
 
-MV_Camera::MV_Camera(bool Is_init)
+MV_Camera::MV_Camera(bool Is_init, string config_path)
 {
+    this->CameraConfigPath = config_path;
     CameraSdkInit(1);
     this->iStatus = CameraEnumerateDevice(this->tCameraEnumList, &this->iCameraCounts);
     if (this->iCameraCounts == 0)
@@ -43,8 +44,8 @@ MV_Camera::MV_Camera(bool Is_init)
         this->logger->error("None suitable camera!");
     }
     CameraSetTriggerMode(this->hCamera, 0);
-    if (Is_init || access(CameraConfigPath, F_OK) == 0)
-        CameraReadParameterFromFile(this->hCamera, CameraConfigPath);
+    if (Is_init || access(CameraConfigPath.c_str(), F_OK) == 0)
+        CameraReadParameterFromFile(this->hCamera, const_cast<char *>(CameraConfigPath.c_str()));
     CameraSetAeState(this->hCamera, 0);
     CameraPlay(this->hCamera);
     int frameBufferSize = this->tCapability.sResolutionRange.iWidthMax * this->tCapability.sResolutionRange.iHeightMax * 3;
@@ -98,13 +99,13 @@ void MV_Camera::setGain(int gain)
     CameraSetAnalogGain(this->hCamera, gain);
 }
 
-void MV_Camera::saveParam(char tCameraConfigPath[23])
+void MV_Camera::saveParam(const char *tCameraConfigPath)
 {
     if (access(tCameraConfigPath, F_OK) == 0)
         return;
     if (this->hCamera == -1)
         return;
-    CameraSaveParameterToFile(this->hCamera, tCameraConfigPath);
+    CameraSaveParameterToFile(this->hCamera, const_cast<char *>(tCameraConfigPath));
 }
 
 void MV_Camera::disableAutoEx()
@@ -133,10 +134,18 @@ int MV_Camera::getAnalogGain()
 }
 #endif
 
-CameraThread::CameraThread()
+#ifdef UsingVideo
+CameraThread::CameraThread(string config_path, string video_path)
 {
+    this->CameraConfigPath = config_path;
+    this->TestVideoPath = video_path;
 }
-
+#else
+CameraThread::CameraThread(string config_path)
+{
+    this->CameraConfigPath = config_path;
+}
+#endif
 CameraThread::~CameraThread()
 {
 }
@@ -164,14 +173,14 @@ void CameraThread::openCamera(bool is_init)
     try
     {
         this->logger->info("Camera opening ...Process");
-        this->_cap = MV_Camera(is_init);
-        FrameBag framebag = this->_cap.read();
+        this->_cap = std::make_shared<MV_Camera>(is_init, this->CameraConfigPath);
+        FrameBag framebag = this->_cap->read();
         if (!framebag.flag)
         {
             this->logger->warn("Camera not inited");
             return;
         }
-        framebag = this->_cap.read();
+        framebag = this->_cap->read();
         if (!is_init && framebag.flag)
         {
             namedWindow("PREVIEW", WINDOW_NORMAL);
@@ -181,10 +190,10 @@ void CameraThread::openCamera(bool is_init)
             imshow("PREVIEW", framebag.frame);
             int key = waitKey(0);
             destroyWindow("PREVIEW");
-            this->_cap.disableAutoEx();
+            this->_cap->disableAutoEx();
             if (key == 84 || key == 116)
                 this->adjustExposure();
-            this->_cap.saveParam(CameraConfigPath);
+            this->_cap->saveParam(this->CameraConfigPath.c_str());
         }
         initFlag = true;
         this->logger->info("Camera opening ...Done");
@@ -194,7 +203,7 @@ void CameraThread::openCamera(bool is_init)
         this->logger->error("CameraThread::openCamera(){}", e.what());
         return;
     }
-    this->_cap._openflag = initFlag;
+    this->_cap->_openflag = initFlag;
 }
 
 void CameraThread::adjustExposure()
@@ -204,22 +213,22 @@ void CameraThread::adjustExposure()
     moveWindow("EXPOSURE Press Q to Exit", 200, 200);
     setWindowProperty("EXPOSURE Press Q to Exit", WND_PROP_TOPMOST, 1);
     createTrackbar("ex", "EXPOSURE Press Q to Exit", 0, 30000);
-    setTrackbarPos("ex", "EXPOSURE Press Q to Exit", this->_cap.getExposureTime() != -1 ? this->_cap.getExposureTime() : 0);
+    setTrackbarPos("ex", "EXPOSURE Press Q to Exit", this->_cap->getExposureTime() != -1 ? this->_cap->getExposureTime() : 0);
     createTrackbar("gain", "EXPOSURE Press Q to Exit", 0, 256);
-    setTrackbarPos("gain", "EXPOSURE Press Q to Exit", this->_cap.getAnalogGain() != -1 ? this->_cap.getAnalogGain() : 0);
+    setTrackbarPos("gain", "EXPOSURE Press Q to Exit", this->_cap->getAnalogGain() != -1 ? this->_cap->getAnalogGain() : 0);
     createTrackbar("Quit", "EXPOSURE Press Q to Exit", 0, 1);
     setTrackbarPos("Quit", "EXPOSURE Press Q to Exit", 0);
-    FrameBag framebag = this->_cap.read();
+    FrameBag framebag = this->_cap->read();
     while (framebag.flag && waitKey(1) != 81 && waitKey(1) != 113 && getTrackbarPos("Quit", "EXPOSURE Press Q to Exit") == 0)
     {
-        this->_cap.setExposureTime(getTrackbarPos("ex", "EXPOSURE Press Q to Exit"));
-        this->_cap.setGain(getTrackbarPos("gain", "EXPOSURE Press Q to Exit"));
+        this->_cap->setExposureTime(getTrackbarPos("ex", "EXPOSURE Press Q to Exit"));
+        this->_cap->setGain(getTrackbarPos("gain", "EXPOSURE Press Q to Exit"));
         imshow("EXPOSURE Press Q to Exit", framebag.frame);
-        framebag = this->_cap.read();
+        framebag = this->_cap->read();
         waitKey(1);
     }
-    int ex = this->_cap.getExposureTime();
-    int gain = this->_cap.getAnalogGain();
+    int ex = this->_cap->getExposureTime();
+    int gain = this->_cap->getAnalogGain();
     this->logger->info("Setting Expoure Time {}us", ex);
     this->logger->info("Setting analog gain {}", gain);
     destroyWindow("EXPOSURE Press Q to Exit");
@@ -231,6 +240,12 @@ void CameraThread::open()
 #ifdef UsingVideo
     if (!this->_open)
     {
+        if (access(TestVideoPath.c_str(), F_OK) != 0)
+        {
+            this->logger->error("No video file : {}", TestVideoPath);
+            sleep(1);
+            return;
+        }
         this->_cap = VideoCapture(TestVideoPath);
         this->_open = true;
         if (!this->_is_init && this->_open)
@@ -240,7 +255,7 @@ void CameraThread::open()
     if (!this->_open && this->_alive)
     {
         this->openCamera(this->_is_init);
-        this->_open = this->_cap._openflag;
+        this->_open = this->_cap->_openflag;
         if (!this->_is_init && this->_open)
             this->_is_init = true;
     }
@@ -267,7 +282,7 @@ FrameBag CameraThread::read()
         this->_cap.read(framebag.frame);
         framebag.flag = !framebag.frame.empty();
 #else
-        framebag = this->_cap.read();
+        framebag = this->_cap->read();
 #endif
     }
     else if (this->_alive)
@@ -284,7 +299,7 @@ FrameBag CameraThread::read()
 void CameraThread::release()
 {
 #ifndef UsingVideo
-    this->_cap.uninit();
+    this->_cap->uninit();
 #endif
     this->_open = false;
 }

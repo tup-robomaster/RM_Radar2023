@@ -12,6 +12,9 @@
 class Location
 {
 public:
+    typedef std::shared_ptr<Location> Ptr;
+
+public:
     vector<Point2f> pick_points;
     FrameBag frame;
     bool flag = false;
@@ -21,7 +24,8 @@ public:
     Location();
     ~Location();
 
-    bool locate_pick(CameraThread &cap, int enemy, Mat &rvec_Mat, Mat &tvec_Mat);
+    bool locate_pick(CameraThread::Ptr cap, int enemy, Mat &rvec_Mat, Mat &tvec_Mat,
+                     Mat &K_0, Mat &C_0, Mat &E_0);
 };
 
 #endif
