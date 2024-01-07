@@ -4,6 +4,8 @@
 
 clone时请注意携带--recursive拉取子仓库，资源文件放置于release中
 
+请认真阅读本文档，配置程序时需要注意部分细节
+
 ## Version: V1.5 Experimental + Rebuild1.0
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
@@ -176,8 +178,8 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 * 准备装甲板识别及车辆识别模型，现版本可用模型为yolov5 v6.0，注意导出动态Onnx
 * 车辆分类[CAR]
 * 装甲板分类[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7]
-* 将yolov5导出的动态尺寸onnx放置于config.h定义位置
-* 将标定所得参数放置在src/radar2023/RadarClass/Camera/params文件夹中，格式如camera0.yaml所示
+* 将yolov5导出的动态尺寸onnx放置于models目录
+* 将标定所得参数放置在params目录中，格式如资源文件camera0.SJTU.yaml所示
 * 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
 
   ```
@@ -300,6 +302,12 @@ Date:2022-12-04 完成所有基本功能构建，发布V0.1a内部测试版本
    * A: 程序中所提供的onnx模型已在多台设备上通过测试，请确认CMakeLists.txt中CUDA_GEN_CODE项设置正确。
 6. Q: 可否更换到自用Yolov5模型？
    * A: 可以，但需要导出动态onnx并确认单输入单输出，程序中相应修改：MapMapping.h -> _ids的映射值、Radar.h -> ids过滤id。
+
+### Contact
+
+QQ:913872157
+
+E-mail:iratecat1@outlook.com
 
 ### Issues
 
