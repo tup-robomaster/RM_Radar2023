@@ -636,7 +636,7 @@ void Radar::spin()
         return;
     }
     this->_if_record = VideoRecorderSiginal;
-    if (!this->mapMapping->_is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
+    if (!this->mapMapping->_is_pass())
     {
         this->logger->info("Locate pick start ...Process");
         // TODO: Fix here
