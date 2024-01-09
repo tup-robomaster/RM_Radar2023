@@ -8,6 +8,10 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   std_msgs
   sensor_msgs
+  cv_bridge
+  message_generation
+  message_runtime
+  image_transport
 )
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
@@ -23,12 +27,27 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread -lpthread -O3  -Wall -fstack-prot
 set(CUDA_GEN_CODE "-gencode=arch=compute_89,code=sm_89")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
+add_message_files(
+  FILES
+  Location.msg
+  Locations.msg
+)
+
+generate_messages(
+ DEPENDENCIES
+ geometry_msgs
+)
+
 catkin_package(CATKIN_DEPENDS
 	roscpp
   rospy
   roslib
   std_msgs
 	sensor_msgs
+  cv_bridge
+  message_generation
+  message_runtime
+  image_transport
 	)
 # cuda
 include_directories(/user/local/cuda/cuda-11.8/cuda/include)
@@ -52,14 +71,14 @@ link_directories(
   ${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-cuda_add_executable(radar2023
+set(radar2023_source
   main.cpp
   RadarClass/TRTInference/TRTInfer/CUDA/preprocess.cu
   RadarClass/TRTInference/TRTInfer/src/Inference.cpp
   RadarClass/TRTGenerator/TRTGenerator/src/Generator.cpp
   RadarClass/Camera/src/camera.cpp
   RadarClass/Camera/src/VideoRecorder.cpp
-  RadarClass/Common/src/general.cpp
+  RadarClass/Common/src/algorithm.cpp
   RadarClass/Detectors/src/ArmorDetector.cpp
   RadarClass/Detectors/src/CarDetector.cpp
   RadarClass/Detectors/src/depthProcesser.cpp
@@ -82,41 +101,21 @@ cuda_add_executable(radar2023
   RadarClass/DsTracker/src/hungarianoper.cpp
   RadarClass/DsTracker/src/DsTracker.cpp
   RadarClass/Logger/src/ExpLog.cpp
+  )
+
+cuda_add_executable(radar2023
+  ${radar2023_source}
 )
 
 add_executable(offline_point_cloud_publisher tools/offline_point_cloud_pub.cpp)
 target_link_libraries(offline_point_cloud_publisher ${PCL_LIBRARIES}  ${catkin_LIBRARIES} )
 
+add_executable(gui_node GUI/GUI.cpp)
+target_link_libraries(gui_node ${catkin_LIBRARIES} )
+
 target_sources(radar2023
   PRIVATE
-  main.cpp
-  RadarClass/TRTInference/TRTInfer/CUDA/preprocess.cu
-  RadarClass/TRTInference/TRTInfer/src/Inference.cpp
-  RadarClass/TRTGenerator/TRTGenerator/src/Generator.cpp
-  RadarClass/Camera/src/camera.cpp
-  RadarClass/Camera/src/VideoRecorder.cpp
-  RadarClass/Common/src/general.cpp
-  RadarClass/Detectors/src/ArmorDetector.cpp
-  RadarClass/Detectors/src/CarDetector.cpp
-  RadarClass/Detectors/src/depthProcesser.cpp
-  RadarClass/Detectors/src/MovementDetector.cpp
-  RadarClass/Location/src/location.cpp
-  RadarClass/Location/src/MapMapping.cpp
-  RadarClass/Radar/src/Radar.cpp
-  RadarClass/UART/src/offical_judge_Handler.cpp
-  RadarClass/UART/src/serial.cpp
-  RadarClass/UART/src/UART.cpp
-  RadarClass/UART/src/UARTPasser.cpp
-  RadarClass/Logger/src/Logger.cpp
-  RadarClass/DsTracker/src/deepsort.cpp
-  RadarClass/DsTracker/src/featuretensor.cpp
-  RadarClass/DsTracker/src/kalmanfilter.cpp
-  RadarClass/DsTracker/src/linear_assignment.cpp
-  RadarClass/DsTracker/src/sort.cpp
-  RadarClass/DsTracker/src/track.cpp
-  RadarClass/DsTracker/src/tracker.cpp
-  RadarClass/DsTracker/src/hungarianoper.cpp
-  RadarClass/DsTracker/src/DsTracker.cpp
+  ${radar2023_source}
 )
 set_target_properties(radar2023 PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON)

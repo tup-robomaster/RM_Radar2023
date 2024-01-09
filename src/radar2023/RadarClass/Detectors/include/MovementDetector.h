@@ -2,7 +2,7 @@
 #define __MOVEMENTDETECTOR_H
 
 #include "../../Common/include/public.h"
-#include "../../Common/include/general.h"
+#include "../../Common/include/algorithm.h"
 
 /**
  * @brief 运动目标提取类

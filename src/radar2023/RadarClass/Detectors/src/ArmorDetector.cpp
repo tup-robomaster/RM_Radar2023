@@ -38,7 +38,7 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<DetectBox> &targets)
     vector<vector<TRTInferV1::DetectionObj>> results_pre;
     if (targets.size() == 0)
     {
-#ifdef Experimental
+#ifdef ExperimentalOutput
         this->detectedArmorNumThisFrame = 0;
         this->averageConfThisFrame = 0.0;
 #endif
@@ -47,7 +47,7 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image, vector<DetectBox> &targets)
     vector<Mat> preProcessedImage = this->preProcess(image, targets);
     results_pre = this->armorTensorRT.doInference(preProcessedImage, 0.1, 0.25, 0.45);
     this->reBuildBoxs(results_pre, targets, preProcessedImage);
-#ifdef Experimental
+#ifdef ExperimentalOutput
     this->detectedArmorNumThisFrame = this->results.size();
     this->averageConfThisFrame = sumConfAverage(this->results);
 #endif
@@ -116,7 +116,7 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image)
     results_pre = this->armorTensorRT.doInference(images, 0.1, 0.25, 0.45);
     if (results_pre.size() == 0)
     {
-#ifdef Experimental
+#ifdef ExperimentalOutput
         this->detectedArmorNumThisFrame = 0;
         this->averageConfThisFrame = 0.0;
 #endif
@@ -138,7 +138,7 @@ vector<bboxAndRect> ArmorDetector::infer(Mat &image)
                            " [cls] " + to_string(it.classId) +
                            " [conf] " + to_string(it.confidence));
     }
-#ifdef Experimental
+#ifdef ExperimentalOutput
     this->detectedArmorNumThisFrame = this->results.size();
     this->averageConfThisFrame = sumConfAverage(this->results);
 #endif

@@ -15,8 +15,10 @@ Rect rectCenterScale(Rect rect, Size size);
 
 Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH);
 
-#ifdef Experimental
+#ifdef ExperimentalOutput
 float sumConfAverage(std::vector<bboxAndRect> &items);
 #endif
+
+void hsv_to_bgr(int h, int s, int v, int &b, int &g, int &r);
 
 #endif

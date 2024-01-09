@@ -3,7 +3,7 @@
 
 #include "../../Common/include/public.h"
 #include "../../Camera/include/camera.h"
-#include "../../Common/include/general.h"
+#include "../../Common/include/algorithm.h"
 
 /**
  * @brief 四点标定类

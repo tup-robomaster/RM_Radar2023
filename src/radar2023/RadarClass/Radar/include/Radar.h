@@ -22,9 +22,12 @@
 #include "../../UART/include/UART.h"
 #include "../../Location/include/location.h"
 
-#ifdef Experimental
+#ifdef ExperimentalOutput
 #include "../../Logger/include/ExpLog.h"
 #endif
+
+#include <radar2023/Locations.h>
+#include <radar2023/Location.h>
 
 /**
  * @brief 主要雷达类
@@ -45,14 +48,25 @@ private:
     string CameraConfig;
     string SerialPortName;
 
+    bool ExitProgramSiginal = false;
+    bool VideoRecorderSiginal = true;
+
+#ifdef ShowDepth
+    bool _if_coverDepth = true;
+#endif
+
 #ifdef UsingVideo
     string TestVideo;
 #endif
 
     bool _is_LidarInited = false;
     std::shared_ptr<ros::NodeHandle> nh;
-    ros::Subscriber sub;
-    thread lidarMainloop;
+    std::shared_ptr<image_transport::ImageTransport> image_transport;
+    ros::Subscriber sub_lidar;
+    image_transport::Publisher GUI_image_pub_;
+    ros::Publisher pub_locations;
+
+    thread rosSpinLoop;
     thread serRead;
     thread serWrite;
     thread processLoop;
@@ -61,9 +75,10 @@ private:
     bool _thread_working = false;
     bool _Ser_working = false;
     bool _CameraThread_working = false;
-    bool __LidarMainLoop_working = false;
+    bool __RosSpinLoop_working = false;
     bool __MainProcessLoop_working = false;
     bool __VideoRecorderLoop_working = false;
+    bool _recorder_block = false;
 
     DepthQueue::Ptr depthQueue;
     ArmorDetector::Ptr armorDetector;
@@ -84,7 +99,7 @@ private:
     DsTracker::Ptr dsTracker;
 #endif
 
-#ifdef Experimental
+#ifdef ExperimentalOutput
     ExpLog::Ptr myExpLog;
 #endif
 
@@ -131,10 +146,11 @@ public:
     void init();
 
     void setRosNodeHandle(ros::NodeHandle &nh);
+    void setRosImageTransport(image_transport::ImageTransport &image_transport);
     void setRosPackageSharedPath(String &path);
 
     void LidarListenerBegin();
-    void LidarMainLoop();
+    void RosSpinLoop();
     void LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg);
     void SerReadLoop();
     void SerWriteLoop();

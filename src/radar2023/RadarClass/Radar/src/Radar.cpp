@@ -148,6 +148,15 @@ void Radar::init()
 {
     assert(this->nh);
     assert(!share_path.empty());
+    if (this->_init_flag)
+        return;
+    this->logger->info("Initing ...Process");
+    if (ENEMY)
+        this->logger->critical("YOU ARE RED");
+    else
+        this->logger->critical("YOU ARE BLUE");
+    this->GUI_image_pub_ = this->image_transport->advertise("/radar2023/result_view", 1, true);
+    this->pub_locations = this->nh->advertise<radar2023::Locations>("/radar2023/locations", 1, true);
     std::string param_name;
     if (this->nh->searchParam("/radar2023/EnemyType", param_name))
     {
@@ -253,13 +262,6 @@ void Radar::init()
     }
 #endif
 
-    if (this->_init_flag)
-        return;
-    this->logger->info("Initing ...Process");
-    if (ENEMY)
-        this->logger->critical("YOU ARE RED");
-    else
-        this->logger->critical("YOU ARE BLUE");
     Matrix<float, 3, 3> K_0;
     Matrix<float, 1, 5> C_0;
     Matrix<float, 4, 4> E_0;
@@ -285,11 +287,8 @@ void Radar::init()
     this->cameraThread = std::make_shared<CameraThread>(this->share_path + "/params/" + this->CameraConfig);
 #endif
 
-    namedWindow("ControlPanel", WindowFlags::WINDOW_NORMAL);
-    createTrackbar("Exit Program", "ControlPanel", 0, 1, nullptr);
-    setTrackbarPos("Exit Program", "ControlPanel", 0);
-    createTrackbar("Recorder", "ControlPanel", 0, 1, nullptr);
-    setTrackbarPos("Recorder", "ControlPanel", 0);
+    this->nh->setParam("/radar2023/ExitProgram", false);
+    this->nh->setParam("/radar2023/Recorder", true);
     this->LidarListenerBegin();
     this->armorDetector = std::make_shared<ArmorDetector>(this->share_path + "/models/" + this->EngineForArmor,
                                                           this->share_path + "/models/" + this->OnnxForArmor);
@@ -320,12 +319,12 @@ void Radar::init()
     this->dsTracker = std::make_shared<DsTracker>(this->share_path + "/models/" + this->OnnxForSort,
                                                   this->share_path + "/models/" + this->EngineForSort);
 #endif
-#ifdef Experimental
+#ifdef ExperimentalOutput
     this->myExpLog = std::make_shared<ExpLog>();
     this->myExpLog->init(this->share_path + "/ExpResultDir/");
 #endif
 
-    this->videoRecorder->init((this->share_path + "/Record/").c_str(), VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH)) ? setTrackbarPos("Recorder", "ControlPanel", 1) : setTrackbarPos("Recorder", "ControlPanel", 0);
+    this->_recorder_block = !this->videoRecorder->init((this->share_path + "/Record/").c_str(), VideoWriter::fourcc('m', 'p', '4', 'v'), Size(ImageW, ImageH));
     this->cameraThread->start();
     this->_init_flag = true;
     this->logger->info("Init Done");
@@ -335,6 +334,11 @@ void Radar::init()
 void Radar::setRosNodeHandle(ros::NodeHandle &nh)
 {
     this->nh = std::make_shared<ros::NodeHandle>(nh);
+}
+
+void Radar::setRosImageTransport(image_transport::ImageTransport &image_transport)
+{
+    this->image_transport = std::make_shared<image_transport::ImageTransport>(image_transport);
 }
 
 void Radar::setRosPackageSharedPath(String &path)
@@ -347,20 +351,20 @@ void Radar::LidarListenerBegin()
     assert(this->nh);
     if (this->_is_LidarInited)
         return;
-    this->sub = this->nh->subscribe(lidarTopicName, LidarQueueSize, &Radar::LidarCallBack, this);
+    this->sub_lidar = this->nh->subscribe(lidarTopicName, LidarQueueSize, &Radar::LidarCallBack, this);
     this->_is_LidarInited = true;
     this->logger->info("Lidar inited");
 }
 
-void Radar::LidarMainLoop()
+void Radar::RosSpinLoop()
 {
-    while (this->__LidarMainLoop_working)
+    while (this->__RosSpinLoop_working)
     {
         if (ros::ok())
             ros::spinOnce();
     }
     ros::shutdown();
-    this->logger->critical("LidarMainLoop Exit");
+    this->logger->critical("RosSpinLoop Exit");
 }
 
 void Radar::LidarCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
@@ -404,6 +408,12 @@ void Radar::MainProcessLoop()
         FrameBag frameBag = this->cameraThread->read();
         if (frameBag.flag)
         {
+            if (this->_if_record)
+            {
+                Mat record_frame = frameBag.frame.clone();
+                this->myFrames.push(record_frame);
+            }
+
 #ifndef UseOneLayerInfer
 #ifdef UsePointCloudSepTarget
             shared_lock<shared_timed_mutex> slk_md(this->myMutex_publicDepth);
@@ -426,22 +436,51 @@ void Radar::MainProcessLoop()
 #endif
             this->drawArmorsForDebug(pred, frameBag.frame);
 #endif
-#ifdef Experimental
+#ifdef ExperimentalOutput
             int pred_size = pred.size();
             float pred_conf_average = sumConfAverage(pred);
 #endif
+
+#ifdef Test
+#ifdef ShowDepth
+            if (this->_if_coverDepth)
+            {
+                shared_lock<shared_timed_mutex> slk_pd(this->myMutex_publicDepth);
+                for (int i = 0; i < ImageH; ++i)
+                {
+                    uchar *data = frameBag.frame.ptr<uchar>(i);
+                    int k = 0;
+                    for (int j = 0; j < ImageW; ++j)
+                    {
+                        if (this->publicDepth[i][j] != 0)
+                        {
+                            int b, g, r;
+                            hsv_to_bgr((this->publicDepth[i][j] / 100.) * 255, 255, 255, b, g, r);
+                            data[k] = b;
+                            data[k + 1] = g;
+                            data[k + 2] = r;
+                        }
+                        k += 3;
+                    }
+                }
+                slk_pd.unlock();
+            }
+#endif
+#endif
+
             if (pred.size() != 0)
             {
                 this->armor_filter(pred);
-                shared_lock<shared_timed_mutex> slk(this->myMutex_publicDepth);
+                shared_lock<shared_timed_mutex> slk_pd(this->myMutex_publicDepth);
                 if (this->publicDepth.size() == 0)
                 {
-                    slk.unlock();
+                    slk_pd.unlock();
                     this->logger->info("No Lidar Msg , Return");
                 }
                 else
                 {
                     this->detectDepth(pred);
+
 #if defined UseDeepSort && !(defined UsePointCloudSepTarget)
                     this->mapMapping._DeepSort_prediction(pred, sepTargets);
 #endif
@@ -450,25 +489,61 @@ void Radar::MainProcessLoop()
 #else
                     vector<ArmorBoundingBox> IouArmors = {};
 #endif
+
                     this->detectDepth(IouArmors);
-                    slk.unlock();
+                    slk_pd.unlock();
                     this->mapMapping->mergeUpdata(pred, IouArmors, this->K_0_Mat, this->C_0_Mat);
                     judge_message myJudge_message;
                     myJudge_message.task = 1;
                     myJudge_message.loc = this->mapMapping->getloc();
                     this->send_judge(myJudge_message);
+                    if (myJudge_message.loc.size() > 0)
+                    {
+                        radar2023::Locations locations_msg;
+                        for (int i = 0, N = myJudge_message.loc.size(); i < N; ++i)
+                        {
+                            radar2023::Location location_msg;
+                            location_msg.id = myJudge_message.loc[i].id;
+                            location_msg.x = myJudge_message.loc[i].x;
+                            location_msg.y = myJudge_message.loc[i].y;
+                            locations_msg.locations.emplace_back(location_msg);
+                        }
+                        locations_msg.header = std_msgs::Header();
+                        locations_msg.header.frame_id = "radar2023";
+                        locations_msg.header.stamp = ros::Time::now();
+                        locations_msg.header.seq = 1;
+                        this->pub_locations.publish(locations_msg);
+                    }
                 }
             }
             auto end_t = std::chrono::system_clock::now().time_since_epoch();
+
 #ifdef Test
             char ch[255];
             sprintf(ch, "FPS %d", int(std::chrono::nanoseconds(1000000000).count() / (end_t - start_t).count()));
             std::string fps_str = ch;
             cv::putText(frameBag.frame, fps_str, {10, 50}, cv::FONT_HERSHEY_SIMPLEX, 2, {0, 255, 0}, 3);
+            this->mapMapping->_plot_region_rect(this->show_region, frameBag.frame, this->K_0_Mat, this->C_0_Mat);
 #endif
-            this->myFrames.push(frameBag.frame);
+
+            sensor_msgs::ImagePtr image_msg;
+            try
+            {
+                image_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frameBag.frame).toImageMsg();
+                image_msg->header.frame_id = "radar2023";
+                image_msg->header.stamp = ros::Time::now();
+                image_msg->header.seq = 1;
+                this->GUI_image_pub_.publish(image_msg);
+            }
+            catch (cv_bridge::Exception &e)
+            {
+                this->logger->error("cv_bridge exception: %s", e.what());
+                this->logger->flush();
+                continue;
+            }
             this->logger->flush();
-#ifdef Experimental
+
+#ifdef ExperimentalOutput
             std::vector<string> msg;
             msg.emplace_back(to_string(pred.size()));
             msg.emplace_back(to_string(pred_size));
@@ -488,15 +563,19 @@ void Radar::VideoRecorderLoop()
 {
     while (this->__VideoRecorderLoop_working)
     {
-        if (this->_if_record && this->myFrames.size() > 0)
+        if (this->_if_record && this->myFrames.size() > 0 && !this->_recorder_block)
         {
-            this->videoRecorder->write(this->myFrames.front().clone());
+            this->videoRecorder->write(this->myFrames.front());
+            this->myFrames.pop();
         }
         else if (!this->_if_record)
         {
-            this->videoRecorder->close();
+            sleep(1);
         }
     }
+    this->videoRecorder->close();
+    this->_if_record = false;
+    this->nh->setParam("/radar2023/Recorder", false);
     this->logger->critical("VideoRecorderLoop Exit");
 }
 
@@ -516,18 +595,47 @@ void Radar::spin()
 
     assert(cameraThread && myLocation && mapMapping && myUART && mySerial && videoRecorder);
 
-#ifdef Experimental
+#ifdef ExperimentalOutput
     assert(myExpLog);
 #endif
 
     if (!this->_init_flag)
         return;
-    if (getTrackbarPos("Exit Program", "ControlPanel") == 1)
+    std::string param_name;
+    if (this->nh->searchParam("/radar2023/ExitProgram", param_name))
+    {
+        this->nh->getParam(param_name, this->ExitProgramSiginal);
+    }
+    else
+    {
+        ROS_WARN("Parameter ExitProgram not defined");
+    }
+    if (this->nh->searchParam("/radar2023/Recorder", param_name))
+    {
+        this->nh->getParam(param_name, this->VideoRecorderSiginal);
+    }
+    else
+    {
+        ROS_WARN("Parameter Recorder not defined");
+    }
+
+#ifdef ShowDepth
+    if (this->nh->searchParam("/gui/CoverDepth", param_name))
+    {
+        this->nh->getParam(param_name, this->_if_coverDepth);
+    }
+    else
+    {
+        ROS_WARN("Parameter CoverDepth not defined");
+    }
+#endif
+
+    if (this->ExitProgramSiginal == true)
     {
         this->stop();
         return;
     }
-    this->_if_record = getTrackbarPos("Recorder", "ControlPanel");
+    this->_if_record = VideoRecorderSiginal;
     if (!this->mapMapping->_is_pass() || waitKey(1) == 76 || waitKey(1) == 108)
     {
         this->logger->info("Locate pick start ...Process");
@@ -555,10 +663,10 @@ void Radar::spin()
     {
         this->logger->info("Thread starting ...Process");
         this->_thread_working = true;
-        if (!this->__LidarMainLoop_working)
+        if (!this->__RosSpinLoop_working)
         {
-            this->__LidarMainLoop_working = true;
-            this->lidarMainloop = thread(std::bind(&Radar::LidarMainLoop, this));
+            this->__RosSpinLoop_working = true;
+            this->rosSpinLoop = thread(std::bind(&Radar::RosSpinLoop, this));
         }
         if (!this->__MainProcessLoop_working)
         {
@@ -586,16 +694,8 @@ void Radar::spin()
         this->serWrite = thread(std::bind(&Radar::SerWriteLoop, this));
         this->logger->info("SerThread initing ...Done");
     }
-    if (myFrames.size() > 0 && this->is_alive)
+    if (myFrames.size() > 0 && this->is_alive && !this->_if_record)
     {
-        Mat frame = myFrames.front().clone();
-        this->mapMapping->_plot_region_rect(this->show_region, frame, this->K_0_Mat, this->C_0_Mat);
-        cv::Mat map1, map2;
-        cv::Size imageSize = frame.size();
-        cv::initUndistortRectifyMap(this->K_0_Mat, this->C_0_Mat, cv::Mat(), cv::getOptimalNewCameraMatrix(this->K_0_Mat, this->C_0_Mat, imageSize, 1, imageSize, 0), imageSize, CV_16SC2, map1, map2);
-        cv::remap(frame, frame, map1, map2, cv::INTER_LINEAR);
-        imshow("ControlPanel", frame);
-        resizeWindow("ControlPanel", 1920, 1080);
         myFrames.pop();
     }
 }
@@ -607,14 +707,13 @@ void Radar::stop()
     this->logger->flush();
     if (this->cameraThread->is_open())
         this->cameraThread->stop();
-    cv::destroyAllWindows();
     if (this->_thread_working)
     {
         this->_thread_working = false;
-        if (this->__LidarMainLoop_working)
+        if (this->__RosSpinLoop_working)
         {
-            this->__LidarMainLoop_working = false;
-            this->lidarMainloop.join();
+            this->__RosSpinLoop_working = false;
+            this->rosSpinLoop.join();
         }
         if (this->__MainProcessLoop_working)
         {
@@ -633,16 +732,16 @@ void Radar::stop()
             this->serWrite.join();
         }
     }
-    this->videoRecorder->close();
-    this->_if_record = false;
     this->armorDetector->unInit();
+
 #if !(defined UsePointCloudSepTarget || defined UseOneLayerInfer)
     this->carDetector->unInit();
 #endif
 
-#ifdef Experimental
+#ifdef ExperimentalOutput
     this->myExpLog->uninit();
 #endif
+
     this->logger->warn("Program Shutdown");
 }
 

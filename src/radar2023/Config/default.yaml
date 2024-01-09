@@ -3,7 +3,7 @@
   AuthPassword: "momoko11" # 用户密码，用于串口权限
   CameraConfig: "Config_0.SJTU.Config" # 相机配置文件名称
   TestVideo: "SJTU.mp4" # 测试视频名称
-  CameraParam: "camera0.yaml" # 相机参数文件
+  CameraParam: "camera0.SJTU.yaml" # 相机参数文件
   OnnxForArmor: "Armor.onnx" # 装甲板转换用Onnx模型
   OnnxForCar: "Car.onnx" # 车辆转换用Onnx模型
   EngineForArmor: "Armor.engine" # 生成的装甲板识别用TRT模型
@@ -11,3 +11,7 @@
   OnnxForSort: "" # Sort使用的Onnx模型
   EngineForSort: "" # Sort使用的TRT模型
   SerialPortName: "/dev/ttyUSB0" # 串口地址
+
+/gui:
+  MapRMUC: "map.jpg" # 地图文件名
+  CoverDepth: true

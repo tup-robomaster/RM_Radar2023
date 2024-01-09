@@ -1,5 +1,6 @@
 <launch>
     <param name="pcd_path" type="string" value="$(find radar2023)/resources/pcds.txt"/>
+    <node pkg="radar2023" type="gui_node" name="gui_node" output="screen"></node>
     <node pkg="radar2023" type="offline_point_cloud_publisher" name="point_cloud_node" output="screen"></node>
     
 </launch>

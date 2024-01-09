@@ -2,7 +2,7 @@
 #define __CARDETECTOR_H
 
 #include "../../TRTInference/TRTInfer/include/Inference.h"
-#include "../../Common/include/general.h"
+#include "../../Common/include/algorithm.h"
 
 /**
  * @brief 车辆识别

@@ -15,6 +15,7 @@ MV_Camera::MV_Camera(bool Is_init, string config_path)
     if (this->iCameraCounts == 0)
     {
         this->logger->error("No camera found!");
+        sleep(1);
         return;
     }
     try
@@ -25,11 +26,13 @@ MV_Camera::MV_Camera(bool Is_init, string config_path)
     catch (const std::exception &e)
     {
         this->logger->error("CameraInitERROR!{}", e.what());
+        sleep(1);
         return;
     }
     if (this->iStatus != CAMERA_STATUS_SUCCESS)
     {
         this->logger->error("CameraInit Failed!{}", this->iStatus);
+        sleep(1);
         return;
     }
     else
@@ -63,12 +66,14 @@ FrameBag MV_Camera::read()
     if (this->hCamera == -1)
     {
         this->logger->error("No handled camera found!");
+        sleep(1);
         return framebag;
     }
     CameraGetImageBuffer(this->hCamera, &this->sFrameInfo, &this->pRawDataBuffer, 200);
     if (CameraImageProcess(this->hCamera, this->pRawDataBuffer, this->pFrameBuffer, &this->sFrameInfo) != CAMERA_STATUS_SUCCESS)
     {
         this->logger->error("Can not process Image!");
+        sleep(1);
         return framebag;
     }
     framebag.frame = cv::Mat(
@@ -201,6 +206,7 @@ void CameraThread::openCamera(bool is_init)
     catch (const std::exception &e)
     {
         this->logger->error("CameraThread::openCamera(){}", e.what());
+        sleep(1);
         return;
     }
     this->_cap->_openflag = initFlag;

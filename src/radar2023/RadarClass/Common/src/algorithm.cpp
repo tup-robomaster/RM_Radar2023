@@ -1,4 +1,4 @@
-#include "../include/general.h"
+#include "../include/algorithm.h"
 
 bool read_param(Mat &K_0, Mat &C_0, Mat &E_0, String path)
 {
@@ -49,7 +49,7 @@ Rect reMapRect(Rect &rect, int blocksizeW, int blocksizeH)
     return Rect(rect.x * blocksizeW, rect.y * blocksizeH, rect.width * blocksizeW, rect.height * blocksizeH);
 }
 
-#ifdef Experimental
+#ifdef ExperimentalOutput
 float sumConfAverage(std::vector<bboxAndRect> &items)
 {
     float sum = 0.;
@@ -61,3 +61,51 @@ float sumConfAverage(std::vector<bboxAndRect> &items)
     return items.size() != 0 ? sum / items.size() : 0.;
 }
 #endif
+
+void hsv_to_bgr(int h, int s, int v, int &b, int &g, int &r)
+{
+    h = std::max(0, std::min(255, h));
+    s = std::max(0, std::min(255, s));
+    v = std::max(0, std::min(255, v));
+
+    float hh = h / 42.5f;
+    int i = static_cast<int>(floor(hh));
+    float f = hh - i;
+    float p = v * (1.0f - s / 255.0f);
+    float q = v * (1.0f - s / 255.0f * f);
+    float t = v * (1.0f - s / 255.0f * (1.0f - f));
+
+    switch (i)
+    {
+    case 0:
+        b = round(p);
+        g = round(t);
+        r = round(v);
+        break;
+    case 1:
+        b = round(p);
+        g = round(v);
+        r = round(q);
+        break;
+    case 2:
+        b = round(t);
+        g = round(v);
+        r = round(p);
+        break;
+    case 3:
+        b = round(v);
+        g = round(q);
+        r = round(p);
+        break;
+    case 4:
+        b = round(v);
+        g = round(p);
+        r = round(t);
+        break;
+    case 5:
+        b = round(q);
+        g = round(p);
+        r = round(v);
+        break;
+    }
+}

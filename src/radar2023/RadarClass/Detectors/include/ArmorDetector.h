@@ -2,7 +2,7 @@
 #define __ARMORDETECTOR_H
 
 #include "../../TRTInference/TRTInfer/include/Inference.h"
-#include "../../Common/include/general.h"
+#include "../../Common/include/algorithm.h"
 
 /**
  * @brief 装甲板识别
@@ -21,7 +21,7 @@ private:
     string TensorRTEnginePath;
     string OnnxPath;
 
-#ifdef Experimental
+#ifdef ExperimentalOutput
     int detectedArmorNumThisFrame = 0;
     float averageConfThisFrame = 0.0;
 #endif

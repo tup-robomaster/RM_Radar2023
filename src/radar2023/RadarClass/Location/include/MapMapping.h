@@ -1,7 +1,7 @@
 #ifndef __MAPMAPPING_H
 #define __MAPMAPPING_H
 
-#include "../../Common/include/general.h"
+#include "../../Common/include/algorithm.h"
 #include "../../Detectors/include/depthProcesser.h"
 
 /**

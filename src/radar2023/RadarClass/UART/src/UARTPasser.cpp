@@ -50,7 +50,7 @@ void UARTPasser::Referee_Update_GameData(unsigned char *buffer)
     if (this->_Now_stage < 5 && (buffer[7] >> 4) == 5)
     {
         this->_Game_End_Flag = true;
-        this->logger->critical("GAME END !");
+        this->logger->critical("GAME FINISH !");
         for (int i = 0; i < 12; ++i)
         {
             this->_max_hp[i] = this->_init_hp[i];

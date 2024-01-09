@@ -170,7 +170,7 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 * 若不使用MKL，注释掉src/radar2023/CMakeLists.txt ->34 include_directories(/opt/intel/oneapi/mkl/latest/include)、35 link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64) 、108 libmkl_rt.so 和 src/radar2023/RadarClass/Common/include/public.h
   -> 3 #define EIGEN_USE_MKL_ALL、4 #define EIGEN_VECTORIZE_SSE4_2 [可选]
 * 修改Config目录下default.yaml以适配参数
-* ExpResultDir[实验数据输出目录]、logs[日志存放目录]、models[模型存放目录『onnx、engine』]、params[相机参数存放目录『Config、yaml』]、Record[录制视频存放目录]、resources[资源存放目录『pcds.txt、*.mp4』]
+* ExpResultDir[实验数据输出目录]、logs[日志存放目录]、models[模型存放目录『onnx、engine』]、params[相机参数存放目录『Config、yaml』]、Record[录制视频存放目录]、resources[资源存放目录『pcds.txt、*.mp4、map.jpg』]
 * 修改config.h中相关配置
 
   * 特别注意事项：
@@ -266,6 +266,8 @@ roslaunch radar2023 radar2023.launch
 此为实验性功能且性能消耗极大，不保证有效效果
 
 ### 开发日志
+
+Date:2024.1.09 V1.5:整理代码，更新GUI，修复录像错误
 
 Date:2024.1.07 V1.5:整理代码，优化交互，修复深度获取错误
 

@@ -1,6 +1,7 @@
 #define Test        // 测试标志
 #define TestWithVis // 显示可视化检测结果
-#define UsingVideo  //是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
+#define UsingVideo  // 是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
+#define ShowDepth   // 是否在GUI覆盖深度图
 
 #define lidarTopicName (char *)"/livox/lidar"
 
@@ -37,7 +38,7 @@
 
 // #define UseDeepSort
 
-/*---For experimental [实验数据输出][仅作识别效率记录][识别数据将混乱]---*/
+/*---For ExperimentalOutput [实验数据输出][仅作识别效率记录][识别数据将混乱]---*/
 
-// #define Experimental     //启用实验模式
+// #define ExperimentalOutput     //启用实验模式输出
 // #define UseOneLayerInfer //启用单层神经网络预测模式

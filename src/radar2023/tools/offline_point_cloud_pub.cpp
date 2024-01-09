@@ -44,7 +44,7 @@ int main(int argc, char **argv)
                 {
                     output_msg.header.stamp = ros::Time::now();
                     pcl::toROSMsg(cloud, output_msg);
-                    output_msg.header.frame_id = "point_cloud_frame_id";
+                    output_msg.header.frame_id = "map";
                     pub.publish(output_msg);
                     rate.sleep();
                     cloud.clear();

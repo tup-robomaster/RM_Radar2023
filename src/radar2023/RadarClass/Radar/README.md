@@ -22,7 +22,7 @@ Radar
 * send_judge() 裁判系统通讯
 * init() 雷达初始化
 * LidarListenerBegin() 启动点云接收
-* LidarMainLoop() 激光雷达工作线程
+* RosSpinLoop() ROS自旋线程，主要控制点云接收
 * LidarCallBack() 点云数据接收回调，处理点云数据
 * SeparationLoop() 图像分割工作线程
 * SerReadLoop() 串口读线程
