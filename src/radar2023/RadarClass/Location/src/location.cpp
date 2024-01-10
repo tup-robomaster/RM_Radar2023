@@ -46,26 +46,32 @@ Location::~Location()
 bool Location::locate_pick(CameraThread::Ptr cap, int enemy, Mat &rvec_Mat, Mat &tvec_Mat,
                            Mat &K_0, Mat &C_0, Mat &E_0)
 {
+    if (this->location_targets.empty())
+    {
+        this->logger->error("Empty MapPoints !");
+        return false;
+    }
     this->frame = FrameBag();
     this->flag = false;
     vector<Point2f>().swap(this->pick_points);
 
-    map<int, vector<string>> tips{{0, {"red_base", "blue_outpost", "b_right_top", "red_outpost"}},
-                                  {1, {"blue_base", "red_outpost", "r_right_top", "blue_outpost"}}};
+    map<int, vector<string>> tips;
+    tips[0] = this->targets_selected_enemy_red;
+    tips[1] = this->targets_selected_enemy_blue;
     vector<Point3f> ops;
     if (enemy == 0)
     {
-        ops.emplace_back(location_targets.find("red_base")->second);
-        ops.emplace_back(location_targets.find("blue_outpost")->second);
-        ops.emplace_back(location_targets.find("b_rt")->second);
-        ops.emplace_back(location_targets.find("red_outpost")->second);
+        for(auto &it : this->targets_selected_enemy_red)
+        {
+            ops.emplace_back(location_targets.find(it)->second);
+        }
     }
     else
     {
-        ops.emplace_back(location_targets.find("blue_base")->second);
-        ops.emplace_back(location_targets.find("red_outpost")->second);
-        ops.emplace_back(location_targets.find("r_rt")->second);
-        ops.emplace_back(location_targets.find("blue_outpost")->second);
+        for(auto &it : this->targets_selected_enemy_blue)
+        {
+            ops.emplace_back(location_targets.find(it)->second);
+        }
     }
     frame = cap->read();
     if (!cap->is_open() || !frame.flag)
@@ -75,7 +81,7 @@ bool Location::locate_pick(CameraThread::Ptr cap, int enemy, Mat &rvec_Mat, Mat 
     cv::namedWindow("PickPoints", WindowFlags::WINDOW_GUI_NORMAL);
     cv::resizeWindow("PickPoints", Size(1280, 780));
     cv::setWindowProperty("PickPoints", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
-    cv::moveWindow("PickPoints", 500, 300);
+    cv::moveWindow("PickPoints", 420, 150);
     cv::namedWindow("ZOOM_WINDOW", WindowFlags::WINDOW_GUI_NORMAL);
     cv::resizeWindow("ZOOM_WINDOW", 400, 400);
     cv::setWindowProperty("ZOOM_WINDOW", WindowPropertyFlags::WND_PROP_TOPMOST, 1);
@@ -134,6 +140,42 @@ bool Location::locate_pick(CameraThread::Ptr cap, int enemy, Mat &rvec_Mat, Mat 
     {
         this->logger->error("Solve PnP failed");
         return false;
+    }
+    return true;
+}
+
+bool Location::decodeMapPoints(string path)
+{
+    this->location_targets.clear();
+    this->targets_selected_enemy_blue.clear();
+    this->targets_selected_enemy_red.clear();
+    Json::Reader jsonReader;
+    Json::Value jsonValue;
+    std::ifstream jsonFile(path);
+    if (!jsonReader.parse(jsonFile, jsonValue, true))
+    {
+        this->logger->error("Json file read error !");
+        jsonFile.close();
+        return false;
+    }
+    Json::Value arrayValue = jsonValue["Points"];
+    for (int i = 0; i < int(arrayValue.size()); ++i)
+    {
+        Point3f point;
+        point.x = arrayValue[i]["x"].asFloat();
+        point.y = arrayValue[i]["y"].asFloat();
+        point.z = arrayValue[i]["z"].asFloat();
+        this->location_targets[arrayValue[i]["name"].asCString()] = point;
+    }
+    arrayValue = jsonValue["when_enemy_red"];
+    for (int i = 0; i < int(arrayValue.size()); ++i)
+    {
+        this->targets_selected_enemy_red.emplace_back(arrayValue[i].asCString());
+    }
+    arrayValue = jsonValue["when_enemy_blue"];
+    for (int i = 0; i < int(arrayValue.size()); ++i)
+    {
+        this->targets_selected_enemy_blue.emplace_back(arrayValue[i].asCString());
     }
     return true;
 }

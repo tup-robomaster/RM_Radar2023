@@ -104,6 +104,7 @@ set(radar2023_source
   RadarClass/DsTracker/src/hungarianoper.cpp
   RadarClass/DsTracker/src/DsTracker.cpp
   RadarClass/Logger/src/ExpLog.cpp
+  ../ThirdParty/Json/jsoncpp.cpp
   )
 
 cuda_add_executable(radar2023

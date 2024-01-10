@@ -19,6 +19,9 @@ public:
     FrameBag frame;
     bool flag = false;
     std::shared_ptr<spdlog::logger> logger = spdlog::get("RadarLogger");
+    map<string, Point3f> location_targets;
+    std::vector<string> targets_selected_enemy_red;
+    std::vector<string> targets_selected_enemy_blue;
 
 public:
     Location();
@@ -26,6 +29,7 @@ public:
 
     bool locate_pick(CameraThread::Ptr cap, int enemy, Mat &rvec_Mat, Mat &tvec_Mat,
                      Mat &K_0, Mat &C_0, Mat &E_0);
+    bool decodeMapPoints(string path);
 };
 
 #endif

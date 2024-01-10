@@ -170,7 +170,7 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 * 若不使用MKL，注释掉src/radar2023/CMakeLists.txt ->34 include_directories(/opt/intel/oneapi/mkl/latest/include)、35 link_directories(/opt/intel/oneapi/mkl/latest/lib/intel64) 、108 libmkl_rt.so 和 src/radar2023/RadarClass/Common/include/public.h
   -> 3 #define EIGEN_USE_MKL_ALL、4 #define EIGEN_VECTORIZE_SSE4_2 [可选]
 * 修改Config目录下default.yaml以适配参数
-* ExpResultDir[实验数据输出目录]、logs[日志存放目录]、models[模型存放目录『onnx、engine』]、params[相机参数存放目录『Config、yaml』]、Record[录制视频存放目录]、resources[资源存放目录『pcds.txt、*.mp4、map.jpg』]
+* ExpResultDir[实验数据输出目录]、logs[日志存放目录]、models[模型存放目录『onnx、engine』]、params[参数存放目录『Config、yaml、Json』]、Record[录制视频存放目录]、resources[资源存放目录『pcds.txt、*.mp4、map.jpg』]
 * 修改config.h中相关配置
 
   * 特别注意事项：
@@ -202,7 +202,7 @@ roslaunch radar2023 radar2023.launch
 
 2.初始化完成后，程序会尝试启动相机并展示一张预览图，若对相机曝光、增益不满意，在预览图上按“t”进入调节界面，在调节界面中有相应的退出滑条。
 
-3.相机预览结束后，进入四点标注界面，根据提示完成标注点选取，每确定一点，在标定窗口按“z”撤回，按其他任意键确定。Tips: 在src/RadarClass/Location/src/location.cpp -> locate_pick函数中更改使用的3D点；在src/radar2023/RadarClass/Common/include/public.h -> location_targets中更改3D点坐标。
+3.相机预览结束后，进入四点标注界面，根据提示完成标注点选取，每确定一点，在标定窗口按“z”撤回，按其他任意键确定。Tips: 在params/MapMappingPoints配置标定点
 
 4.标定结束后，进入控制窗口，可控制程序退出和视频录制，在图像中显示空间点反投影效果和识别车辆，对标定结果不满意可退出程序重新标定。
 

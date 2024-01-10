@@ -43,6 +43,8 @@
 #include "../../../config.h"
 #include "../../Logger/include/Logger.h"
 
+#include "../../../../ThirdParty/Json/json.h"
+
 using namespace std;
 using namespace Eigen;
 using namespace cv;
@@ -146,17 +148,5 @@ struct judge_message
     unsigned char team;
     vector<MapLocation3D> loc;
 };
-
-/**
- * @brief 四点标定定位点
- */
-const map<string, Point3f> location_targets = {{"red_base", Point3f(1.760, -15. + 7.539, 0.200 + 0.918)},
-                                               {"blue_outpost", Point3f(16.776, -15. + 12.565, 1.581)},
-                                               {"red_outpost", Point3f(11.176, -15. + 2.435, 1.581)},
-                                               {"blue_base", Point3f(26.162, -15. + 7.539, 0.200 + 0.918)},
-                                               {"r_rt", Point3f(8.805, -5.728 - 0.660, 0.120 + 0.495)},
-                                               {"r_lt", Point3f(8.805, -5.728, 0.120 + 0.495)},
-                                               {"b_rt", Point3f(19.200, -9.272 + 0.660, 0.120 + 0.495)},
-                                               {"b_lt", Point3f(19.200, -9.272, 0.120 + 0.495)}};
 
 #endif

@@ -279,6 +279,7 @@ void Radar::init()
     this->videoRecorder = std::make_shared<VideoRecorder>();
     this->mySerial = std::make_shared<MySerial>();
     this->mapMapping = std::make_shared<MapMapping>();
+    this->myLocation->decodeMapPoints(this->share_path + "/params/MapMappingPoints.json");
 
 #ifdef UsingVideo
     this->cameraThread = std::make_shared<CameraThread>(this->share_path + "/params/" + this->CameraConfig,
