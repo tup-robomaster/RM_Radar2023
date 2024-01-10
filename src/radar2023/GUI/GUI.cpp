@@ -58,6 +58,15 @@ int main(int argc, char **argv)
     bool _if_coverDepth = true;
     string param_name, map_name;
     int ENEMY = 0;
+    if (nh.searchParam("/gui/CoverDepth", param_name))
+    {
+        nh.getParam(param_name, _if_coverDepth);
+        _if_coverDepth ? setTrackbarPos("CoverDepth", "GUI", 1) : setTrackbarPos("CoverDepth", "GUI", 0);
+    }
+    else
+    {
+        ROS_WARN("Parameter CoverDepth not defined");
+    }
     if (nh.searchParam("/gui/MapRMUC", param_name))
     {
         nh.getParam(param_name, map_name);
@@ -100,7 +109,7 @@ int main(int argc, char **argv)
         {
             if (it.x == 0 && it.y == 0)
                 continue;
-            if(ENEMY == 1)
+            if (ENEMY == 1)
             {
                 it.x = 28.0 - it.x;
                 it.y = 15.0 - it.y;

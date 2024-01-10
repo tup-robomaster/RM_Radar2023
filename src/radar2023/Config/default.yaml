@@ -14,4 +14,4 @@
 
 /gui:
   MapRMUC: "map.jpg" # 地图文件名
-  CoverDepth: true
+  CoverDepth: false # 是否默认启用深度图覆盖
