@@ -116,7 +116,7 @@ vector<Rect> MovementDetector::detectMovementTarget(float input[int(ImageH / _bl
     {
         for (int n = 0; n < int(ImageW / _blockSizeW); ++n)
         {
-            this->movementMask[m][n] = (this->depthBackground[m][n] != 0 && input[m][n] != 0 && (abs(input[m][n] - this->depthBackground[m][n]) > this->offsetMap[m][n] * OffsetRatio)) ? 1 : 0;
+            this->movementMask[m][n] = (fabs(this->depthBackground[m][n]) > Epsilon && fabs(input[m][n]) > Epsilon && (abs(input[m][n] - this->depthBackground[m][n]) > this->offsetMap[m][n] * OffsetRatio)) ? 1 : 0;
         }
     }
     for (int m = 0; m < int(ImageH / _blockSizeH); ++m)

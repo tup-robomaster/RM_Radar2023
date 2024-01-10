@@ -22,21 +22,21 @@ void MapMapping::_location_prediction()
 {
     for (size_t i = 0; i < this->_location3D.size(); ++i)
     {
-        bool do_pre = this->_location3D[i].x != 0 &&
-                      this->_location3D[i].y != 0 &&
-                      this->_location_cache[0][i].x != 0 &&
-                      this->_location_cache[0][i].y != 0 &&
-                      this->_location_cache[1][i].x != 0 &&
-                      this->_location_cache[1][i].y != 0 &&
-                      this->_location_pred_time[i] != 1;
+        bool do_pre = (fabs(this->_location3D[i].x) > Epsilon &&
+                       fabs(this->_location3D[i].y) > Epsilon &&
+                       fabs(this->_location_cache[0][i].x) > Epsilon &&
+                       fabs(this->_location_cache[0][i].y) > Epsilon &&
+                       fabs(this->_location_cache[1][i].x) > Epsilon &&
+                       fabs(this->_location_cache[1][i].y) > Epsilon &&
+                       this->_location_pred_time[i] != 1);
         if (do_pre)
         {
-            float m_v[2] = {Pre_radio * (this->_location_cache[1][i].x - this->_location_cache[0][i].x),
-                            Pre_radio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};
+            float m_v[2] = {Pre_ratio * (this->_location_cache[1][i].x - this->_location_cache[0][i].x),
+                            Pre_ratio * (this->_location_cache[1][i].y - this->_location_cache[0][i].y)};
             this->_location3D[i].x = m_v[0] + this->_location_cache[1][i].x;
             this->_location3D[i].y = m_v[1] + this->_location_cache[1][i].y;
         }
-        if (this->_location3D[i].x != 0 && this->_location3D[i].y != 0 && this->_location_pred_time[i] == 1)
+        if (fabs(this->_location3D[i].x) > Epsilon && fabs(this->_location3D[i].y) > Epsilon && this->_location_pred_time[i] == 1)
             this->_location_pred_time[i] = 0;
         if (do_pre && this->_location_pred_time[i] == 0)
             this->_location_pred_time[i] = Pre_Time + 1;
@@ -188,7 +188,8 @@ void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
     rvec_input.copyTo(this->rvec);
     tvec_input.copyTo(this->tvec);
 
-    stringstream ss_rvec, ss_tvec;
+    stringstream ss_rvec,
+        ss_tvec;
     ss_rvec << "rvec= " << endl
             << " " << rvec_input << endl
             << endl;
@@ -204,8 +205,8 @@ void MapMapping::push_T(Mat &rvec_input, Mat &tvec_input)
     rvec_Matrix.copyTo(T_Matrix(Rect(0, 0, 3, 3)));
     this->tvec.copyTo(T_Matrix(Rect(3, 0, 1, 3)));
     T_Matrix.at<_Float32>(Point2i(3, 3)) = 1.f;
-    cv2eigen(T_Matrix, this->_T);
-    this->_T << this->_T.inverse();
+    cv2eigen(T_Matrix, this->T);
+    this->_T << this->T.inverse();
     Matrix<float, 4, 1> m1;
     m1 << 0.f, 0.f, 0.f, 1.f;
     this->cameraPostion << (this->_T * m1).topRows(3);
@@ -249,7 +250,7 @@ void MapMapping::mergeUpdata(vector<bboxAndRect> &pred, vector<ArmorBoundingBox>
                                       { return int(item.cls) == item_cls; }) == locations.end();
             if (!check)
                 continue;
-            if (Ioubbox[i].depth != 0 && !isnan(Ioubbox[i].depth))
+            if (fabs(Ioubbox[i].depth) > Epsilon && !isnan(Ioubbox[i].depth))
             {
                 Ioubbox[i].flag = true;
                 locations.emplace_back(Ioubbox[i]);
@@ -337,9 +338,9 @@ void MapMapping::adjust_z_one(MapLocation3D &loc)
     {
         Matrix<float, 3, 1> line;
         line << loc.x - this->cameraPostion(0, 0), loc.y - this->cameraPostion(1, 0), loc.z - this->cameraPostion(2, 0);
-        float radio = (pre_loc.z - this->cameraPostion(2, 0)) / line(2, 0);
-        loc.x = radio * line(0, 0) + this->cameraPostion(0, 0);
-        loc.y = radio * line(1, 0) + this->cameraPostion(1, 0);
-        loc.z = radio * line(2, 0) + this->cameraPostion(2, 0);
+        float ratio = (pre_loc.z - this->cameraPostion(2, 0)) / line(2, 0);
+        loc.x = ratio * line(0, 0) + this->cameraPostion(0, 0);
+        loc.y = ratio * line(1, 0) + this->cameraPostion(1, 0);
+        loc.z = ratio * line(2, 0) + this->cameraPostion(2, 0);
     }
 }

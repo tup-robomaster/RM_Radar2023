@@ -9,13 +9,13 @@ void Radar::armor_filter(vector<bboxAndRect> &pred)
         float max_conf = 0.f;
         for (size_t j = 0; j < pred.size(); ++j)
         {
-            if ((int)pred[j].armor.cls == this->ids[i] && pred[j].armor.conf - max_conf > 0)
+            if ((int)pred[j].armor.cls == this->ids[i] && pred[j].armor.conf - max_conf > Epsilon)
             {
                 max_id = j;
                 max_conf = pred[j].armor.conf;
             }
         }
-        if (max_conf != 0.f)
+        if (fabs(max_conf) > Epsilon)
             results.emplace_back(pred[max_id]);
     }
     pred.swap(results);
@@ -58,7 +58,7 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
     {
         if (armors[i].x0 > ImageW || armors[i].y0 > ImageH || armors[i].x0 + armors[i].w > ImageW || armors[i].y0 + armors[i].h > ImageH)
             continue;
-        float count = 0;
+        int count = 0;
         vector<float> tempBox;
         float center[2] = {armors[i].x0 + armors[i].w / 2.f, armors[i].y0 + armors[i].h / 2.f};
         for (int j = int(max<float>(center[1] - armors[i].h / 2.f, 0.)); j < int(min<float>(center[1] + armors[i].h / 2.f, ImageH)); ++j)
@@ -71,12 +71,12 @@ void Radar::detectDepth(vector<ArmorBoundingBox> &armors)
                 ++count;
             }
         }
-        float tempNum = 0;
+        int tempNum = 0;
         for (const auto &jt : tempBox)
         {
             tempNum += jt;
         }
-        armors[i].depth = count != 0 ? tempNum / count : 0.;
+        armors[i].depth = count != 0 ? (float)tempNum / (float)count : 0.;
         this->logger->info("Depth: [CLS] " + to_string(armors[i].cls) + " [Depth] " + to_string(armors[i].depth));
     }
 }
@@ -452,7 +452,7 @@ void Radar::MainProcessLoop()
                     int k = 0;
                     for (int j = 0; j < ImageW; ++j)
                     {
-                        if (this->publicDepth[i][j] != 0)
+                        if (fabs(this->publicDepth[i][j]) > Epsilon)
                         {
                             int b, g, r;
                             hsv_to_bgr((this->publicDepth[i][j] / 100.) * 255, 255, 255, b, g, r);

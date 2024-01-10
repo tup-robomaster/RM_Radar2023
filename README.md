@@ -180,9 +180,11 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 * 装甲板分类[B1 B2 B3 B4 B5 B7 R1 R2 R3 R4 R5 R7]
 * 将yolov5导出的动态尺寸onnx放置于models目录
 * 将标定所得参数放置在params目录中，格式如资源文件camera0.SJTU.yaml所示
-* 确保ROS环境激活后在RM_RADAR2023文件夹下使用：
+* 确保ROS环境激活后在RM_RADAR2023文件夹下使用（oneapi命令为mkl所需环境）：
 
   ```
+  source /opt/ros/noetic/setup.sh
+  source ~/intel/oneapi/setvars.sh
   catkin_make
   ```
 * 为串口及雷达驱动添加权限[在串口权限自动设置失败时使用]
@@ -267,6 +269,8 @@ roslaunch radar2023 radar2023.launch
 
 ### 开发日志
 
+Date:2024.1.10 V1.5:修复计算精度导致的运算错误
+
 Date:2024.1.09 V1.5:整理代码，更新GUI，修复录像错误
 
 Date:2024.1.07 V1.5:整理代码，优化交互，修复深度获取错误
@@ -304,6 +308,8 @@ Date:2022-12-04 完成所有基本功能构建，发布V0.1a内部测试版本
    * A: 程序中所提供的onnx模型已在多台设备上通过测试，请确认CMakeLists.txt中CUDA_GEN_CODE项设置正确。
 6. Q: 可否更换到自用Yolov5模型？
    * A: 可以，但需要导出动态onnx并确认单输入单输出，程序中相应修改：MapMapping.h -> _ids的映射值、Radar.h -> ids过滤id。
+7. Q: 报错 error while loading shared libraries: libnvinfer.so.8: cannot open shared object file: No such file or directory…
+   * A: 没有配置好Tensorrt环境，请确保环境变量配置正常
 
 ### Contact
 

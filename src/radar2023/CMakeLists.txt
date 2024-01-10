@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
-find_package(CUDA 11.8 REQUIRED)
+find_package(CUDA 11 REQUIRED)
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 message("CUDA_LIBRARIES:${CUDA_LIBRARIES}")
@@ -24,7 +24,7 @@ include_directories()
 add_compile_options(-std=c++17)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=16000000")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread -lpthread -O3  -Wall -fstack-protector-all")
-set(CUDA_GEN_CODE "-gencode=arch=compute_89,code=sm_89")
+set(CUDA_GEN_CODE "-gencode=arch=compute_86,code=sm_86")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}  -std=c++17 -O3 -Xcompiler -fPIC -g -w ${CUDA_GEN_CODE}")
 
 add_message_files(
@@ -50,14 +50,17 @@ catkin_package(CATKIN_DEPENDS
   image_transport
 	)
 # cuda
-include_directories(/user/local/cuda/cuda-11.8/cuda/include)
-link_directories(/user/local/cuda/cuda-11.8/cuda/lib)
+include_directories(/user/local/cuda/include)
+link_directories(/user/local/cuda/lib)
 # cudnn
-include_directories(/user/local/cuda/cuda-11.8/cudnn/v8.0.4/include)
-link_directories(/user/local/cuda/cuda-11.8/cudnn/v8.0.4/lib64)
+include_directories(/user/local/cuda/cudnn/v8.0.4/include)
+link_directories(/user/local/cuda/cudnn/v8.0.4/lib64)
+# Tensorrt
+include_directories(/usr/local/TensorRT/include)
+link_directories(/usr/local/TensorRT/lib)
 # mkl
-include_directories(/usr/include/mkl)
-link_directories(/usr/include/mkl/intel64)
+include_directories(${MKLROOT}/include)
+link_directories(${MKLROOT}/lib/intel64)
 # fmt
 include_directories(${FMT_INCLUDE_DIRS})
 
@@ -141,7 +144,8 @@ target_link_libraries(radar2023
   fmt::fmt-header-only
   cudart
   nvonnxparser
-  nvinfer
+  libnvinfer.so
+  libnvinfer_plugin.so
 )
 
 install(TARGETS radar2023 
@@ -161,10 +165,10 @@ install(DIRECTORY
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 	)
 
-# macro(remove_warnings)
-#   add_definitions(-Wno-deprecated-declarations
-#     -Wno-unused-but-set-variable
-#     -Wno-unused-variable)
-# endmacro()
+macro(remove_warnings)
+  add_definitions(-Wno-deprecated-declarations
+    -Wno-unused-but-set-variable
+    -Wno-unused-variable)
+endmacro()
 
-# remove_warnings()
+remove_warnings()

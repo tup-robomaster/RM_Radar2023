@@ -1,17 +1,18 @@
 #define Test        // 测试标志
 #define TestWithVis // 显示可视化检测结果
 #define UsingVideo  // 是否使用视频(！！！可能造成OOM, 请注意设置FRAME_DEPTH)
-#define ShowDepth   // 是否在GUI覆盖深度图
+// #define ShowDepth   // 是否在GUI覆盖深度图
 
 #define lidarTopicName (char *)"/livox/lidar"
 
-#define FRAME_DEPTH 500 // 图像队列深度，OOM时适当减少
+#define FRAME_DEPTH 100 // 图像队列深度，OOM时适当减少
 
 #define MaxPointsNum 10000 // 最大点云数量
 #define ImageH 2064        // 图像高度
 #define ImageW 3088        // 图像宽度
 #define maxQueueSize 100   // 点云最大帧队列长度
 #define LidarQueueSize 1   // 雷达消息队列
+#define Epsilon (const float)1e-6
 
 #define MAXBO 3
 
@@ -19,7 +20,7 @@
 #define L_P true        // 位置预测
 #define Z_THRE 0.2      // Z轴突变阈值
 #define Pre_Time 10     // 预测次数
-#define Pre_radio 0.2f  // 预测速度比例
+#define Pre_ratio 0.1f  // 预测速度比例
 #define Real_Size_W 15. // 真实宽度
 #define Real_Size_H 28. // 真实高度（长）
 #define IoU_THRE 0.8f   // IoU预测阈值

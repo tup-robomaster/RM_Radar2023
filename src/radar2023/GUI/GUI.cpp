@@ -78,6 +78,8 @@ int main(int argc, char **argv)
     if (!map_name.empty() && access((share_path + "/resources/" + map_name).c_str(), F_OK) == 0)
     {
         map = cv::imread(share_path + "/resources/" + map_name);
+        if (ENEMY == 1)
+            cv::flip(map, map, -1);
     }
     else
     {
@@ -94,10 +96,15 @@ int main(int argc, char **argv)
         {
             cv::resize(map, display(Rect(result_image->image.cols, 0, result_image->image.rows * 0.54, result_image->image.rows)), Size(result_image->image.rows * 0.54, result_image->image.rows));
         }
-        for (auto &it : locs)
+        for (auto it : locs)
         {
             if (it.x == 0 && it.y == 0)
                 continue;
+            if(ENEMY == 1)
+            {
+                it.x = 28.0 - it.x;
+                it.y = 15.0 - it.y;
+            }
             Scalar color;
             string text;
             if (it.id < 6)
@@ -119,8 +126,6 @@ int main(int argc, char **argv)
             center.y = center.y + (text_size.height) / 2;
             putText(display, text, center, FONT_HERSHEY_SIMPLEX, 1, color, 2);
         }
-        if(ENEMY == 1)
-            cv::flip(display(Rect(result_image->image.cols, 0, result_image->image.rows * 0.54, result_image->image.rows)), display(Rect(result_image->image.cols, 0, result_image->image.rows * 0.54, result_image->image.rows)), -1);
         cv::imshow("GUI", display);
         cv::resizeWindow("GUI", Size(1536, 864));
         bool if_exit_program_current = getTrackbarPos("Exit Program", "GUI") == 1 ? true : false;

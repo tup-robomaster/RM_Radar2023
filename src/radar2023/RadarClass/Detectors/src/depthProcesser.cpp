@@ -52,7 +52,7 @@ vector<vector<float>> DepthQueue::pushback(pcl::PointCloud<pcl::PointXYZ> &pc)
     {
         if (dptBox(0, i) > 0)
         {
-            if ((this->depth[ipBox(1, i)][ipBox(0, i)] != 0. && dptBox(0, i) < this->depth[ipBox(1, i)][ipBox(0, i)]) || this->depth[ipBox(1, i)][ipBox(0, i)] == 0.)
+            if ((fabs(this->depth[ipBox(1, i)][ipBox(0, i)]) > Epsilon && dptBox(0, i) < this->depth[ipBox(1, i)][ipBox(0, i)]) || fabs(this->depth[ipBox(1, i)][ipBox(0, i)]) < Epsilon)
                 this->depth[ipBox(1, i)][ipBox(0, i)] = dptBox(0, i);
         }
         else

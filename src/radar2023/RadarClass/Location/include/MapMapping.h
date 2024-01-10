@@ -20,6 +20,7 @@ private:
     vector<MapLocation3D> cached_location3D;
 
     Matrix<float, 4, 4> _T;
+    Matrix<float, 4, 4> T;
     Matrix<float, 3, 1> cameraPostion;
     Mat rvec, tvec;
     bool _pass_flag = false;
