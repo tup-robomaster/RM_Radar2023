@@ -54,6 +54,7 @@ int main(int argc, char **argv)
     createTrackbar("CoverDepth", "GUI", 0, 1, nullptr);
     setTrackbarPos("CoverDepth", "GUI", 1);
     bool if_exit_program = false;
+    nh.setParam("/gui/CoverDepth", if_exit_program);
     bool _if_record = true;
     bool _if_coverDepth = true;
     string param_name, map_name;
