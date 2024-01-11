@@ -743,6 +743,7 @@ void Radar::stop()
     this->myExpLog->uninit();
 #endif
 
+    ros::shutdown();
     this->logger->warn("Program Shutdown");
 }
 

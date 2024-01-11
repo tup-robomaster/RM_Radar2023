@@ -14,24 +14,26 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "point_cloud_node");
     ros::NodeHandle nh;
     ros::Publisher pub = nh.advertise<sensor_msgs::PointCloud2>("/livox/lidar", 1000);
-    nh.param<std::string>("pcd_path",  pcd_path,  "None");
+    nh.param<std::string>("pcd_path", pcd_path, "None");
     ros::Rate rate(10);
     ifstream ifs;
     ifs.open(pcd_path, ios::in);
     if (!ifs.is_open())
     {
-        cout << "txt文件打开失败" << endl;
+        ROS_ERROR("txt文件打开失败");
     }
 
     pcl::PointCloud<pcl::PointXYZ> cloud;
     sensor_msgs::PointCloud2 output_msg;
 
     string line;
+    bool ExitProgramSiginal = false;
 
     while (ros::ok())
     {
         while (true)
         {
+            ros::spinOnce();
             getline(ifs, line);
             if (line.compare("") == 0)
             {
@@ -61,9 +63,22 @@ int main(int argc, char **argv)
                     cloud.points.push_back(point);
                 }
             }
+            std::string param_name;
+            if (nh.searchParam("/radar2023/ExitProgram", param_name))
+            {
+                nh.getParam(param_name, ExitProgramSiginal);
+            }
+            else
+            {
+                ROS_WARN("Parameter ExitProgram not defined");
+            }
+            if (ExitProgramSiginal)
+            {
+                break;
+            }
         }
+        break;
     }
-    ros::spin();
-
+    ros::shutdown();
     return 0;
 }

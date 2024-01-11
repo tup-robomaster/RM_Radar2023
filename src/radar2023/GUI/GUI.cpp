@@ -158,5 +158,6 @@ int main(int argc, char **argv)
         cv::waitKey(1);
     }
     cv::destroyAllWindows();
-    ROS_INFO("GUI EXIT");
+    ros::shutdown();
+    return 0;
 }

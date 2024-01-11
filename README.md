@@ -31,8 +31,9 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 
 部署前需要自行准备的并更改的有：
 
+* Livox雷达驱动配置[包含于ThirdParty]
 * 相机内参与畸变参数
-* 相机到激光雷达的外参 推荐使用 [Livox相机-激光雷达 联合标定](https://github.com/Livox-SDK/livox_camera_lidar_calibration "Github链接")
+* 相机到激光雷达的外参 推荐使用 [Livox相机-激光雷达 联合标定](https://github.com/Livox-SDK/livox_camera_lidar_calibration "Github链接")[包含于ThirdParty]
 * 网络对应的TensorRT相关参数[废弃]
 * 车辆及装甲板识别模型
 * 测试视频[可选]
@@ -104,7 +105,7 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 * DDR5 32G 7400 RAM
 * GeForce RTX 4090 GPU
 
-## 3.文件结构-SRC
+## 3.文件结构-SRC [OLD]
 
 * radar2023
   * demo_resource 存放常用资源和工具
@@ -189,10 +190,11 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
   ```
 * 为串口及雷达驱动添加权限[在串口权限自动设置失败时使用]
 
-### 启动
+### 启动 [XXX详见livox_ros_driver->README.md]
 
 ```
 source devel/setup.bash
+roslaunch livox_ros_driver livox_lidar_msg.launch bd_list:="XXX" 
 roslaunch radar2023 radar2023.launch
 ```
 
