@@ -195,7 +195,7 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 ```
 source devel/setup.bash
 source ~/intel/oneapi/setvars.sh
-roslaunch livox_ros_driver livox_lidar_msg.launch bd_list:="XXX" 
+roslaunch livox_ros_driver livox_lidar.launch bd_list:="XXX" 
 roslaunch radar2023 radar2023.launch
 ```
 
