@@ -5,6 +5,7 @@ bool read_param(Mat &K_0, Mat &C_0, Mat &E_0, String path)
     if (access(path.c_str(), F_OK) != 0)
         return false;
     cv::FileStorage fs;
+    std::cout << "Strating to read params from yaml file" << std::endl;
     try
     {
         fs = cv::FileStorage(path, FileStorage::READ);
@@ -14,9 +15,16 @@ bool read_param(Mat &K_0, Mat &C_0, Mat &E_0, String path)
         std::cerr << e.what() << '\n';
         return false;
     }
+    if (!fs.isOpened())
+    {
+        std::cout << "Failed to open yaml file: " << path << std::endl;
+        return false;
+    }
     fs["K_0"] >> K_0;
     fs["C_0"] >> C_0;
     fs["E_0"] >> E_0;
+    std::cout << "Read params success!" << std::endl;
+    fs.release();
     return true;
 }
 

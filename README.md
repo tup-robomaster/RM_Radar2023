@@ -4,7 +4,7 @@
 
 clone时请注意携带--recursive拉取子仓库，资源文件放置于release中
 
-请认真阅读本文档，配置程序时需要注意部分细节
+请认真阅读本文档，配置程序时需要注意部分细节，务必完成Demo运行后再进行参数修改
 
 ## Version: V1.5 Experimental + Rebuild1.0
 
@@ -313,6 +313,8 @@ Date:2022-12-04 完成所有基本功能构建，发布V0.1a内部测试版本
    * A: 可以，但需要导出动态onnx并确认单输入单输出，程序中相应修改：MapMapping.h -> _ids的映射值、Radar.h -> ids过滤id。
 7. Q: 报错 error while loading shared libraries: libnvinfer.so.8: cannot open shared object file: No such file or directory…
    * A: 没有配置好Tensorrt环境，请确保环境变量配置正常
+8. Q: 程序无报错退出，终止前输出Strating to read params from yaml file
+   * A: 多为opencv FileStorage 错误，请尝试更换版本或重新编译opencv
 
 ### Contact
 
