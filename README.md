@@ -315,6 +315,8 @@ Date:2022-12-04 完成所有基本功能构建，发布V0.1a内部测试版本
    * A: 没有配置好Tensorrt环境，请确保环境变量配置正常
 8. Q: 程序无报错退出，终止前输出Strating to read params from yaml file
    * A: 多为opencv FileStorage 错误，请尝试更换版本或重新编译opencv
+9. Q: 编译时报错：找不到 -lCUDA:cublas -lCUDA:cudart...但是CUDA等已正常安装
+   * A: 安装了冲突的CUDA和ceres-solver版本，临时解决办法：编译安装ceres-solver后转移或删除系统cmake目录下FindCUDAToolkit.cmake，重新编译项目
 
 ### Contact
 
