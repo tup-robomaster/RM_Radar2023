@@ -6,7 +6,9 @@ clone时请注意携带--recursive拉取子仓库，资源文件放置于release
 
 请认真阅读本文档，配置程序时需要注意部分细节，务必完成Demo运行后再进行参数修改
 
-## Version: V1.5 Experimental + Rebuild1.0
+## Version: V1.5 Experimental + Rebuild1.0 [EOL]
+
+注意！此仓库已不再适配24及往后赛季
 
 程序点云接收基于ros-noetic框架，使用ROS版Livox雷达驱动
 
