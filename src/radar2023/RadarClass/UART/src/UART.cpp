@@ -468,5 +468,5 @@ void UART::write(MySerial::Ptr ser)
         data[data_p + 7] = t_y[3];
     }
     Referee_Transmit_BetweenCar(dataID, receiverId, data, ser);
-    usleep(100000);
+    usleep(10000);
 }
